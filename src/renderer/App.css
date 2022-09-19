@@ -1,0 +1,68 @@
+/*
+ * @NOTE: Prepend a `~` to css file paths that are in your node_modules
+ *        See https://github.com/webpack-contrib/sass-loader#imports
+ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .selected-conv-item {
+    @apply before:absolute before:content-[''] before:!opacity-100 before:inset-y-0 before:left-0 before:border-0 before:border-r-[3px] before:h-[60%] before:top-1/2 before:transition-all before:transform before:duration-300 before:-translate-y-1/2 before:border-solid before:border-primary transition-colors transform duration-300 scale-y-100 bg-primary-1;
+  }
+}
+
+body {
+  height: 100%;
+  background: linear-gradient(
+    200.96deg,
+    #fedc2a -29.09%,
+    #dd5789 51.77%,
+    #7a2c9e 129.35%
+  );
+  font-family: sans-serif;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  overflow-y: hidden;
+}
+
+.ant-menu-inline .ant-menu-selected::after,
+.ant-menu-inline .ant-menu-item-selected::after {
+  display: none !important;
+}
+
+/* fix overflow conversation preview */
+.ant-space-item:last-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.ant-input-prefix {
+  margin-right: 6px;
+}
+
+.input-pl[placeholder]:empty:before {
+  content: attr(placeholder);
+  color: #555;
+}
+.input-wrapper {
+  border: 1px solid #d9d9d9;
+}
+
+.input-wrapper:focus-within {
+  border-color: #2c9989;
+  box-shadow: 0 0 0 2px rgba(18, 140, 126, 0.2);
+  border-right-width: 1px;
+  outline: 0;
+}
+.input-wrapper:hover {
+  border: 1px solid #2c9989;
+  transition: all;
+  cursor: auto;
+  transition-duration: 0.3s;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+}
