@@ -14,7 +14,7 @@ import {
 } from 'antd';
 import type { MenuProps } from 'antd';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { convdata } from 'renderer/mock/conversation';
+import { conversation, genMockChat } from 'renderer/mock/conversation';
 import {
   BellFilled,
   NotificationFilled,
@@ -38,14 +38,14 @@ export function Conversations({
   onChatIdChange: (v: Id) => void;
 }) {
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<Conversation[]>([]);
+  const [data, setData] = useState<Conversation[]>();
 
   const loadMoreData = () => {
-    if (loading) {
-      return;
-    }
+    // if (loading) {
+    //   return;
+    // }
 
-    setLoading(true);
+    // setLoading(true);
     // fetch(
     //   'https://randomuser.me/api/?results=10&inc=name,gender,email,nat,picture&noinfo'
     // )
@@ -58,6 +58,17 @@ export function Conversations({
     //   .catch(() => {
     //     setLoading(false);
     //   });
+
+    const newitems = Array.from(
+      {
+        length: 10,
+      },
+      () => genMockChat()
+    );
+    const a = data;
+    a.push(newitems);
+    const combined: Conversation[] = [data, ...newitems];
+    setData([...combined]);
   };
 
   useEffect(() => {
@@ -76,7 +87,7 @@ export function Conversations({
   }, []);
 
   return (
-    <div>
+    <div className="h-full flex flex-col  ">
       <div className="ml-7 mr-6 pt-5 pb-8">
         <Input
           size="large"
@@ -87,12 +98,13 @@ export function Conversations({
       </div>
       <div
         id="scrollableDiv"
+        className="flex-1"
         style={{
-          height: '100%',
           overflowY: 'auto',
         }}
       >
         <InfiniteScroll
+          style={{ minWidth: 0 }}
           dataLength={data.length}
           next={loadMoreData}
           hasMore={false}

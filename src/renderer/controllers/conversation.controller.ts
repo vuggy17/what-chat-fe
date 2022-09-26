@@ -7,10 +7,11 @@ import {
   ConversationRepository,
   IConversationRepository,
 } from 'renderer/repository/conversation.repository';
-import { OMessage } from 'renderer/shared/lib/network/type';
+import { OConveration, OMessage } from 'renderer/shared/lib/network/type';
 import { Subject } from 'rxjs';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
 import { Observable } from 'rxjs/internal/Observable';
+import ChatParser from './adapter';
 
 class CConevrsationController {
   activeChat: BehaviorSubject<Id>;
@@ -32,6 +33,15 @@ class CConevrsationController {
 
   onMessageReceived(message: OMessage) {
     console.log(message);
+  }
+
+  addConverstaion(v: OConveration) {
+    const validChat = new ChatParser().toEntity({} as OConveration);
+
+    this._conversationManager.conversations = [
+      validChat,
+      ...this._conversationManager.conversations,
+    ];
   }
 
   setActiveChat(chatId: Id) {
