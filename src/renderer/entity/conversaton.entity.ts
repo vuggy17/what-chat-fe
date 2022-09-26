@@ -10,4 +10,5 @@ export type Conversation = {
   preview: string;
   lastUpdate: Date;
   unreadCount: number;
+  typing: boolean;
 };

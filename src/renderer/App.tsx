@@ -32,7 +32,7 @@ export default function App() {
         <Route
           path={CHAT}
           element={
-            <Preload>
+            <Preload userId="1">
               <Chats />
             </Preload>
           }

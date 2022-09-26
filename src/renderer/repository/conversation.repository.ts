@@ -23,6 +23,12 @@ class ConversationRepositoryImpl implements IConversationRepository {
       }, 2000)
     );
   }
+
+  saveConversation(conversation: Conversation): Promise<Conversation> {
+    return new Promise((resolve, reject) => {
+      resolve(conversation);
+    });
+  }
 }
 
 export const ConversationRepository = new ConversationRepositoryImpl(1);

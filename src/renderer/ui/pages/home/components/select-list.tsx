@@ -32,6 +32,7 @@ type ConversationItemProps = {
   description: string;
   time: Date;
   status: 0 | 1;
+  typing: boolean;
   selected: boolean;
   onSelectItem: (key: any) => void;
 };
@@ -44,6 +45,7 @@ export function ConversationItem({
   time,
   status,
   onSelectItem,
+  typing,
   selected,
 }: ConversationItemProps) {
   const itemRef = useRef<HTMLLIElement>(null);
@@ -97,12 +99,16 @@ export function ConversationItem({
               <Title level={5} style={{ margin: 0 }}>
                 {name}
               </Title>
-              <Text ellipsis style={{ minWidth: 0 }}>
-                Lorem ipsum, dolor sit amet consectetur adipisicing elit.
-                Architecto, dolores cumque. Architecto, dolores
-                cumque.Architecto, dolores cumque.Architecto, dolores
-                cumque.Architecto, dolores cumque.
-              </Text>
+              {typing ? (
+                <Text className="text-primary">Typing...</Text>
+              ) : (
+                <Text ellipsis style={{ minWidth: 0 }}>
+                  Lorem ipsum, dolor sit amet consectetur adipisicing elit.
+                  Architecto, dolores cumque. Architecto, dolores
+                  cumque.Architecto, dolores cumque.Architecto, dolores
+                  cumque.Architecto, dolores cumque.
+                </Text>
+              )}
             </Space>
           </Col>
           <Col span={3}>
@@ -136,6 +142,7 @@ export default function ConversationList({ ...props }: SelectListProps) {
       {props.data.map((d) => {
         return (
           <ConversationItem
+            typing={d.typing}
             avatar={d.avatar || 'https://source.unsplash.com/random/100×100'}
             key={d.id}
             id={d.id}

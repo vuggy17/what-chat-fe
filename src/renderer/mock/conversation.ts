@@ -5,6 +5,7 @@ import { faker } from '@faker-js/faker';
 export const convdata: Conversation[] = [
   {
     id: '0869256174',
+    typing: true,
     name: faker.name.fullName(),
     isGroup: true,
     lastMessage: faker.company.bs(),
@@ -16,6 +17,21 @@ export const convdata: Conversation[] = [
     participants: [faker.random.word()],
   },
   {
+    typing: false,
+
+    id: faker.unique(faker.phone.number),
+    name: faker.name.fullName(),
+    isGroup: true,
+    lastMessage: faker.company.bs(),
+    lastUpdate: new Date(),
+    online: 1,
+    preview: faker.company.bs(),
+    unreadCount: 0,
+    status: 'sending',
+    participants: [faker.random.word()],
+  },
+  {
+    typing: false,
     id: faker.unique(faker.phone.number),
     name: faker.name.fullName(),
     isGroup: true,
@@ -29,6 +45,7 @@ export const convdata: Conversation[] = [
   },
   {
     id: faker.unique(faker.phone.number),
+    typing: false,
     name: faker.name.fullName(),
     isGroup: true,
     lastMessage: faker.company.bs(),
@@ -42,18 +59,7 @@ export const convdata: Conversation[] = [
   {
     id: faker.unique(faker.phone.number),
     name: faker.name.fullName(),
-    isGroup: true,
-    lastMessage: faker.company.bs(),
-    lastUpdate: new Date(),
-    online: 1,
-    preview: faker.company.bs(),
-    unreadCount: 0,
-    status: 'sending',
-    participants: [faker.random.word()],
-  },
-  {
-    id: faker.unique(faker.phone.number),
-    name: faker.name.fullName(),
+    typing: false,
     isGroup: true,
     lastMessage: faker.company.bs(),
     lastUpdate: new Date(),
