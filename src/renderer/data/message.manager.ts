@@ -35,6 +35,10 @@ export class MessageManager {
     const [chatId, data] = v;
     this._savedMessages[chatId] = data;
   }
+
+  addmessage(message: Message) {
+    this._messages.push(message);
+  }
 }
 
 export default MessageManager.use();

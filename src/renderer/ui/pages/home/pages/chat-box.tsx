@@ -311,8 +311,8 @@ export default function ChatBox({ chatId }: { chatId: Id }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const previusChatId = usePrevious(chatId);
 
-  const sendMessage = () => {
-    console.log('message sent13');
+  const sendMessage = (msg: Message) => {
+    ConversationController.sendMessage(msg);
   };
   const virtualso = useRef(null);
   const currentChatId = '1';

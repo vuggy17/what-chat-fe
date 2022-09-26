@@ -32,7 +32,35 @@ class CConevrsationController {
   }
 
   onMessageReceived(message: OMessage) {
-    console.log(message);
+    // check if chat exist
+    const chat = this._conversationManager.getConversation(
+      message.conversationId
+    );
+    if (chat) {
+      // update chat
+      this.updateConverstationMeta(chat);
+      // formate message
+      // update message
+    } else {
+      // create chat
+      // update chat
+      // update message
+    }
+  }
+
+  addConversation(conversation: Conversation) {
+    this._conversationManager.conversations.push(conversation);
+    this.conversations.next(this._conversationManager.conversations);
+  }
+
+  updateConverstationMeta(conversation: Conversation) {
+    const index = this._conversationManager.conversations.findIndex(
+      (item) => item.id === conversation.id
+    );
+    if (index !== -1) {
+      this._conversationManager.conversations[index] = conversation;
+      this.conversations.next(this._conversationManager.conversations);
+    }
   }
 
   addConverstaion(v: OConveration) {
@@ -54,6 +82,8 @@ class CConevrsationController {
   }
 
   async loadConversation(from: Id | undefined, count = 10) {
+    // load conversation
+    // load first conversation messages
     if (from) {
       // load from id = xxxx
       console.log('chat paginated loading');
@@ -66,6 +96,10 @@ class CConevrsationController {
       // trigger ui update
       this.conversations.next(data);
     }
+  }
+
+  sendMessage(message: Message) {
+    this._messageManager.addmessage(message);
   }
 }
 

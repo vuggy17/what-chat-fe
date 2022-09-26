@@ -6,6 +6,7 @@ import { CONV_PAGE_SIZE } from 'renderer/shared/constants';
 export function genMockChat(): Conversation {
   return {
     id: faker.unique(faker.phone.number),
+    typing: Math.random() * 10 > 5,
     name: faker.name.fullName(),
     isGroup: true,
     lastMessage: faker.company.bs(),

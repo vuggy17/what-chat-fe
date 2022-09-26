@@ -127,6 +127,10 @@ export function Conversations({
           />
         </InfiniteScroll>
       </div>
+
+      <Button onClick={() => ConversationController.createChat()}>
+        Create new chat
+      </Button>
     </div>
   );
 }
