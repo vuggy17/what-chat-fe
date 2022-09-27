@@ -31,6 +31,8 @@ import React, {
 import { Link } from 'react-router-dom';
 import { Virtuoso } from 'react-virtuoso';
 import ConversationController from 'renderer/controllers/conversation.controller';
+import messageController from 'renderer/controllers/message.controller';
+import messageManager from 'renderer/data/message.manager';
 import { Conversation, Message } from 'renderer/entity';
 import { genMockMsg, messages as mockmsg } from 'renderer/mock/message';
 import { MSG_PAGE_SIZE } from 'renderer/shared/constants';
@@ -249,45 +251,47 @@ function MessageBubble({
 
 type MessageListProps = {
   messages: Message[];
-  onLoadMore: () => void;
+  chatId: Id;
   virtualso: any;
 };
 
-function MessageList({ messages, onLoadMore, virtualso }: MessageListProps) {
-  const [firstItemIndex, setFirstItemIndex] = useState(
-    MSG_PAGE_SIZE - messages.length
-  );
+function MessageList({ messages, chatId, virtualso }: MessageListProps) {
+  const START_INDEX = 100000; // set this to avoid firstItemIndex decreased to 0
+  const [firstItemIndex, setFirstItemIndex] = useState(START_INDEX);
+  const previusChatId = useRef(chatId);
 
   const internalMessages = useMemo(() => {
-    const nextFirstItemIndex = MSG_PAGE_SIZE - messages.length;
-    setFirstItemIndex(nextFirstItemIndex);
+    // const nextFirstItemIndex = MSG_PAGE_SIZE - messages.length;
+    // setFirstItemIndex(nextFirstItemIndex);
     return messages;
   }, [messages]);
 
-  const msgBubble = useCallback((pos: number, data: Message) => {
-    let hasNext = false;
+  const msgBubble = useCallback(
+    (pos: number, data: Message) => {
+      const hasNext = false;
 
-    // if there is multiple chat bubble rendered continuous or last item in the conversation, add a avatar to the last item
-    if (pos < messages.length - 1) {
-      if (messages[pos + 1].fromMe !== data.fromMe) hasNext = true;
-    } else hasNext = true;
-    return (
-      <div className="overflow-hidden">
-        <MessageBubble
-          self={data.fromMe}
-          content={data.content}
-          time={data.createdAt}
-          type="text"
-          hasAvatar={hasNext}
-          key={data.id}
-        />
-      </div>
-    );
-  }, []);
+      // if there is multiple chat bubble rendered continuous or last item in the conversation, add a avatar to the last item
+      // if (pos < messages.length - 1) {
+      //   if (messages[pos + 1].fromMe !== data.fromMe) hasNext = true;
+      // } else hasNext = true;
+      return (
+        <div className="overflow-hidden">
+          <MessageBubble
+            self={data.fromMe}
+            content={data.content}
+            time={data.createdAt}
+            type="text"
+            hasAvatar={hasNext}
+            key={data.id}
+          />
+        </div>
+      );
+    },
+    [messages]
+  );
 
-  // setting 'auto' for behavior does help in this sample, but not in my actual code
   const followOutput = useCallback((isAtBottom: boolean) => {
-    return isAtBottom ? 'smooth' : false;
+    return isAtBottom ? 'smooth' : 'auto';
   }, []);
 
   return (
@@ -295,63 +299,51 @@ function MessageList({ messages, onLoadMore, virtualso }: MessageListProps) {
       ref={virtualso}
       data={internalMessages}
       itemContent={msgBubble}
-      initialTopMostItemIndex={internalMessages.length - 1}
-      firstItemIndex={Math.max(0, firstItemIndex)}
-      startReached={onLoadMore}
-      followOutput={followOutput}
+      initialTopMostItemIndex={messages.length - 1}
+      firstItemIndex={firstItemIndex}
+      // startReached={prependItems}
+      // followOutput={followOutput}
       style={{ overflow: 'auto' }}
     />
   );
 }
 
-const randomNumber = (min: number, max: number) =>
-  Math.floor(Math.random() * (max - min + 1)) + min;
-
 export default function ChatBox({ chatId }: { chatId: Id }) {
   const [messages, setMessages] = useState<Message[]>([]);
-  const previusChatId = usePrevious(chatId);
 
-  const sendMessage = (msg: Message) => {
-    ConversationController.sendMessage(msg);
-  };
   const virtualso = useRef(null);
-  const currentChatId = '1';
 
-  const loadOldMsg = useCallback(() => {
-    // console.log('Chat: startReached');
-    // const newMessages = Array.from({ length: MSG_PAGE_SIZE }, genMockMsg);
-    // // simulate network request with random timeout
-    // const timeout = randomNumber(100, 600);
-    // setTimeout(() => {
-    //   savedMessages[chatId] = appendNewMessages(newMessages);
-    //   setMessages(combinedMessages);
-    // }, timeout);
-  }, [messages]);
+  const onSendMessage = (msg: File | string, type: MessageType) => {
+    messageController.sendMessage(msg, { type, chatId });
+    ConversationController.updateConverstationMeta(chatId, {
+      lastUpdate: new Date(),
+      status: 'sending',
+    });
+  };
 
   useEffect(() => {
-    const newMessages = Array.from({ length: MSG_PAGE_SIZE }, genMockMsg);
-    // simulate network request with random timeout
-    const timeout = randomNumber(100, 600);
-    setTimeout(() => {
-      // savedMessages[chatId] = appendNewMessages(newMessages);
-      setMessages(newMessages);
-    }, timeout);
-    return () => {};
+    const subcription = messageController.messages.subscribe({
+      next: (v) => {
+        setMessages(v);
+        console.log(v);
+      },
+    });
+    return () => {
+      subcription.unsubscribe();
+    };
   }, [chatId]);
-
-  if (chatId !== previusChatId) return null;
 
   return (
     <div className=" flex flex-col min-h-0 h-full pb-4 pr-2">
       <Header chatId={chatId} />
-      <div className="flex-auto  pl-4 pr-3 mb-3">
+      <div className="flex-auto  pl-4 pr-3 mb-3 transition-all transform duration-700">
         <MessageList
-          messages={mockmsg}
-          onLoadMore={loadOldMsg}
+          messages={messages}
+          chatId={chatId}
           virtualso={virtualso}
         />
       </div>
-      <Input onSubmit={sendMessage} />
+      <Input onSubmit={onSendMessage} />
     </div>
   );
 }

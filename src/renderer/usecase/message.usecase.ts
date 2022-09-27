@@ -1,6 +1,6 @@
 import { Message } from 'renderer/entity/message.entity';
-import { genId } from 'renderer/utils/genid';
-import { getBase64 } from 'renderer/utils/readimg';
+import genId from 'renderer/utils/genid';
+import getBase64 from 'renderer/utils/readimg';
 
 export function createMessage(content: string, id?: any): Message {
   return {
@@ -14,6 +14,11 @@ export function createMessage(content: string, id?: any): Message {
   };
 }
 
+/**
+ *
+ * @param content can be a file or a string
+ * @returns new message object to display in the UI
+ */
 export function createMsgPlaceholder(content: File | string) {
   const uuid = genId();
   return {
@@ -45,7 +50,7 @@ export function createMsgPlaceholder(content: File | string) {
         status: 'unsent',
       };
     },
-    text: () => ({
+    text: (): Message => ({
       id: uuid,
       globalId: null,
       content,

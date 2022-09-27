@@ -17,6 +17,12 @@ const CONV_PAGE_SIZE = 10;
 // NETWORK
 const BASEURL = 'http://localhost:3003/';
 const REQUEST_TIMEOUT = 5000;
+const HTTP_ERROR = {
+  401: 'Wrong username or password',
+  403: 'User existed',
+  404: 'Not found',
+  500: 'Service unavailable',
+};
 
 // EVENT
 enum SocketEvent {
@@ -38,4 +44,5 @@ export {
   BASEURL,
   REQUEST_TIMEOUT,
   SocketEvent,
+  HTTP_ERROR,
 };

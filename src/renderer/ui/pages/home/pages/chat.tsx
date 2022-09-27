@@ -25,6 +25,10 @@ import ChatBoxProvider, {
 } from 'renderer/shared/context/chatbox.context';
 import ConversationController from 'renderer/controllers/conversation.controller';
 import { Conversation } from 'renderer/entity';
+import messageController from 'renderer/controllers/message.controller';
+import messageManager from 'renderer/data/message.manager';
+import quickSort from 'renderer/utils/sort';
+import { messsageRespository } from 'renderer/repository/message.respository';
 import SelectList, { ConversationItem } from '../components/select-list';
 import ChatBox from './chat-box';
 
@@ -37,38 +41,17 @@ export function Conversations({
   active: Id;
   onChatIdChange: (v: Id) => void;
 }) {
-  const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<Conversation[]>();
+  const [data, setData] = useState<Conversation[]>([]);
 
   const loadMoreData = () => {
-    // if (loading) {
-    //   return;
-    // }
-
-    // setLoading(true);
-    // fetch(
-    //   'https://randomuser.me/api/?results=10&inc=name,gender,email,nat,picture&noinfo'
-    // )
-    //   .then((res) => res.json())
-    //   .then((body) => {
-    //     setData([...data, ...body.results]);
-    //     setLoading(false);
-    //     return -1;
-    //   })
-    //   .catch(() => {
-    //     setLoading(false);
-    //   });
-
     const newitems = Array.from(
       {
         length: 10,
       },
       () => genMockChat()
     );
-    const a = data;
-    a.push(newitems);
-    const combined: Conversation[] = [data, ...newitems];
-    setData([...combined]);
+    const a = data.concat(newitems);
+    setData([...a]);
   };
 
   useEffect(() => {
@@ -77,7 +60,7 @@ export function Conversations({
     // subscrible for converstaion added or removed
     const subcription = ConversationController.conversations.subscribe({
       next: (v) => {
-        setData(v);
+        setData(quickSort(v, 'lastUpdate', 'desc'));
       },
     });
     return () => {
@@ -128,8 +111,13 @@ export function Conversations({
         </InfiniteScroll>
       </div>
 
-      <Button onClick={() => ConversationController.createChat()}>
-        Create new chat
+      <Button
+        onClick={() => {
+          messageController.getMessages('asds', 0, 10);
+          console.log(messageManager.messages.length);
+        }}
+      >
+        add 10 chat
       </Button>
     </div>
   );
@@ -178,14 +166,21 @@ export default function Chat() {
   const [activeChat, setActiveChat] = useState<Id | undefined>();
 
   const changeActiveChat = (nextId: Id) => {
-    if (nextId !== activeChat) ConversationController.setActiveChat(nextId);
+    if (nextId !== activeChat) {
+      ConversationController.setActiveChat(nextId);
+      messageManager.setCachedMessages(activeChat!, messageManager.messages);
+
+      messageController.getMessages(nextId);
+    }
   };
 
   useEffect(() => {
     const subcription = ConversationController.activeChat.subscribe({
       next: (v) => {
-        console.log('active chat', v);
         setActiveChat(v);
+        console.log('chat changed', v);
+
+        // messageController.getMessage(v);
       },
     });
     return () => {

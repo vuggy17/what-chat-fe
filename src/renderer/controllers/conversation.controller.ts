@@ -3,15 +3,15 @@ import conversationManager, {
 } from 'renderer/data/conversation.manager';
 import messageManager, { MessageManager } from 'renderer/data/message.manager';
 import { Conversation, Message } from 'renderer/entity';
+import { conversation, genMockChat } from 'renderer/mock/conversation';
 import {
   ConversationRepository,
   IConversationRepository,
 } from 'renderer/repository/conversation.repository';
 import { OConveration, OMessage } from 'renderer/shared/lib/network/type';
-import { Subject } from 'rxjs';
+import { createMsgPlaceholder } from 'renderer/usecase/message.usecase';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
-import { Observable } from 'rxjs/internal/Observable';
-import ChatParser from './adapter';
+import { chatParser } from './adapter';
 
 class CConevrsationController {
   activeChat: BehaviorSubject<Id>;
@@ -31,6 +31,26 @@ class CConevrsationController {
     );
   }
 
+  async init() {
+    // load inital data
+    // const data = await this._convRespository.getConversations(); // disable for now
+    const data = conversation;
+
+    // save to manager
+    this._conversationManager.conversations = [
+      ...this._conversationManager.conversations,
+      ...data,
+    ];
+
+    // set active conversation
+    const firstChatId = data[0].id;
+    this._conversationManager.activeConversationId = firstChatId;
+
+    // trigger ui update
+    this.conversations.next(data);
+    this.activeChat.next(this._conversationManager.activeConversationId);
+  }
+
   onMessageReceived(message: OMessage) {
     // check if chat exist
     const chat = this._conversationManager.getConversation(
@@ -48,23 +68,26 @@ class CConevrsationController {
     }
   }
 
-  addConversation(conversation: Conversation) {
-    this._conversationManager.conversations.push(conversation);
+  addConversation(v: Conversation) {
+    this._conversationManager.conversations.push(v);
     this.conversations.next(this._conversationManager.conversations);
   }
 
-  updateConverstationMeta(conversation: Conversation) {
+  updateConverstationMeta(id: Id, meta: Partial<Conversation>) {
     const index = this._conversationManager.conversations.findIndex(
-      (item) => item.id === conversation.id
+      (item) => item.id === id
     );
     if (index !== -1) {
-      this._conversationManager.conversations[index] = conversation;
+      this._conversationManager.conversations[index] = Object.assign(
+        this._conversationManager.conversations[index],
+        meta
+      );
       this.conversations.next(this._conversationManager.conversations);
     }
   }
 
   addConverstaion(v: OConveration) {
-    const validChat = new ChatParser().toEntity({} as OConveration);
+    const validChat = chatParser.toEntity({} as OConveration);
 
     this._conversationManager.conversations = [
       validChat,
@@ -81,25 +104,38 @@ class CConevrsationController {
     return this._conversationManager.getConversation(chatId);
   }
 
-  async loadConversation(from: Id | undefined, count = 10) {
-    // load conversation
-    // load first conversation messages
-    if (from) {
-      // load from id = xxxx
+  /** get chat list and messages of the newest chat
+   * @param from: the number of chat to skip
+   */
+  async loadConversation(from = 0, count = 10) {
+    if (from !== 0) {
       console.log('chat paginated loading');
     } else {
-      const data = await this._convRespository.getConversations();
+      // const data = await this._convRespository.getConversations(); // disable for now
+      const data = conversation;
+
+      // save to manager
       this._conversationManager.conversations = [
         ...this._conversationManager.conversations,
         ...data,
       ];
+
       // trigger ui update
-      this.conversations.next(data);
+      this.conversations.next(data); // this could cause a bug if the data is not loaded yet
     }
   }
 
-  sendMessage(message: Message) {
-    this._messageManager.addmessage(message);
+  createChat() {
+    // create chat
+    const newchat = genMockChat();
+    this._conversationManager.conversations = [
+      ...this._conversationManager.conversations,
+      newchat,
+    ];
+    // save to db
+    this._convRespository.saveConversations([newchat]);
+    // update chat
+    // update message
   }
 }
 

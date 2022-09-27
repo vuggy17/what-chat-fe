@@ -1,1 +1,1 @@
-export type TabName = "messages" | "contacts" | "new-message";
+export type TabName = 'messages' | 'contacts' | 'new-message';

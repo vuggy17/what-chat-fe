@@ -1,5 +1,9 @@
 /* eslint-disable no-plusplus */
-export default function quickSort<T>(arr: any[], condition: string): T[] {
+export default function quickSort<T>(
+  arr: any[],
+  condition: string,
+  direction: 'desc' | 'asc' = 'desc'
+): T[] {
   if (arr.length < 2) return arr;
 
   const pivotIndex = arr.length - 1;
@@ -12,10 +16,21 @@ export default function quickSort<T>(arr: any[], condition: string): T[] {
   for (let i = 0; i < pivotIndex; i++) {
     currentItem = arr[i];
 
-    if (currentItem[condition] < pivot[condition]) {
-      left.push(currentItem);
-    } else {
-      right.push(currentItem);
+    switch (direction) {
+      case 'desc':
+        if (currentItem[condition] > pivot[condition]) {
+          left.push(currentItem);
+        } else {
+          right.push(currentItem);
+        }
+        break;
+      default:
+        if (currentItem[condition] < pivot[condition]) {
+          left.push(currentItem);
+        } else {
+          right.push(currentItem);
+        }
+        break;
     }
   }
 

@@ -29,7 +29,6 @@ export class ConversationManager {
   }
 
   public set activeConversationId(v: Id) {
-    console.log('chat changed', v);
     this._activeConversationId = v;
   }
 

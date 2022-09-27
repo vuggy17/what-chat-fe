@@ -94,7 +94,7 @@ export function ConversationItem({
           <Col span={21} style={{ minWidth: 0, flex: 1 }}>
             <Space
               direction="vertical"
-              style={{ width: '100%', gap: 0, justifyContent: 'center' }}
+              style={{ width: '100%', columnGap: 0, justifyContent: 'center' }}
             >
               <Title level={5} style={{ margin: 0 }}>
                 {name}
@@ -148,7 +148,7 @@ export default function ConversationList({ ...props }: SelectListProps) {
             id={d.id}
             description={d.preview}
             status={d.online}
-            name={d.name}
+            name={d.id}
             time={d.lastUpdate}
             onSelectItem={(key) => {
               props.onSelect(key);
