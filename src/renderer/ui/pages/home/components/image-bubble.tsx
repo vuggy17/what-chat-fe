@@ -47,7 +47,7 @@ export default function ImageBubble({ ...props }: ImageBubbleProps) {
         .then((res) => {
           if (res) {
             console.info(res);
-            messageController.notifyFileReady(res.id, res.path); // mark file as uploaded
+            messageController.notifyFileReady(res.id, res.path); // mark file as uploaded, and replace its path with the remote path
             // messageController.sendMessage(res, {
             //   type: 'photo',
             //   chatId: props.chatId,
@@ -57,8 +57,6 @@ export default function ImageBubble({ ...props }: ImageBubbleProps) {
         .catch((err) => console.error('Error on loading bubble image', err));
     }
   }, []);
-
-  console.info('path', props.path);
 
   return (
     <div className="w-auto h-[300px] overflow-hidden ">
