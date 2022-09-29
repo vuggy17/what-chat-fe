@@ -58,7 +58,7 @@ class CConevrsationController {
     );
     if (chat) {
       // update chat
-      this.updateConverstationMeta(chat);
+      this.updateConverstationMeta(chat.id, { lastUpdate: new Date() });
       // formate message
       // update message
     } else {

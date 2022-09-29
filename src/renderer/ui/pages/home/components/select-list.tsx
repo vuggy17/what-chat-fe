@@ -148,7 +148,7 @@ export default function ConversationList({ ...props }: SelectListProps) {
             id={d.id}
             description={d.preview}
             status={d.online}
-            name={d.id}
+            name={d.name}
             time={d.lastUpdate}
             onSelectItem={(key) => {
               props.onSelect(key);

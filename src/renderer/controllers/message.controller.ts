@@ -1,18 +1,18 @@
-import { message } from 'antd';
 import messageManager, { MessageManager } from 'renderer/data/message.manager';
-import { Message } from 'renderer/entity';
-import { conversation } from 'renderer/mock/conversation';
-import { genMockMsg, messages } from 'renderer/mock/message';
+import { FileMessage, Message } from 'renderer/entity';
+import { messages } from 'renderer/mock/message';
 import {
   IMessageRespository,
   messsageRespository,
 } from 'renderer/repository/message.respository';
 import { MSG_PAGE_SIZE } from 'renderer/shared/constants';
-import { OMessage } from 'renderer/shared/lib/network/type';
-import { createMsgPlaceholder } from 'renderer/usecase/message.usecase';
+import {
+  createMessage,
+  createMsgPlaceholder,
+} from 'renderer/usecase/message.usecase';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
-import { messageParser } from './adapter';
 
+// save uploading file for later retry
 class MessageController {
   messages: BehaviorSubject<Message[]>;
 
@@ -24,7 +24,7 @@ class MessageController {
   }
 
   sendMessage(
-    content: File | string,
+    content: string | File,
     meta: {
       type: 'file' | 'photo' | 'text';
       chatId: Id;
@@ -39,50 +39,65 @@ class MessageController {
       case 'photo':
         // TODO: upload photo
         break;
-      case 'text':
-        m = createMsgPlaceholder(content).text();
 
         break;
       default:
-        m = createMsgPlaceholder(content).text();
+        m = createMessage(content);
 
         break;
     }
 
-    this.manager.addMessages(m!);
+    // send it
 
-    // const cachedmsg = this.manager.getCachedMessages(meta.chatId);
-    // console.log(this.manager.messages);
+    // this.manager.messages = [...this.manager.messages, m!];
 
-    // this.manager.setCachedMessages(meta.chatId, cachedmsg.concat(m!));
+    // this.messages.next(this.manager.messages);
+  }
 
+  // // add message from external source to manager
+  // async addMessages(chatId: Id, message: OMessage[]): Promise<void> {
+  //   const internalMessages: Message[] = message.map((m) =>
+  //     messageParser.toEntity(m)
+  //   );
+
+  //   this.manager.addMessagesToActiceChat(...internalMessages);
+  //   this.manager.setCachedMessages(chatId, internalMessages);
+  //   this.messages.next(this.manager.getCachedMessages(chatId));
+  // }
+
+  addMessage(message: Message) {
+    this.manager.messages = [...this.manager.messages, message];
     this.messages.next(this.manager.messages);
   }
 
-  // add message from external source to manager
-  async addMessages(chatId: Id, message: OMessage[]): Promise<void> {
-    const internalMessages: Message[] = message.map((m) =>
-      messageParser.toEntity(m)
+  // get message from external source or cached value
+  async loadMoreMessages(
+    chatId: Id,
+    count: number = MSG_PAGE_SIZE
+  ): Promise<void> {
+    const data = await this.repo.getMessages(
+      chatId,
+      count,
+      this.manager.messages.length
     );
 
-    this.manager.addMessages(...internalMessages);
-    this.manager.setCachedMessages(chatId, internalMessages);
-    this.messages.next(this.manager.getCachedMessages(chatId));
+    // this.manager.messages = [...data, ...this.manager.messages];
+    const copy = this.manager.messages;
+    copy.unshift(...data);
+
+    this.manager.messages = copy;
+    this.messages.next(copy);
   }
 
-  // get message from external source or cached value
-  async getMessages(
-    chatId: Id,
-    skip = 0,
-    count: number = MSG_PAGE_SIZE * 2
-  ): Promise<void> {
-    const cached = this.manager.getCachedMessages(chatId);
-    this.manager.messages = cached;
-
-    if (cached.length < count + skip) {
-      const data = await this.repo.getMessages(chatId, count, skip);
-
-      this.manager.addMessages(data);
+  async loadMessage(chatId: Id) {
+    const cachedMessages = this.manager.getCachedMessages(chatId);
+    // if cached is empty, ignore cached value and fetch from external source
+    // else use it
+    if (cachedMessages.length > 0) {
+      this.manager.messages = cachedMessages;
+    } else {
+      const data = await this.repo.getMessages(chatId, MSG_PAGE_SIZE, 0);
+      this.manager.messages = data;
     }
 
     this.messages.next(this.manager.messages);
@@ -94,6 +109,35 @@ class MessageController {
 
     this.manager.messages = data;
     this.messages.next(data);
+  }
+
+  async uploadFile(
+    file: File,
+    meta: {
+      chatId: Id;
+      type: 'file' | 'photo';
+      id: Id;
+    }
+  ) {
+    const resp = await this.repo.uploadFile(file, meta);
+    return { id: meta.id, ...resp };
+  }
+
+  notifyFileReady(fileId: Id, remoteUrl: string) {
+    this.repo.notifyFileReady(fileId);
+
+    // find message with this file id and change it uploaded property to true
+    const index = this.manager.messages.findIndex((m) => m.id === fileId);
+    if (index > -1) {
+      const source = this.manager.messages[index] as FileMessage;
+      const copy = { ...source, uploaded: true, path: remoteUrl };
+      (this.manager.messages[index] as FileMessage) = copy;
+    }
+    this.messages.next(this.manager.messages);
+  }
+
+  getUploadProgress(fileId: Id) {
+    return this.repo.getUploadProgress(fileId);
   }
 }
 

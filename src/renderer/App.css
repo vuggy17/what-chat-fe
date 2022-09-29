@@ -67,6 +67,11 @@ body {
   -webkit-box-sizing: border-box;
 }
 
+* {
+  overflow-anchor: none;
+}
+
+
 /* typing animation */
 /* .dot-typing {
   position: relative;

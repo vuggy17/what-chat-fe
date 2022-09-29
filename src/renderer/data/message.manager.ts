@@ -20,8 +20,6 @@ export class MessageManager {
   }
 
   getCachedMessages(chatId: Id): Message[] {
-    console.log(this._caches);
-
     return this._caches.get(chatId) || [];
   }
 
@@ -37,13 +35,9 @@ export class MessageManager {
     this._messages = v;
   }
 
-  addMessages(m: Message[]): void {
-    this._messages = this._messages.concat(m);
-    console.info('this message', this.messages);
-    console.info('m', m);
-    const combined = this._messages.concat(m);
-    this._messages = [...combined];
-    console.info('combined', combined);
+  flush() {
+    this._caches.clear();
+    console.log(this._caches);
   }
 }
 

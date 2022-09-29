@@ -1,4 +1,9 @@
-import React, { createContext, useEffect, useState } from 'react';
+import React, {
+  createContext,
+  useEffect,
+  useLayoutEffect,
+  useState,
+} from 'react';
 import {
   Avatar,
   Badge,
@@ -25,10 +30,12 @@ import ChatBoxProvider, {
 } from 'renderer/shared/context/chatbox.context';
 import ConversationController from 'renderer/controllers/conversation.controller';
 import { Conversation } from 'renderer/entity';
-import messageController from 'renderer/controllers/message.controller';
+
 import messageManager from 'renderer/data/message.manager';
 import quickSort from 'renderer/utils/sort';
 import { messsageRespository } from 'renderer/repository/message.respository';
+import { MSG_PAGE_SIZE } from 'renderer/shared/constants';
+import messageController from 'renderer/controllers/message.controller';
 import SelectList, { ConversationItem } from '../components/select-list';
 import ChatBox from './chat-box';
 
@@ -46,7 +53,7 @@ export function Conversations({
   const loadMoreData = () => {
     const newitems = Array.from(
       {
-        length: 10,
+        length: 5,
       },
       () => genMockChat()
     );
@@ -54,7 +61,7 @@ export function Conversations({
     setData([...a]);
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     loadMoreData();
 
     // subscrible for converstaion added or removed
@@ -90,7 +97,7 @@ export function Conversations({
           style={{ minWidth: 0 }}
           dataLength={data.length}
           next={loadMoreData}
-          hasMore={false}
+          hasMore
           loader={
             <Skeleton
               avatar
@@ -113,11 +120,17 @@ export function Conversations({
 
       <Button
         onClick={() => {
-          messageController.getMessages('asds', 0, 10);
-          console.log(messageManager.messages.length);
+          messageController.loadMoreMessages('2');
         }}
       >
-        add 10 chat
+        clear cache
+      </Button>
+      <Button
+        onClick={() => {
+          messageManager.flush();
+        }}
+      >
+        clear cache
       </Button>
     </div>
   );
@@ -167,20 +180,16 @@ export default function Chat() {
 
   const changeActiveChat = (nextId: Id) => {
     if (nextId !== activeChat) {
-      ConversationController.setActiveChat(nextId);
       messageManager.setCachedMessages(activeChat!, messageManager.messages);
-
-      messageController.getMessages(nextId);
+      ConversationController.setActiveChat(nextId);
     }
   };
 
   useEffect(() => {
     const subcription = ConversationController.activeChat.subscribe({
-      next: (v) => {
-        setActiveChat(v);
-        console.log('chat changed', v);
-
-        // messageController.getMessage(v);
+      next: (chatId) => {
+        messageController.loadMessage(chatId);
+        setActiveChat(chatId);
       },
     });
     return () => {
@@ -204,7 +213,7 @@ export default function Chat() {
         <Content className="h-full w-full  ">
           <ChatBox chatId={activeChat!} />
         </Content>
-        <Divider type="vertical" className="h-full ml-0" />
+        <Divider type="vertical" className="h-full ml-0 mr-0" />
         {/* option menu */}
         <Sider
           theme="light"

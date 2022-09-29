@@ -19,9 +19,26 @@ export function genMockChat(): Conversation {
   };
 }
 
-export const conversation: Conversation[] = Array.from(
+const aa: Conversation[] = Array.from(
   {
     length: CONV_PAGE_SIZE,
   },
   () => genMockChat()
 );
+
+export const conversation = [
+  {
+    id: '2',
+    typing: Math.random() * 10 > 5,
+    name: faker.name.fullName(),
+    isGroup: true,
+    lastMessage: faker.company.bs(),
+    lastUpdate: new Date(),
+    online: 1,
+    preview: faker.company.bs(),
+    unreadCount: 0,
+    status: 'sending',
+    participants: [faker.random.word()],
+  } as Conversation,
+  ...aa,
+];
