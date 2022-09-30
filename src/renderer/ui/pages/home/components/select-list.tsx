@@ -47,7 +47,7 @@ export function ConversationItem({
   time,
   status,
   onSelectItem,
-  muted,
+  muted = false,
   typing,
   selected,
 }: ConversationItemProps) {
@@ -67,7 +67,7 @@ export function ConversationItem({
     // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events
     <li
       ref={itemRef}
-      className=" relative py-2 pl-7 pr-7 before:opacity-0 cursor-pointer   "
+      className=" relative py-2 pl-7 pr-2 before:opacity-0 cursor-pointer   "
       onClick={() => onSelectItem(id)}
     >
       <Space
@@ -97,9 +97,14 @@ export function ConversationItem({
           <Col flex="1" style={{ minWidth: 0 }}>
             <Space
               direction="vertical"
-              style={{ width: '100%', columnGap: 0, justifyContent: 'center' }}
+              style={{
+                width: '100%',
+                columnGap: 0,
+                justifyContent: 'center',
+                minWidth: 0,
+              }}
             >
-              <Title level={5} style={{ margin: 0 }}>
+              <Title level={5} ellipsis style={{ margin: 0 }}>
                 {name}
               </Title>
               {typing ? (
@@ -114,13 +119,13 @@ export function ConversationItem({
               )}
             </Space>
           </Col>
-          <Col span={3}>
+          <Col flex="none">
             <Space direction="vertical" align="end">
               <Text type="secondary" className="text-[12px]">
                 {formatDTime(time.toString())}
               </Text>
               <Space>
-                <BellFilled />
+                {muted && <BellFilled />}
                 <Badge
                   count={10}
                   overflowCount={9}
@@ -156,7 +161,7 @@ export default function ConversationList({ ...props }: SelectListProps) {
             status={d.online}
             name={d.name}
             time={d.lastUpdate}
-            muted
+            muted={d.muted}
             onSelectItem={(key) => {
               props.onSelect(key);
             }}

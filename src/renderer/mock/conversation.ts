@@ -15,6 +15,7 @@ export function genMockChat(): Conversation {
     preview: faker.company.bs(),
     unreadCount: 0,
     status: 'sending',
+    muted: Math.random() * 10 > 5,
     participants: [faker.random.word()],
   };
 }

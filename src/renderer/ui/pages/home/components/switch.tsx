@@ -3,7 +3,11 @@ import React, { useEffect, useState } from 'react';
 
 interface AppSwitchProps extends HasChildren {
   onChange?: (checked: boolean) => void;
-  CheckedComponent: (props: any) => JSX.Element;
+  CheckedComponent: ({
+    toggleState,
+  }: {
+    toggleState: () => void;
+  }) => JSX.Element;
   defaultChecked?: boolean;
 }
 
@@ -16,6 +20,7 @@ export default function AppSwitch({
   const [checked, setChecked] = useState(defaultChecked);
 
   const handleComponentClick = () => {
+    // TODO: toggle chat muted state
     setChecked(!checked);
   };
 

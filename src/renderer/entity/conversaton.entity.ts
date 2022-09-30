@@ -9,6 +9,7 @@ export type Conversation = {
   participants: Id[];
   preview: string;
   lastUpdate: Date;
+  muted: boolean;
   unreadCount: number;
   typing: boolean;
 };
