@@ -1,3 +1,5 @@
+/* eslint-disable promise/always-return */
+/* eslint-disable promise/catch-or-return */
 import {
   Message,
   PhotoMessage,
@@ -29,6 +31,7 @@ export function createMsgPlaceholder(chatId: Id, content: string | any) {
   return {
     image: (): PhotoMessage => {
       const file = content as File;
+
       const path = URL.createObjectURL(file);
       return {
         id: uuid,

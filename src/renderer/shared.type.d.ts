@@ -23,5 +23,9 @@ type Result = {
   data: any;
 };
 
+interface HasChildren {
+  children: React.ReactNode | any;
+}
+
 type OperationResult = MakeOptional<Result, 'reason' | 'data'>;
 declare module 'react-tiny-link';

@@ -16,6 +16,7 @@ import {
 } from 'antd';
 import { Conversation } from 'renderer/entity';
 import formatDTime from 'renderer/utils/time';
+import { BellFilled } from '@ant-design/icons';
 
 const { Paragraph, Title, Text } = Typography;
 
@@ -34,6 +35,7 @@ type ConversationItemProps = {
   status: 0 | 1;
   typing: boolean;
   selected: boolean;
+  muted: boolean;
   onSelectItem: (key: any) => void;
 };
 
@@ -45,6 +47,7 @@ export function ConversationItem({
   time,
   status,
   onSelectItem,
+  muted,
   typing,
   selected,
 }: ConversationItemProps) {
@@ -71,7 +74,7 @@ export function ConversationItem({
         direction="horizontal"
         size="middle"
         style={{ width: '100%' }}
-        className="last:flex-1 last:min-w-0"
+        // className="last:flex-1 last:min-w-0"
       >
         {status === 1 ? (
           <Badge color="green">
@@ -91,7 +94,7 @@ export function ConversationItem({
           style={{ minWidth: 0, flex: 1, marginRight: 0 }}
           align="middle"
         >
-          <Col span={21} style={{ minWidth: 0, flex: 1 }}>
+          <Col flex="1" style={{ minWidth: 0 }}>
             <Space
               direction="vertical"
               style={{ width: '100%', columnGap: 0, justifyContent: 'center' }}
@@ -116,18 +119,21 @@ export function ConversationItem({
               <Text type="secondary" className="text-[12px]">
                 {formatDTime(time.toString())}
               </Text>
-              <Badge
-                count={10}
-                overflowCount={9}
-                style={{
-                  backgroundColor: '#DFF6F4',
-                  color: '#128C7E',
-                  border: '0px',
-                  boxShadow: 'none',
-                  fontWeight: 700,
-                  fontSize: 10,
-                }}
-              />
+              <Space>
+                <BellFilled />
+                <Badge
+                  count={10}
+                  overflowCount={9}
+                  style={{
+                    backgroundColor: '#DFF6F4',
+                    color: '#128C7E',
+                    border: '0px',
+                    boxShadow: 'none',
+                    fontWeight: 700,
+                    fontSize: 10,
+                  }}
+                />
+              </Space>
             </Space>
           </Col>
         </Row>
@@ -150,6 +156,7 @@ export default function ConversationList({ ...props }: SelectListProps) {
             status={d.online}
             name={d.name}
             time={d.lastUpdate}
+            muted
             onSelectItem={(key) => {
               props.onSelect(key);
             }}

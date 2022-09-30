@@ -39,6 +39,12 @@ export class ConversationManager {
   public set conversations(v: Conversation[]) {
     this._conversations = v;
   }
+
+  // getActiveConversation(): Conversation {
+  //   return this._conversations.find(
+  //     (item) => item.id === this._activeConversationId
+  //   )!;
+  // }
 }
 
 export default ConversationManager.use();
