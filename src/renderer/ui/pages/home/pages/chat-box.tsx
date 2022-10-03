@@ -34,7 +34,7 @@ function Header({ chatId }: { chatId: Id }) {
 
   return (
     <>
-      <div className="pt-4 flex justify-between items-center pl-4 pr-10">
+      <div className="pt-4 flex justify-between items-center pl-4 pr-10 ">
         <Space size="middle" align="center">
           <Avatar
             shape="circle"

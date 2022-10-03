@@ -6,6 +6,7 @@ import {
   Menu,
   MenuProps,
   Row,
+  Space,
   Tooltip,
   Typography,
 } from 'antd';
@@ -13,7 +14,7 @@ import React, { useEffect, useState } from 'react';
 import ConversationController from 'renderer/controllers/conversation.controller';
 import conversationManager from 'renderer/data/conversation.manager';
 import { Conversation } from 'renderer/entity';
-import { Bell, BellOff, Pin, PinOff } from './icons';
+import { Bell, BellOff, FileText, Photo, Pin, PinOff } from './icons';
 import AppSwitch from './switch';
 
 interface ChatOptionToggleProps {
@@ -35,22 +36,24 @@ function getItem(
   } as MenuItem;
 }
 const items: MenuItem[] = [
-  getItem(<Typography.Text strong>Customize chat</Typography.Text>, 'sub1', [
+  getItem(<Typography.Text strong>View Media, Files</Typography.Text>, 'sub1', [
     getItem(
-      'Item 1',
-      null,
-      [getItem('Option 1', '1'), getItem('Option 2', '2')],
-      'group'
+      <Space>
+        <Photo />
+        <Typography.Text>Media</Typography.Text>
+      </Space>,
+      1
     ),
     getItem(
-      'Item 2',
-      null,
-      [getItem('Option 3', '3'), getItem('Option 4', '4')],
-      'group'
+      <Space>
+        <FileText />
+        <Typography.Text>Files</Typography.Text>
+      </Space>,
+      2
     ),
   ]),
 
-  getItem('Navigation Two', 5),
+  getItem('Delete chat', 5),
 ];
 
 export default function ChatOptionToggle({ id }: ChatOptionToggleProps) {
@@ -164,6 +167,7 @@ export default function ChatOptionToggle({ id }: ChatOptionToggleProps) {
           </Row>
           <div className="py-5">
             <Menu
+              className="[&>li>ul>li]:pl-6"
               onClick={(info) => console.info('menu clicked', info)}
               style={{ width: '100%', backgroundColor: 'transparent' }}
               mode="inline"

@@ -2,8 +2,8 @@
 /* eslint-disable promise/catch-or-return */
 import {
   Message,
-  PhotoMessage,
   TextMessage,
+  FileMessage,
 } from 'renderer/entity/message.entity';
 import genId from 'renderer/utils/genid';
 import getBase64 from 'renderer/utils/readimg';
@@ -13,7 +13,7 @@ export function createMessage(content: string | any, id?: any): Message {
     id: id || genId(),
     globalId: null,
     content,
-    fromMe: true,
+    fromMe: false,
     type: 'text',
     createdAt: new Date(),
     status: 'unsent',
@@ -29,22 +29,25 @@ export function createMessage(content: string | any, id?: any): Message {
 export function createMsgPlaceholder(chatId: Id, content: string | any) {
   const uuid = genId();
   return {
-    image: (): PhotoMessage => {
+    image: (): FileMessage => {
       const file = content as File;
-
-      const path = URL.createObjectURL(file);
+      const fileInfo = {
+        path: URL.createObjectURL(file),
+        name: file.name,
+        size: file.size,
+      };
       return {
         id: uuid,
         globalId: null,
         content,
         type: 'photo',
-        path,
         uploaded: false,
         createdAt: new Date(),
-        fromMe: true,
+        fromMe: false,
         senderId: '0',
         chatId,
         status: 'unsent',
+        ...fileInfo,
       };
     },
     file: (): Message => {
@@ -52,11 +55,10 @@ export function createMsgPlaceholder(chatId: Id, content: string | any) {
       const fileInfo = {
         path: URL.createObjectURL(file),
         name: file.name,
+        size: file.size,
       };
       return {
         id: uuid,
-        path: fileInfo.path,
-        name: fileInfo.name,
         uploaded: false,
         chatId,
         content: file,
@@ -64,15 +66,16 @@ export function createMsgPlaceholder(chatId: Id, content: string | any) {
         type: 'file',
         senderId: '0',
         createdAt: new Date(),
-        fromMe: true,
+        fromMe: false,
         status: 'unsent',
+        ...fileInfo,
       };
     },
     text: (): TextMessage => ({
       id: uuid,
       globalId: null,
       content,
-      fromMe: true,
+      fromMe: false,
       type: 'text',
       createdAt: new Date(),
       senderId: '0',
@@ -80,67 +83,4 @@ export function createMsgPlaceholder(chatId: Id, content: string | any) {
       chatId,
     }),
   };
-}
-
-// // return image which have content is a base64 string
-// export async function createMessageFromImage(content: File): Promise<Message> {
-//   const base64 = await getBase64(content);
-//   return {
-//     id: genId(),
-//     globalId: null,
-//     content: base64,
-//     type: 'photo',
-//     createdAt: new Date(),
-//     fromMe: true,
-//     status: 'sending',
-//   };
-// }
-
-// // return image which have content is a File
-// export function genImageMessage(img: File, id?: any): Message {
-//   return {
-//     id: id || genId(),
-//     content: img,
-//     globalId: null,
-//     type: 'photo',
-//     createdAt: new Date(),
-//     fromMe: true,
-//     status: 'sending',
-//   };
-// }
-
-// // get file preview
-// export async function genFilePreview(file: File, id?: any): Promise<Message> {
-//   // const base64 = await getBase64(file);
-//   const fileInfo = {
-//     path: URL.createObjectURL(file),
-//     name: file.name,
-//   };
-//   console.log('filepaht', fileInfo.path);
-
-//   return {
-//     id: id || genId(),
-//     content: JSON.stringify(fileInfo),
-//     globalId: null,
-//     type: 'file',
-//     createdAt: new Date(),
-//     fromMe: true,
-//     status: 'sending',
-//   };
-// }
-
-// export function genFileMessage(file: File, id?: any): Message {
-//   return {
-//     id: id || genId(),
-//     content: file,
-//     type: 'file',
-//     globalId: null,
-//     createdAt: new Date(),
-//     fromMe: true,
-//     status: 'sending',
-//   };
-// }
-
-export function appendNewMessages(newMessages: Message[], initials: Message[]) {
-  return [...newMessages, ...initials];
 }
