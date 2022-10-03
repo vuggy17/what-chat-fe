@@ -12,4 +12,5 @@ export type Conversation = {
   muted: boolean;
   unreadCount: number;
   typing: boolean;
+  pinned: boolean;
 };

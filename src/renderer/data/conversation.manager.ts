@@ -28,7 +28,7 @@ export class ConversationManager {
     return this._activeConversationId!;
   }
 
-  public set activeConversationId(v: Id) {
+  public set activeConversationId(v: Id | null) {
     this._activeConversationId = v;
   }
 

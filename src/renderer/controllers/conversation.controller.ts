@@ -32,7 +32,12 @@ class CConevrsationController {
   }
 
   async init() {
-    // load inital data
+    // flush old data
+    this._conversationManager.conversations = [];
+    this._conversationManager.activeConversationId = null;
+    this._messageManager.messages = [];
+
+    // load chat list
     // const data = await this._convRespository.getConversations(); // disable for now
     const data = conversation;
 

@@ -1,7 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable promise/always-return */
-import { FullscreenExitOutlined } from '@ant-design/icons';
-import React, { useEffect, useLayoutEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import messageController from 'renderer/controllers/message.controller';
 // eslint-disable-next-line import/no-cycle
 import { MessageBubbleProps } from './chat-bubble';

@@ -16,6 +16,7 @@ export function genMockChat(): Conversation {
     unreadCount: 0,
     status: 'sending',
     muted: Math.random() * 10 > 5,
+    pinned: Math.random() * 10 > 7,
     participants: [faker.random.word()],
   };
 }
@@ -40,6 +41,8 @@ export const conversation = [
     unreadCount: 0,
     status: 'sending',
     participants: [faker.random.word()],
+    muted: Math.random() * 10 > 5,
+    pinned: Math.random() * 10 > 7,
   } as Conversation,
   ...aa,
 ];

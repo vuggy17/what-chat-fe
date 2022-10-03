@@ -1,4 +1,4 @@
-import { MoreOutlined } from '@ant-design/icons';
+import { MoreOutlined, UserOutlined } from '@ant-design/icons';
 import {
   Avatar,
   Badge,
@@ -36,7 +36,12 @@ function Header({ chatId }: { chatId: Id }) {
     <>
       <div className="pt-4 flex justify-between items-center pl-4 pr-10">
         <Space size="middle" align="center">
-          <Avatar shape="circle" style={{ marginTop: 6 }} />
+          <Avatar
+            shape="circle"
+            style={{ marginTop: 6 }}
+            src={data.avatar}
+            icon={<UserOutlined />}
+          />
           <div className="flex flex-col">
             <Space style={{ paddingTop: 6 }}>
               <Typography.Title level={5} style={{ marginBottom: 0 }}>
@@ -61,7 +66,7 @@ function Header({ chatId }: { chatId: Id }) {
           onClick={toggleOpenConvOption}
         />
       </div>
-      <Divider style={{ marginTop: 18, marginBottom: 18 }} />
+      <Divider style={{ marginTop: 18, marginBottom: 0 }} />
     </>
   );
 }
@@ -126,7 +131,7 @@ export default function Chat({ chatId }: any) {
   return (
     <div className=" flex flex-col min-h-0 h-full pb-4 pr-2">
       <Header chatId={chatId} />
-      <div className="flex-auto  pl-4 pr-3 mb-3 transition-all transform duration-700 overflow-hidden">
+      <div className="flex-auto pl-4 pr-3 mb-3 transition-all transform duration-700 overflow-hidden">
         {/* if switching lists, unmount virtuoso so internal state gets reset */}
         {prevChatId === chatId ? (
           <MessageList

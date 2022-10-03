@@ -1,8 +1,19 @@
 import { SearchOutlined } from '@ant-design/icons';
-import { Avatar, Button, Col, Menu, MenuProps, Row, Typography } from 'antd';
+import {
+  Avatar,
+  Button,
+  Col,
+  Menu,
+  MenuProps,
+  Row,
+  Tooltip,
+  Typography,
+} from 'antd';
 import React, { useEffect, useState } from 'react';
+import ConversationController from 'renderer/controllers/conversation.controller';
 import conversationManager from 'renderer/data/conversation.manager';
 import { Conversation } from 'renderer/entity';
+import { Bell, BellOff, Pin, PinOff } from './icons';
 import AppSwitch from './switch';
 
 interface ChatOptionToggleProps {
@@ -49,8 +60,6 @@ export default function ChatOptionToggle({ id }: ChatOptionToggleProps) {
     setData(conversationManager.getConversation(id));
   }, [id]);
 
-  console.log('chat pane', data);
-
   return (
     <>
       {data && (
@@ -77,63 +86,32 @@ export default function ChatOptionToggle({ id }: ChatOptionToggleProps) {
             <Col flex="1" className="flex justify-center text-center">
               <AppSwitch
                 defaultChecked={data.muted}
+                onChange={(muted) =>
+                  ConversationController.updateConverstationMeta(id, { muted })
+                }
                 CheckedComponent={({ toggleState }) => (
                   <span>
-                    <Button
-                      icon={
-                        <span className="anticon">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            fill="none"
-                            strokeWidth="1.75"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                            <line x1="3" y1="3" x2="21" y2="21" />
-                            <path d="M17 17h-13a4 4 0 0 0 2 -3v-3a7 7 0 0 1 1.279 -3.716m2.072 -1.934c.209 -.127 .425 -.244 .649 -.35a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3" />
-                            <path d="M9 17v1a3 3 0 0 0 6 0v-1" />
-                          </svg>
-                        </span>
-                      }
-                      style={{ backgroundColor: '#EBEBEB' }}
-                      type="text"
-                      onClick={toggleState}
-                    />
-                    <p className="ant-badge block mt-1">Unmute</p>
+                    <Tooltip title="Click to unmute">
+                      <Button
+                        icon={<BellOff />}
+                        style={{ backgroundColor: '#EBEBEB' }}
+                        type="text"
+                        onClick={() => toggleState()}
+                      />
+                    </Tooltip>
+                    <p className="ant-badge block mt-1">Muted</p>
                   </span>
                 )}
               >
                 {({ toggleState }) => (
                   <span>
                     <Button
-                      icon={
-                        <span className="anticon ">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            fill="none"
-                            strokeWidth="1.75"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                            <path d="M10 5a2 2 0 0 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6" />
-                            <path d="M9 17v1a3 3 0 0 0 6 0v-1" />
-                          </svg>
-                        </span>
-                      }
+                      icon={<Bell />}
                       style={{ backgroundColor: '#EBEBEB' }}
                       type="text"
-                      onClick={toggleState}
+                      onClick={() => toggleState()}
                     />
+
                     <p className="ant-badge block mt-1">Mute</p>
                   </span>
                 )}
@@ -141,65 +119,33 @@ export default function ChatOptionToggle({ id }: ChatOptionToggleProps) {
             </Col>
             <Col flex="1" className="flex justify-center text-center">
               <AppSwitch
+                onChange={(pinned) =>
+                  ConversationController.updateConverstationMeta(id, { pinned })
+                }
+                defaultChecked={data.pinned}
                 CheckedComponent={({ toggleState }) => (
                   <span>
-                    <Button
-                      icon={
-                        <span className="anticon">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            fill="none"
-                            strokeWidth="1.75"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                            <path d="M9 4v6l-2 4v2h10v-2l-2 -4v-6" />
-                            <line x1="12" y1="16" x2="12" y2="21" />
-                            <line x1="8" y1="4" x2="16" y2="4" />
-                          </svg>
-                        </span>
-                      }
-                      style={{ backgroundColor: '#EBEBEB' }}
-                      type="text"
-                      onClick={toggleState}
-                    />
-                    <p className="ant-badge block mt-1">Unpin</p>
+                    <Tooltip title="Click to unpin">
+                      <Button
+                        icon={<Pin />}
+                        style={{ backgroundColor: '#EBEBEB' }}
+                        type="text"
+                        onClick={toggleState}
+                      />
+                    </Tooltip>
+                    <p className="ant-badge block mt-1">Pinned</p>
                   </span>
                 )}
               >
                 {({ toggleState }) => (
                   <span>
                     <Button
-                      icon={
-                        <span className="anticon ">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            fill="none"
-                            strokeWidth="1.75"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                            <line x1="3" y1="3" x2="21" y2="21" />
-                            <path d="M15 4.5l-3.249 3.249m-2.57 1.433l-2.181 .818l-1.5 1.5l7 7l1.5 -1.5l.82 -2.186m1.43 -2.563l3.25 -3.251" />
-                            <line x1="9" y1="15" x2="4.5" y2="19.5" />
-                            <line x1="14.5" y1="4" x2="20" y2="9.5" />
-                          </svg>
-                        </span>
-                      }
+                      icon={<PinOff />}
                       style={{ backgroundColor: '#EBEBEB' }}
                       type="text"
-                      onClick={toggleState}
+                      onClick={() => toggleState()}
                     />
+
                     <p className="ant-badge block mt-1">Pin</p>
                   </span>
                 )}

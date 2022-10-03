@@ -1,5 +1,6 @@
 /* eslint-disable import/no-cycle */
 /* eslint-disable react/jsx-props-no-spreading */
+import { UserOutlined } from '@ant-design/icons';
 import { Avatar, Tooltip, Typography } from 'antd';
 import React from 'react';
 import formatDTime from 'renderer/utils/time';
@@ -73,7 +74,7 @@ export default function MessageBubble({
         className="flex-shrink-0 pr-2 pb-1 self-end"
         style={{ visibility: hasAvatar ? 'visible' : 'hidden' }}
       >
-        <Avatar shape="circle" />
+        <Avatar shape="circle" icon={<UserOutlined />} />
       </div>
       <Tooltip title={formatDTime(time.toString())} placement="left">
         <div className="bg-[#EBEBEB] break-words max-w-[90%] rounded-md rounded-bl-none p-3 pb-0">

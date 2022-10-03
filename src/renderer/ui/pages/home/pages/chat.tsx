@@ -1,6 +1,5 @@
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { Button, Divider, Input, Layout, Skeleton, Typography } from 'antd';
-import type { MenuProps } from 'antd';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { genMockChat } from 'renderer/mock/conversation';
 import { SearchOutlined } from '@ant-design/icons';
@@ -11,7 +10,7 @@ import { Conversation } from 'renderer/entity';
 import messageManager from 'renderer/data/message.manager';
 import quickSort from 'renderer/utils/sort';
 import messageController from 'renderer/controllers/message.controller';
-import SelectList from '../components/select-list';
+import SelectList from '../components/conversation-list';
 import ChatBox from './chat-box';
 import ChatOptionToggle from '../components/chat-big-menu';
 
@@ -58,7 +57,7 @@ export function Conversations({
         <Input
           size="large"
           style={{ padding: '8px 11px', color: '#171717' }}
-          placeholder="Search or start a new chat"
+          placeholder="Search a chat"
           prefix={<SearchOutlined className="text-gray-1" />}
         />
       </div>
@@ -93,21 +92,6 @@ export function Conversations({
           />
         </InfiniteScroll>
       </div>
-
-      <Button
-        onClick={() => {
-          messageController.loadMoreMessages('2');
-        }}
-      >
-        clear cache
-      </Button>
-      <Button
-        onClick={() => {
-          messageManager.flush();
-        }}
-      >
-        clear cache
-      </Button>
     </div>
   );
 }
@@ -142,7 +126,13 @@ export default function Chat() {
         <Typography.Title level={2}> Messages</Typography.Title>
       </Header>
       <Layout className="h-full rounded-xl bg-[#f3f3f3]">
-        <Sider theme="light" style={{ background: 'transparent' }} width={360}>
+        <Sider
+          theme="light"
+          style={{ background: 'transparent' }}
+          width={360}
+          collapsedWidth={110}
+          breakpoint="lg"
+        >
           <Conversations
             active={activeChat!}
             onChatIdChange={changeActiveChat}

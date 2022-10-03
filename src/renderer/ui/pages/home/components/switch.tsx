@@ -14,19 +14,20 @@ interface AppSwitchProps extends HasChildren {
 export default function AppSwitch({
   onChange,
   CheckedComponent,
-  defaultChecked = false,
+  defaultChecked,
   ...props
 }: AppSwitchProps) {
-  const [checked, setChecked] = useState(defaultChecked);
+  const [checked, setChecked] = useState(defaultChecked || false);
 
   const handleComponentClick = () => {
-    // TODO: toggle chat muted state
-    setChecked(!checked);
+    const nextState = !checked;
+    if (typeof onChange === 'function') onChange(nextState);
+    setChecked(nextState);
   };
 
   useEffect(() => {
-    if (typeof onChange === 'function') onChange(checked);
-  }, [checked, onChange]);
+    setChecked(defaultChecked || false);
+  }, [defaultChecked]);
 
   if (checked) return <CheckedComponent toggleState={handleComponentClick} />;
   return (

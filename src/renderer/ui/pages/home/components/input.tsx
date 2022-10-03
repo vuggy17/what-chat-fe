@@ -6,7 +6,7 @@
 
 import { PaperClipOutlined, SendOutlined } from '@ant-design/icons';
 import { Tooltip, Typography } from 'antd';
-import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
+import React, { ChangeEvent, useEffect, useRef } from 'react';
 
 export default function Input({
   ...props
@@ -14,19 +14,22 @@ export default function Input({
   onSubmit(content: string | File, type: 'file' | 'photo' | 'text'): void;
 }) {
   const inputRef = useRef<any>();
-  const [text, setText] = useState<string>();
 
   const reset = () => {
-    setText('');
     inputRef.current.innerHTML = '';
   };
 
+  const handleSend = (v: string) => {
+    if (v && v.trim().length > 0) {
+      props.onSubmit(v, 'text');
+    }
+    reset();
+  };
+
   const handleEnter = (e: any) => {
-    if (e.key === 'Enter' && Boolean(text)) {
-      if (text) {
-        props.onSubmit(text.toString(), 'text');
-      }
-      reset();
+    const value = inputRef.current.textContent;
+    if (e.key === 'Enter' && Boolean(value)) {
+      handleSend(value);
     }
     if (e.which === 13) e.preventDefault();
   };
@@ -81,7 +84,6 @@ export default function Input({
           contentEditable
           placeholder="Type your message...."
           onKeyDown={handleEnter}
-          onInput={(e: any) => setText(e.currentTarget.textContent)}
         />
       </div>
       <Tooltip title="Open file">
@@ -106,8 +108,7 @@ export default function Input({
         <span
           className="flex items-center justify-center h-10 min-w-0 gap-2 font-semibold text-md ml-1 pr-2 group  cursor-pointer"
           onClick={() => {
-            props.onSubmit(text!, 'text');
-            reset();
+            handleSend(inputRef.current.textContext);
           }}
         >
           <Typography.Text className="group-hover:text-primary transition-colors duration-300">
