@@ -12,6 +12,7 @@ import path from 'path';
 import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
+import fs from 'fs-extra';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
@@ -29,6 +30,22 @@ ipcMain.on('ipc-example', async (event, arg) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
   console.log(msgTemplate(arg));
   event.reply('ipc-example', msgTemplate('pong'));
+});
+
+// save file to ./tmp folder
+// args[0] is the file name
+// args[1] is the file buffer
+ipcMain.on('save-file', (event, args) => {
+  console.info('save-file', args);
+  const FILE_PATH = `tmp/${args[0]}`;
+  fs.outputFile(FILE_PATH, args[1], (err: any) => {
+    if (err) {
+      console.error('Error saving file: ', err);
+      event.sender.send('error', err.message);
+    } else {
+      event.sender.send('saved-file', args[0]);
+    }
+  });
 });
 
 if (process.env.NODE_ENV === 'production') {

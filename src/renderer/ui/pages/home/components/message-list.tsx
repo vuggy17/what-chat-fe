@@ -30,9 +30,6 @@ export default function MessagesList({
     setIsAtBottom(atBottom);
   };
 
-  // console.log('MessagesList: Starting firstItemIndex', firstItemIndex);
-  // console.log('MessagesList: Starting messages length', messages.length);
-
   const internalMessages = useMemo(() => {
     const nextFirstItemIndex = START_INDEX - messages.length;
     setFirstItemIndex(nextFirstItemIndex);
@@ -61,6 +58,7 @@ export default function MessagesList({
             time={rowData.createdAt}
             hasAvatar={!isSameSender} // if next message is from the same sender, don't render avatar
             key={rowData.id}
+            sender={rowData.senderId}
             // eslint-disable-next-line react/jsx-props-no-spreading
             {...rowData}
           />
@@ -119,7 +117,6 @@ export default function MessagesList({
             icon={<DownOutlined />}
             shape="circle"
             style={{
-              // height: isAtBottom ? 0 : 'auto',
               opacity: isAtBottom ? 0 : 1,
               transform: isAtBottom ? 'translateY(20px)' : 'translateY(-50px)',
             }}

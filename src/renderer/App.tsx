@@ -24,6 +24,7 @@ import Profile from './ui/pages/home/pages/profile';
 import Friends from './ui/pages/home/pages/friends';
 import ChatBoxProvider from './shared/context/chatbox.context';
 import Preload from './ui/pages/preload/preload';
+import './node-event';
 
 class ErrorBoundary extends React.Component<any, any> {
   constructor(props: any) {
@@ -61,7 +62,7 @@ class ErrorBoundary extends React.Component<any, any> {
 
 export default function App() {
   return (
-    <ErrorBoundary>
+    <ErrorBoundary className="scroll">
       <Router>
         <Routes>
           <Route path={LOGIN} element={<Login />} />

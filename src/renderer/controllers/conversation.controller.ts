@@ -8,8 +8,10 @@ import {
   ConversationRepository,
   IConversationRepository,
 } from 'renderer/repository/conversation.repository';
+import { CONV_PAGE_SIZE } from 'renderer/shared/constants';
 import { OConveration, OMessage } from 'renderer/shared/lib/network/type';
 import { createMsgPlaceholder } from 'renderer/usecase/message.usecase';
+import { quickSort } from 'renderer/utils/array';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
 import { chatParser } from './adapter';
 
@@ -26,9 +28,7 @@ class CConevrsationController {
     this.activeChat = new BehaviorSubject(
       this._conversationManager.activeConversationId
     );
-    this.conversations = new BehaviorSubject(
-      this._conversationManager.conversations
-    );
+    this.conversations = new BehaviorSubject([] as Conversation[]);
   }
 
   async init() {
@@ -38,8 +38,12 @@ class CConevrsationController {
     this._messageManager.messages = [];
 
     // load chat list
-    // const data = await this._convRespository.getConversations(); // disable for now
-    const data = conversation;
+    const internalConversation = await this._convRespository.getConversations();
+    const data = quickSort<Conversation>(
+      internalConversation,
+      'lastUpdate',
+      'desc'
+    );
 
     // save to manager
     this._conversationManager.conversations = [
@@ -48,12 +52,15 @@ class CConevrsationController {
     ];
 
     // set active conversation
+    // conversation list must be sorted by lastUpdate
     const firstChatId = data[0].id;
     this._conversationManager.activeConversationId = firstChatId;
 
+    console.log('firstChatId', firstChatId);
+
     // trigger ui update
     this.conversations.next(data);
-    this.activeChat.next(this._conversationManager.activeConversationId);
+    this.activeChat.next(firstChatId);
   }
 
   onMessageReceived(message: OMessage) {
@@ -109,24 +116,23 @@ class CConevrsationController {
     return this._conversationManager.getConversation(chatId);
   }
 
-  /** get chat list and messages of the newest chat
+  /** get chat list
    * @param from: the number of chat to skip
    */
-  async loadConversation(from = 0, count = 10) {
-    if (from !== 0) {
-      console.log('chat paginated loading');
-    } else {
-      // const data = await this._convRespository.getConversations(); // disable for now
-      const data = conversation;
+  async loadConversation(skip: number, count = CONV_PAGE_SIZE) {
+    if (skip >= this._conversationManager.conversations.length - 1) {
+      const data = await this._convRespository.getConversations(skip, count);
 
       // save to manager
-      this._conversationManager.conversations = [
-        ...this._conversationManager.conversations,
-        ...data,
-      ];
+      this._conversationManager.conversations =
+        this._conversationManager.conversations.concat(data);
 
       // trigger ui update
-      this.conversations.next(data); // this could cause a bug if the data is not loaded yet
+      this.conversations.next(this._conversationManager.conversations); // this could cause a bug if the data is not loaded yet
+    } else {
+      throw new Error(
+        "Skip can't be smaller than the length of the current conversation list"
+      );
     }
   }
 

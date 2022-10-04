@@ -35,6 +35,10 @@ export class MessageManager {
     this._messages = v;
   }
 
+  getMessageById(id: Id): Message | undefined {
+    return this._messages.find((item) => item.id === id);
+  }
+
   flush() {
     this._caches.clear();
     console.log(this._caches);

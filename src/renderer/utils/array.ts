@@ -1,5 +1,12 @@
 /* eslint-disable no-plusplus */
-export default function quickSort<T>(
+/**
+ *
+ * @param arr array to sort
+ * @param condition key to sort by (must be a key of T)
+ * @param direction asc|desc
+ * @returns new sorted array
+ */
+function quickSort<T>(
   arr: any[],
   condition: string,
   direction: 'desc' | 'asc' = 'desc'
@@ -36,3 +43,13 @@ export default function quickSort<T>(
 
   return [...quickSort(left, condition), pivot, ...quickSort(right, condition)];
 }
+
+function groupBy<T>(array: T[], count: number) {
+  const result = [];
+  for (let i = 0; i < array.length; i += count) {
+    result.push(array.slice(i, i + count));
+  }
+  return result;
+}
+
+export { quickSort, groupBy };

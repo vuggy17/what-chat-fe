@@ -24,12 +24,11 @@ type Result = {
 };
 
 interface HasChildren {
-  children: React.ReactNode | any
+  children: React.ReactNode | any;
+}
 
 type OperationResult = MakeOptional<Result, 'reason' | 'data'>;
+
 declare module 'react-tiny-link';
-({
-  toggleState,
-}: {
-  toggleState: () => void;
-}) => JSX.Element;
+
+// ({ toggleState }: { toggleState: () => void }) => JSX.Element;

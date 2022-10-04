@@ -12,7 +12,7 @@ const C_PROFILE = `${CHAT}/profile`;
 
 // DATA
 const MSG_PAGE_SIZE = 30;
-const CONV_PAGE_SIZE = 40;
+const CONV_PAGE_SIZE = 20;
 
 // NETWORK
 const BASEURL = 'http://localhost:3003/';

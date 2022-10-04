@@ -179,16 +179,16 @@ export function ConversationItem({
 export default function ConversationList({ ...props }: SelectListProps) {
   return (
     <ul className="list-none p-0 overflow-hidden">
-      {props.data.map((d) => {
+      {props.data.map((d, index) => {
         return (
           <ConversationItem
             typing={d.typing}
-            avatar={d.avatar || 'https://source.unsplash.com/random/100×100'}
+            avatar={d.avatar || 'https://source.unsplash.com/random/100×100'} // random image if avatar is not set
             key={d.id}
             id={d.id}
             description={d.preview}
             status={d.online}
-            name={d.name}
+            name={d.name + index}
             time={d.lastUpdate}
             muted={d.muted}
             onSelectItem={(key) => {

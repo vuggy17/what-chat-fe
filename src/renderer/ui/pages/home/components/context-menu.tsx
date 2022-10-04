@@ -3,22 +3,26 @@
 /* eslint-disable react/jsx-props-no-spreading */
 import {
   DeleteOutlined,
+  DownloadOutlined,
   EditOutlined,
   ExclamationCircleOutlined,
 } from '@ant-design/icons';
-import { Dropdown, Menu, Space, Modal } from 'antd';
-import { BrowserWindow } from 'electron';
+import { Dropdown, Menu, Space, Modal, message } from 'antd';
 import React, { HtmlHTMLAttributes } from 'react';
+import messageController from 'renderer/controllers/message.controller';
+import messageManager from 'renderer/data/message.manager';
+import { FileMessage } from 'renderer/entity';
+import { ipcRenderer } from 'electron';
 
 const { confirm } = Modal;
 
 interface ActionMenuProps extends HtmlHTMLAttributes<HTMLDivElement> {
   chatId: Id;
   messageId: Id;
-  actions: Array<'delete' | 'edit'>;
+  actions: Array<'delete' | 'edit' | 'download'>;
 }
 
-export default function BubbleActionRightClickContext({
+export default function BubbleActionMenu({
   chatId,
   messageId,
   actions,
@@ -46,7 +50,31 @@ export default function BubbleActionRightClickContext({
 
   const handleEdit = () => {
     // open edit image lib
+    alert('editing');
     console.log('message edited');
+  };
+
+  const download = () => {
+    console.log('downloading');
+    const file = messageManager.getMessageById(messageId) as FileMessage;
+
+    // const { ipcRenderer } = window.require('electron');
+    message.loading({
+      key: `download_${file.name}`,
+      content: 'Downloading..',
+      duration: 3,
+    });
+
+    if (file) {
+      file.content?.arrayBuffer().then((buffer) => {
+        const buff = Buffer.from(buffer);
+        window.electron.ipcRenderer.sendMessage('save-file', [file.name, buff]);
+        console.log(
+          `Saving ${JSON.stringify({ name: file.name, size: file.size })}`
+        );
+        return null;
+      });
+    }
   };
 
   const menuItems = (
@@ -61,6 +89,17 @@ export default function BubbleActionRightClickContext({
                 <Space>
                   <EditOutlined />
                   Edit
+                </Space>
+              ),
+            };
+          case 'download':
+            return {
+              key: 'download',
+              onClick: download,
+              label: (
+                <Space>
+                  <DownloadOutlined />
+                  Save
                 </Space>
               ),
             };

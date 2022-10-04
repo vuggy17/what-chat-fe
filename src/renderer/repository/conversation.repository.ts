@@ -1,11 +1,11 @@
 import { Conversation } from 'renderer/entity';
 import { CONV_PAGE_SIZE } from 'renderer/shared/constants';
-import { conversation as data } from 'renderer/mock/conversation';
+import { conversation as data, genMockChat } from 'renderer/mock/conversation';
 import { IHttp, OConveration } from 'renderer/shared/lib/network/type';
 import HttpClient from 'renderer/services/http';
 
 export interface IConversationRepository {
-  getConversations(start?: number, count?: number): Promise<OConveration[]>;
+  getConversations(start?: number, count?: number): Promise<Conversation[]>;
   saveConversations(conversations: Conversation[]): Promise<void>;
 }
 
@@ -25,18 +25,25 @@ class ConversationRepositoryImpl implements IConversationRepository {
   async getConversations(
     start: number | undefined = 0,
     count: number | undefined = CONV_PAGE_SIZE
-  ): Promise<OConveration[]> {
+  ): Promise<Conversation[]> {
     // const request = await this._dataSource.get('/conversations', {
     //   start,
     //   count,
     // });
     // const chats = request.data;
     // return chats
+    const newitems = Array.from(
+      {
+        length: count,
+      },
+      () => genMockChat()
+    );
+    console.log('newitems', newitems.length);
 
     // return fake data
     return new Promise((resolve, reject) =>
       setTimeout(() => {
-        resolve([]);
+        resolve(newitems);
       }, 500)
     );
   }

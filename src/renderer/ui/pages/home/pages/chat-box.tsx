@@ -84,7 +84,7 @@ export default function Chat({ chatId }: any) {
   useEffect(() => {
     const subcription = messageController.messages.subscribe({
       next: (v) => {
-        console.log('ChatBox: messages changed', v);
+        // console.log('ChatBox: messages changed', v);
         setMessages([...v]);
       },
     });
@@ -131,7 +131,7 @@ export default function Chat({ chatId }: any) {
   return (
     <div className=" flex flex-col min-h-0 h-full pb-4 pr-2">
       <Header chatId={chatId} />
-      <div className="flex-auto pl-4 pr-3 mb-3 transition-all transform duration-700 overflow-hidden">
+      <div className="flex-auto pl-4 pr-3 transition-all transform duration-700 overflow-hidden">
         {/* if switching lists, unmount virtuoso so internal state gets reset */}
         {prevChatId === chatId ? (
           <MessageList

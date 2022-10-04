@@ -1,22 +1,33 @@
-import { SearchOutlined } from '@ant-design/icons';
+import {
+  ArrowLeftOutlined,
+  ExclamationCircleOutlined,
+  SearchOutlined,
+} from '@ant-design/icons';
 import {
   Avatar,
   Button,
   Col,
   Menu,
   MenuProps,
+  Modal,
   Row,
   Space,
+  Tabs,
   Tooltip,
   Typography,
 } from 'antd';
+import TabPane from 'antd/lib/tabs/TabPane';
 import React, { useEffect, useState } from 'react';
 import ConversationController from 'renderer/controllers/conversation.controller';
 import conversationManager from 'renderer/data/conversation.manager';
 import { Conversation } from 'renderer/entity';
+import usePrevious from 'renderer/utils/use-previous';
+import FileList from './file-list';
 import { Bell, BellOff, FileText, Photo, Pin, PinOff } from './icons';
+import MediaGalery from './media-galery';
 import AppSwitch from './switch';
 
+const { confirm } = Modal;
 interface ChatOptionToggleProps {
   id: Id;
 }
@@ -36,33 +47,40 @@ function getItem(
   } as MenuItem;
 }
 const items: MenuItem[] = [
-  getItem(<Typography.Text strong>View Media, Files</Typography.Text>, 'sub1', [
-    getItem(
-      <Space>
-        <Photo />
-        <Typography.Text>Media</Typography.Text>
-      </Space>,
-      1
-    ),
-    getItem(
-      <Space>
-        <FileText />
-        <Typography.Text>Files</Typography.Text>
-      </Space>,
-      2
-    ),
-  ]),
+  getItem(
+    <Typography.Text strong>Shared Media, Files</Typography.Text>,
+    'sub1',
+    [
+      getItem(
+        <Space>
+          <Photo strokeWidth={1.5} />
+          Media{' '}
+        </Space>,
+        'media'
+      ),
+      getItem(
+        <Space>
+          <FileText />
+          Files
+        </Space>,
+        'files'
+      ),
+    ]
+  ),
 
-  getItem('Delete chat', 5),
+  getItem(
+    <Typography.Text type="danger">Delete chat</Typography.Text>,
+    'delete'
+  ),
 ];
 
-export default function ChatOptionToggle({ id }: ChatOptionToggleProps) {
-  const [data, setData] = useState<Conversation | undefined>();
-
-  useEffect(() => {
-    setData(conversationManager.getConversation(id));
-  }, [id]);
-
+function Main({
+  data,
+  handleTabClick,
+}: {
+  data: Conversation;
+  handleTabClick: (key: string) => void;
+}) {
   return (
     <>
       {data && (
@@ -73,9 +91,10 @@ export default function ChatOptionToggle({ id }: ChatOptionToggleProps) {
           >
             <Avatar
               size={{ xs: 24, sm: 32, md: 40, lg: 64, xl: 80, xxl: 90 }}
+              src={data.avatar}
             />
             <Typography.Title level={4} style={{ marginBottom: 0 }}>
-              {conversationManager.getConversation(id)?.name}
+              {data.name}
             </Typography.Title>
             <Typography.Text type="secondary">Coding 🐱‍🐉</Typography.Text>
           </div>
@@ -90,7 +109,9 @@ export default function ChatOptionToggle({ id }: ChatOptionToggleProps) {
               <AppSwitch
                 defaultChecked={data.muted}
                 onChange={(muted) =>
-                  ConversationController.updateConverstationMeta(id, { muted })
+                  ConversationController.updateConverstationMeta(data.id, {
+                    muted,
+                  })
                 }
                 CheckedComponent={({ toggleState }) => (
                   <span>
@@ -123,7 +144,9 @@ export default function ChatOptionToggle({ id }: ChatOptionToggleProps) {
             <Col flex="1" className="flex justify-center text-center">
               <AppSwitch
                 onChange={(pinned) =>
-                  ConversationController.updateConverstationMeta(id, { pinned })
+                  ConversationController.updateConverstationMeta(data.id, {
+                    pinned,
+                  })
                 }
                 defaultChecked={data.pinned}
                 CheckedComponent={({ toggleState }) => (
@@ -167,14 +190,129 @@ export default function ChatOptionToggle({ id }: ChatOptionToggleProps) {
           </Row>
           <div className="py-5">
             <Menu
-              className="[&>li>ul>li]:pl-6"
-              onClick={(info) => console.info('menu clicked', info)}
+              selectedKeys={['23']}
+              onClick={({ key }) => handleTabClick(key)}
               style={{ width: '100%', backgroundColor: 'transparent' }}
               mode="inline"
               items={items}
             />
           </div>
         </>
+      )}
+    </>
+  );
+}
+
+export default function ChatOptionToggle({ id }: ChatOptionToggleProps) {
+  const [data, setData] = useState<Conversation | undefined>();
+  const [activeTab, setActiveTab] = useState('main');
+  const prevChatId = usePrevious(id);
+
+  useEffect(() => {
+    setData(conversationManager.getConversation(id));
+    setActiveTab('main');
+  }, [id]);
+
+  const onTabClick = (key: string) => {
+    if (key !== 'delete') {
+      setActiveTab(key);
+    } else {
+      confirm({
+        title: 'Are you sure delete this conversation?',
+        icon: <ExclamationCircleOutlined />,
+        content: 'Action canot be unverted',
+        okText: 'Yes',
+        okType: 'danger',
+        cancelText: 'No',
+        mask: false,
+        centered: true,
+        transitionName: '',
+        onOk() {
+          console.log('OK');
+          // TODO: delele conversation
+        },
+        onCancel() {
+          console.log('Cancel');
+        },
+      });
+    }
+  };
+  return (
+    <>
+      {data && (
+        <Tabs
+          defaultValue="main"
+          style={{ height: '100%', overflow: 'hidden' }}
+          activeKey={activeTab}
+          animated
+          tabBarStyle={{ display: 'none' }}
+          items={[
+            {
+              key: 'main',
+              label: undefined,
+              children: <Main data={data} handleTabClick={onTabClick} />,
+            },
+            {
+              key: 'media',
+              label: undefined,
+
+              children: (
+                <div className="relative flex flex-col h-screen">
+                  <Space className="absolute left-0">
+                    <Button
+                      icon={<ArrowLeftOutlined />}
+                      onClick={() => setActiveTab('main')}
+                      type="link"
+                    >
+                      Back
+                    </Button>
+                  </Space>
+                  <Space align="center" className="w-full ">
+                    <Typography.Title
+                      level={5}
+                      className=" text-center"
+                      style={{ marginBottom: 0 }}
+                    >
+                      Media, image
+                    </Typography.Title>
+                  </Space>
+
+                  <div className="h-6" />
+                  <MediaGalery id={id} />
+                </div>
+              ),
+            },
+            {
+              key: 'files',
+              label: undefined,
+              children: (
+                <div className="relative flex flex-col h-screen">
+                  <Space className="absolute left-0">
+                    <Button
+                      icon={<ArrowLeftOutlined />}
+                      onClick={() => setActiveTab('main')}
+                      type="link"
+                    >
+                      Back
+                    </Button>
+                  </Space>
+                  <Space align="center" className="w-full ">
+                    <Typography.Title
+                      level={5}
+                      className=" text-center"
+                      style={{ marginBottom: 0 }}
+                    >
+                      Files
+                    </Typography.Title>
+                  </Space>
+
+                  <div className="h-2" />
+                  <FileList id={id} />
+                </div>
+              ),
+            },
+          ]}
+        />
       )}
     </>
   );

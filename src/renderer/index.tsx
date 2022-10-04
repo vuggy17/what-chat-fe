@@ -10,4 +10,9 @@ window.electron.ipcRenderer.once('ipc-example', (arg) => {
   // eslint-disable-next-line no-console
   console.log(arg);
 });
+window.electron.ipcRenderer.once('error', (arg) => {
+  // eslint-disable-next-line no-console
+  console.error('Main process thrown an error', arg);
+});
+
 window.electron.ipcRenderer.sendMessage('ipc-example', ['ping']);

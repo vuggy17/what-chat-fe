@@ -49,6 +49,9 @@ const configuration: webpack.Configuration = {
       NODE_ENV: 'production',
     }),
     new DotenvWebpackPlugin(),
+    new webpack.ProvidePlugin({
+      Buffer: ['buffer', 'Buffer'],
+    }),
   ],
 };
 

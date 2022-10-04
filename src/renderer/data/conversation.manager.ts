@@ -21,7 +21,9 @@ export class ConversationManager {
   }
 
   public getConversation(locator: Id) {
-    return this._conversations.find((item) => item.id === locator);
+    const a = this._conversations.find((item) => item.id === locator);
+    console.log('found', a);
+    return a;
   }
 
   public get activeConversationId(): Id {

@@ -8,8 +8,10 @@ import ConversationController from 'renderer/controllers/conversation.controller
 import { Conversation } from 'renderer/entity';
 
 import messageManager from 'renderer/data/message.manager';
-import quickSort from 'renderer/utils/sort';
+
 import messageController from 'renderer/controllers/message.controller';
+import { quickSort } from 'renderer/utils/array';
+import usePrevious from 'renderer/utils/use-previous';
 import SelectList from '../components/conversation-list';
 import ChatBox from './chat-box';
 import ChatOptionToggle from '../components/chat-big-menu';
@@ -26,23 +28,16 @@ export function Conversations({
   const [data, setData] = useState<Conversation[]>([]);
 
   const loadMoreData = () => {
-    const newitems = Array.from(
-      {
-        length: 5,
-      },
-      () => genMockChat()
-    );
-    const a = data.concat(newitems);
-    setData([...a]);
+    ConversationController.loadConversation(data.length - 1);
   };
 
   useLayoutEffect(() => {
-    loadMoreData();
-
     // subscrible for converstaion added or removed
     const subcription = ConversationController.conversations.subscribe({
       next: (v) => {
-        setData(quickSort(v, 'lastUpdate', 'desc'));
+        console.log('conversation changed', v.length - 1);
+
+        setData(v);
       },
     });
     return () => {
@@ -103,15 +98,18 @@ export default function Chat() {
 
   const changeActiveChat = (nextId: Id) => {
     if (nextId !== activeChat) {
-      messageManager.setCachedMessages(activeChat!, messageManager.messages);
+      messageManager.setCachedMessages(activeChat!, messageManager.messages); // save loaded message to cache
+      console.info('Change active chat, old value: ', activeChat);
+
       ConversationController.setActiveChat(nextId);
+      messageController.loadMessage(nextId);
     }
   };
 
   useEffect(() => {
     const subcription = ConversationController.activeChat.subscribe({
       next: (chatId) => {
-        messageController.loadMessage(chatId);
+        console.info('Change active chat: ', 'on next', chatId);
         setActiveChat(chatId);
       },
     });
@@ -144,12 +142,12 @@ export default function Chat() {
         </Content>
         <Divider type="vertical" className="h-full ml-0 mr-0" />
         {/* option menu */}
-        {activeChat && (
+        {convOptionOpen && activeChat && (
           <Sider
+            className="max-h-full overflow-auto h-full "
             theme="light"
             style={{
               background: 'white',
-              display: convOptionOpen ? 'block' : 'none',
               marginLeft: -8,
             }}
             width={360}

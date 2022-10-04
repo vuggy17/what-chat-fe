@@ -7,7 +7,7 @@ import formatDTime from 'renderer/utils/time';
 import FileBubble from './file-bubble';
 import { CircleChecked } from './icons';
 import ImageBubble from './image-bubble';
-import BubbleActionRightClickContext from './rightclick-menu';
+import BubbleActionMenu from './context-menu';
 
 /* eslint-disable react/require-default-props */
 export interface MessageBubbleProps {
@@ -17,6 +17,7 @@ export interface MessageBubbleProps {
   path?: string;
   name?: string;
   size?: number;
+  sender: Id;
   time: Date;
   hasAvatar?: boolean;
   uploaded?: boolean;
@@ -35,8 +36,8 @@ export default function MessageBubble({
       switch (type) {
         case 'file':
           return (
-            <BubbleActionRightClickContext
-              actions={['delete']}
+            <BubbleActionMenu
+              actions={['download', 'delete']}
               chatId={rest.chatId}
               messageId={rest.id}
             >
@@ -46,23 +47,23 @@ export default function MessageBubble({
                 size={rest.size!}
                 {...props}
               />
-            </BubbleActionRightClickContext>
+            </BubbleActionMenu>
           );
         case 'photo':
           return (
-            <BubbleActionRightClickContext
-              actions={['delete', 'edit']}
+            <BubbleActionMenu
+              actions={['download', 'edit', 'delete']}
               chatId={rest.chatId}
               messageId={rest.id}
             >
               <ImageBubble uploaded={rest.uploaded!} {...props} />
-            </BubbleActionRightClickContext>
+            </BubbleActionMenu>
           );
         default:
           return (
             <div className="flex">
-              <div className="bg-primary text-white break-words rounded-md rounded-br-none pt-3 pl-4 pr-1 pb-0  ">
-                <BubbleActionRightClickContext
+              <div className="bg-primary text-white break-words rounded-md rounded-br-none pt-3 pl-4 pr-3 pb-0  ">
+                <BubbleActionMenu
                   actions={['delete']}
                   chatId={rest.chatId}
                   messageId={rest.id}
@@ -70,7 +71,7 @@ export default function MessageBubble({
                   <Typography.Paragraph className="text-inherit">
                     {content}
                   </Typography.Paragraph>
-                </BubbleActionRightClickContext>
+                </BubbleActionMenu>
               </div>
               <div className="invisible">
                 <CircleChecked />
@@ -82,7 +83,6 @@ export default function MessageBubble({
     return (
       // self message
       <div className=" mr-3 float-right flex max-w-[90%] mb-3">
-        <div className="invisible">action menu</div>
         <Tooltip title={formatDTime(time.toString())} placement="left">
           {selfMessage()}
         </Tooltip>
@@ -101,7 +101,7 @@ export default function MessageBubble({
     switch (type) {
       case 'file':
         return (
-          <BubbleActionRightClickContext
+          <BubbleActionMenu
             actions={['delete']}
             chatId={rest.chatId}
             messageId={rest.id}
@@ -112,33 +112,33 @@ export default function MessageBubble({
               size={rest.size!}
               {...props}
             />
-          </BubbleActionRightClickContext>
+          </BubbleActionMenu>
         );
       case 'photo':
         return (
-          <BubbleActionRightClickContext
+          <BubbleActionMenu
             actions={['edit', 'delete']}
             chatId={rest.chatId}
             messageId={rest.id}
           >
             <ImageBubble uploaded={rest.uploaded!} {...props} />
-          </BubbleActionRightClickContext>
+          </BubbleActionMenu>
         );
       default:
         return (
           <div className="bg-[#EBEBEB] break-words  rounded-md rounded-bl-none p-3 pb-0">
-            <BubbleActionRightClickContext
+            <BubbleActionMenu
               actions={['delete']}
               chatId={rest.chatId}
               messageId={rest.id}
             >
               <Typography.Paragraph>{content}</Typography.Paragraph>
-            </BubbleActionRightClickContext>
+            </BubbleActionMenu>
           </div>
         );
     }
   };
-
+  // TODO: get user avar from userManager with props.sender
   return (
     <div className="max-w-[90%] flex clear-right mb-3">
       <div
@@ -150,8 +150,6 @@ export default function MessageBubble({
       <Tooltip title={formatDTime(time.toString())} placement="left">
         {othersMessage()}
       </Tooltip>
-
-      <div className="invisible">action menu</div>
     </div>
   );
 }
