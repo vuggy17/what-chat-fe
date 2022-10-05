@@ -1,5 +1,7 @@
 import React, { ReactNode, useEffect, useState } from 'react';
 import ConversationController from 'renderer/controllers/conversation.controller';
+import messageController from 'renderer/controllers/message.controller';
+import conversationManager from 'renderer/data/conversation.manager';
 
 export default function Preload({
   children,
@@ -13,11 +15,16 @@ export default function Preload({
     const f = async () => {
       // TODO: load user data
       // load converstation list
-      await ConversationController.loadConversation(undefined);
-      // TODO: load first conversation messages
+      await ConversationController.init();
+      const firstChatid = conversationManager.activeConversationId;
+      return messageController.init(firstChatid);
     };
     f()
       .then((_) => {
+        // TODO: save data to cache
+        console.log('🐱‍🐉 Applicaiton is ready');
+        console.log(conversationManager.activeConversationId);
+
         setAppReady(true);
         return null;
       })

@@ -9,9 +9,15 @@ export function genMockMsg(): Message {
     createdAt: new Date(),
     fromMe: Math.floor(Math.random() * 10) + 1 > 5,
     globalId: faker.animal.fish(),
-    id: faker.animal.fish(),
+    id: faker.lorem.paragraph(),
     status: 'sent',
     type: 'text',
+    path: faker.image.imageUrl(),
+    size: Math.random() * 200,
+    uploaded: true,
+    name: faker.name.firstName(),
+    chatId: faker.animal.fish(),
+    senderId: faker.helpers.arrayElement(['1', '2']),
   };
 }
 

@@ -4,22 +4,30 @@ import { Conversation, Message } from 'renderer/entity';
 export class MessageManager {
   private static _instance: MessageManager;
 
-  private _messages: Message[];
+  private _messages: Message[]; // store each chat's messages
 
-  private _savedMessages: Record<Id, Message[]> = {};
+  private _caches: Map<Id, Message[]> = new Map();
 
-  private constructor(initials: Message[]) {
-    this._messages = initials;
+  private constructor() {
+    this._messages = [];
   }
 
-  public static use(): MessageManager {
+  static use(): MessageManager {
     if (!this._instance) {
-      return new MessageManager([]);
+      return new MessageManager();
     }
     return this._instance;
   }
 
-  public get messages(): Message[] {
+  getCachedMessages(chatId: Id): Message[] {
+    return this._caches.get(chatId) || [];
+  }
+
+  setCachedMessages(chatId: Id, messages: Message[]): void {
+    this._caches.set(chatId, messages);
+  }
+
+  get messages(): Message[] {
     return this._messages;
   }
 
@@ -27,17 +35,13 @@ export class MessageManager {
     this._messages = v;
   }
 
-  public getSavedMessages(chatId: Id): Message[] {
-    return this._savedMessages[chatId];
+  getMessageById(id: Id): Message | undefined {
+    return this._messages.find((item) => item.id === id);
   }
 
-  public set savedMessages(v: [Id, Message[]]) {
-    const [chatId, data] = v;
-    this._savedMessages[chatId] = data;
-  }
-
-  addmessage(message: Message) {
-    this._messages.push(message);
+  flush() {
+    this._caches.clear();
+    console.log(this._caches);
   }
 }
 

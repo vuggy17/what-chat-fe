@@ -5,17 +5,20 @@ import { CONV_PAGE_SIZE } from 'renderer/shared/constants';
 // eslint-disable-next-line import/prefer-default-export
 export function genMockChat(): Conversation {
   return {
-    id: faker.unique(faker.phone.number),
+    id: faker.datatype.uuid(),
     typing: Math.random() * 10 > 5,
     name: faker.name.fullName(),
     isGroup: true,
     lastMessage: faker.company.bs(),
-    lastUpdate: new Date(),
+    lastUpdate: faker.date.past(),
     online: 1,
     preview: faker.company.bs(),
     unreadCount: 0,
     status: 'sending',
+    muted: Math.random() * 10 > 5,
+    pinned: Math.random() * 10 > 7,
     participants: [faker.random.word()],
+    avatar: faker.image.avatar(),
   };
 }
 

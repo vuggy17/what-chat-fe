@@ -36,25 +36,31 @@ const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
 
 const Chats: React.FC = () => {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const navigate = useNavigate();
 
   return (
     <Layout style={{ height: '100vh', overflow: 'auto' }}>
       <Sider
         trigger={null}
+        // breakpoint="xl"
         collapsible
+        // onBreakpoint={setCollapsed}
         collapsed={collapsed}
+        defaultCollapsed
         theme="light"
-        className="pr-8 pl-4"
-        width={220}
+        className="px-4"
+        // width={!collapsed ? 220 : ''}
       >
         <div className="flex flex-col flex-1 h-full justify-between ">
           <div>
-            <div className=" m-[16px] ml-0">
-              <img src={logo} alt="logo" className="w-[32px] " />
+            <div
+              className=" m-[16px] ml-0 w-full flex items-center"
+              style={{ justifyContent: collapsed ? 'center' : undefined }}
+            >
+              <img src={logo} alt="logo" className="w-[32px]" />
               {!collapsed && (
-                <p className="inset-0 inline font-semibold duration-300 transition-opacity  text-green-700 text-center align-middle ml-3">
+                <p className="font-semibold duration-300 transition-opacity  text-green-700 ml-3 mb-0">
                   Tailwind
                 </p>
               )}

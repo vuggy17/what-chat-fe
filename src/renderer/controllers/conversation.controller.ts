@@ -3,15 +3,17 @@ import conversationManager, {
 } from 'renderer/data/conversation.manager';
 import messageManager, { MessageManager } from 'renderer/data/message.manager';
 import { Conversation, Message } from 'renderer/entity';
+import { conversation, genMockChat } from 'renderer/mock/conversation';
 import {
   ConversationRepository,
   IConversationRepository,
 } from 'renderer/repository/conversation.repository';
+import { CONV_PAGE_SIZE } from 'renderer/shared/constants';
 import { OConveration, OMessage } from 'renderer/shared/lib/network/type';
-import { Subject } from 'rxjs';
+import { createMsgPlaceholder } from 'renderer/usecase/message.usecase';
+import { quickSort } from 'renderer/utils/array';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
-import { Observable } from 'rxjs/internal/Observable';
-import ChatParser from './adapter';
+import { chatParser } from './adapter';
 
 class CConevrsationController {
   activeChat: BehaviorSubject<Id>;
@@ -26,9 +28,39 @@ class CConevrsationController {
     this.activeChat = new BehaviorSubject(
       this._conversationManager.activeConversationId
     );
-    this.conversations = new BehaviorSubject(
-      this._conversationManager.conversations
+    this.conversations = new BehaviorSubject([] as Conversation[]);
+  }
+
+  async init() {
+    // flush old data
+    this._conversationManager.conversations = [];
+    this._conversationManager.activeConversationId = null;
+    this._messageManager.messages = [];
+
+    // load chat list
+    const internalConversation = await this._convRespository.getConversations();
+    const data = quickSort<Conversation>(
+      internalConversation,
+      'lastUpdate',
+      'desc'
     );
+
+    // save to manager
+    this._conversationManager.conversations = [
+      ...this._conversationManager.conversations,
+      ...data,
+    ];
+
+    // set active conversation
+    // conversation list must be sorted by lastUpdate
+    const firstChatId = data[0].id;
+    this._conversationManager.activeConversationId = firstChatId;
+
+    console.log('firstChatId', firstChatId);
+
+    // trigger ui update
+    this.conversations.next(data);
+    this.activeChat.next(firstChatId);
   }
 
   onMessageReceived(message: OMessage) {
@@ -38,7 +70,7 @@ class CConevrsationController {
     );
     if (chat) {
       // update chat
-      this.updateConverstationMeta(chat);
+      this.updateConverstationMeta(chat.id, { lastUpdate: new Date() });
       // formate message
       // update message
     } else {
@@ -48,23 +80,26 @@ class CConevrsationController {
     }
   }
 
-  addConversation(conversation: Conversation) {
-    this._conversationManager.conversations.push(conversation);
+  addConversation(v: Conversation) {
+    this._conversationManager.conversations.push(v);
     this.conversations.next(this._conversationManager.conversations);
   }
 
-  updateConverstationMeta(conversation: Conversation) {
+  updateConverstationMeta(id: Id, meta: Partial<Conversation>) {
     const index = this._conversationManager.conversations.findIndex(
-      (item) => item.id === conversation.id
+      (item) => item.id === id
     );
     if (index !== -1) {
-      this._conversationManager.conversations[index] = conversation;
+      this._conversationManager.conversations[index] = Object.assign(
+        this._conversationManager.conversations[index],
+        meta
+      );
       this.conversations.next(this._conversationManager.conversations);
     }
   }
 
   addConverstaion(v: OConveration) {
-    const validChat = new ChatParser().toEntity({} as OConveration);
+    const validChat = chatParser.toEntity({} as OConveration);
 
     this._conversationManager.conversations = [
       validChat,
@@ -81,25 +116,37 @@ class CConevrsationController {
     return this._conversationManager.getConversation(chatId);
   }
 
-  async loadConversation(from: Id | undefined, count = 10) {
-    // load conversation
-    // load first conversation messages
-    if (from) {
-      // load from id = xxxx
-      console.log('chat paginated loading');
-    } else {
-      const data = await this._convRespository.getConversations();
-      this._conversationManager.conversations = [
-        ...this._conversationManager.conversations,
-        ...data,
-      ];
+  /** get chat list
+   * @param from: the number of chat to skip
+   */
+  async loadConversation(skip: number, count = CONV_PAGE_SIZE) {
+    if (skip >= this._conversationManager.conversations.length - 1) {
+      const data = await this._convRespository.getConversations(skip, count);
+
+      // save to manager
+      this._conversationManager.conversations =
+        this._conversationManager.conversations.concat(data);
+
       // trigger ui update
-      this.conversations.next(data);
+      this.conversations.next(this._conversationManager.conversations); // this could cause a bug if the data is not loaded yet
+    } else {
+      throw new Error(
+        "Skip can't be smaller than the length of the current conversation list"
+      );
     }
   }
 
-  sendMessage(message: Message) {
-    this._messageManager.addmessage(message);
+  createChat() {
+    // create chat
+    const newchat = genMockChat();
+    this._conversationManager.conversations = [
+      ...this._conversationManager.conversations,
+      newchat,
+    ];
+    // save to db
+    this._convRespository.saveConversations([newchat]);
+    // update chat
+    // update message
   }
 }
 

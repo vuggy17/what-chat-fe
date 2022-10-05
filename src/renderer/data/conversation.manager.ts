@@ -21,15 +21,16 @@ export class ConversationManager {
   }
 
   public getConversation(locator: Id) {
-    return this._conversations.find((item) => item.id === locator);
+    const a = this._conversations.find((item) => item.id === locator);
+    console.log('found', a);
+    return a;
   }
 
   public get activeConversationId(): Id {
     return this._activeConversationId!;
   }
 
-  public set activeConversationId(v: Id) {
-    console.log('chat changed', v);
+  public set activeConversationId(v: Id | null) {
     this._activeConversationId = v;
   }
 
@@ -40,6 +41,12 @@ export class ConversationManager {
   public set conversations(v: Conversation[]) {
     this._conversations = v;
   }
+
+  // getActiveConversation(): Conversation {
+  //   return this._conversations.find(
+  //     (item) => item.id === this._activeConversationId
+  //   )!;
+  // }
 }
 
 export default ConversationManager.use();

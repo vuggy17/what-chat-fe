@@ -67,6 +67,27 @@ body {
   -webkit-box-sizing: border-box;
 }
 
+*::-webkit-scrollbar {
+  -webkit-appearance: none;
+}
+*::-webkit-scrollbar:vertical {
+  width: 8px;
+}
+
+*::-webkit-scrollbar-thumb {
+  border-radius: 8px;
+  background-color: #C0C0C0;
+}
+*::-webkit-scrollbar-track {
+  border-radius: 8px;
+  background-color: #eee;
+
+}
+
+* {
+  overflow-anchor: none;
+}
+
 /* typing animation */
 /* .dot-typing {
   position: relative;
