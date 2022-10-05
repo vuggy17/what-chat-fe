@@ -1,9 +1,10 @@
-import { MoreOutlined, UserOutlined } from '@ant-design/icons';
+import { LoadingOutlined, MoreOutlined, UserOutlined } from '@ant-design/icons';
 import {
   Avatar,
   Badge,
   Button,
   Divider,
+  Input,
   Skeleton,
   Space,
   Typography,
@@ -18,8 +19,9 @@ import { useOptionPanelContext } from 'renderer/shared/context/chatbox.context';
 import { createMsgPlaceholder } from 'renderer/usecase/message.usecase';
 import usePrevious from 'renderer/utils/use-previous';
 
-import Input from '../components/input';
+import RichEditor from '../components/input';
 import MessageList from '../components/message-list';
+import SearchBox from '../components/search-box';
 
 function Header({ chatId }: { chatId: Id }) {
   const { toggleOpenConvOption } = useOptionPanelContext();
@@ -74,9 +76,8 @@ function Header({ chatId }: { chatId: Id }) {
 const randomNumber = (min: number, max: number) =>
   Math.floor(Math.random() * (max - min + 1)) + min;
 
-export default function Chat({ chatId }: any) {
+export default function Chat({ chatId, hasSearch }: any) {
   const [messages, setMessages] = useState<Message[]>([]);
-
   const virtuoso = useRef(null);
 
   const prevChatId = usePrevious(chatId);
@@ -131,7 +132,7 @@ export default function Chat({ chatId }: any) {
   return (
     <div className=" flex flex-col min-h-0 h-full pb-4 pr-2">
       <Header chatId={chatId} />
-      <div className="flex-auto pl-4 pr-3 transition-all transform duration-700 overflow-hidden">
+      <div className="flex-auto relative pl-4 pr-3 transition-all transform duration-700 overflow-hidden">
         {/* if switching lists, unmount virtuoso so internal state gets reset */}
         {prevChatId === chatId ? (
           <MessageList
@@ -148,8 +149,13 @@ export default function Chat({ chatId }: any) {
             />
           ))
         )}
+        {hasSearch && (
+          <div className="absolute top-0 inset-x-0 z-50 [&_*]:rounded-none ">
+            <SearchBox />
+          </div>
+        )}
       </div>
-      <Input onSubmit={onSendMessage} />
+      <RichEditor onSubmit={onSendMessage} />
     </div>
   );
 }

@@ -93,8 +93,8 @@ export function Conversations({
 
 export default function Chat() {
   const { convOptionOpen } = useOptionPanelContext();
-
   const [activeChat, setActiveChat] = useState<Id | undefined>();
+  const [showSearch, setShowSearch] = useState(false);
 
   const changeActiveChat = (nextId: Id) => {
     if (nextId !== activeChat) {
@@ -111,6 +111,7 @@ export default function Chat() {
       next: (chatId) => {
         console.info('Change active chat: ', 'on next', chatId);
         setActiveChat(chatId);
+        setShowSearch(false);
       },
     });
     return () => {
@@ -138,7 +139,7 @@ export default function Chat() {
         </Sider>
         <Divider type="vertical" className="h-full ml-0" />
         <Content className="h-full w-full  ">
-          <ChatBox chatId={activeChat!} />
+          <ChatBox chatId={activeChat!} hasSearch={showSearch} />
         </Content>
         <Divider type="vertical" className="h-full ml-0 mr-0" />
         {/* option menu */}
@@ -152,7 +153,10 @@ export default function Chat() {
             }}
             width={360}
           >
-            <ChatOptionToggle id={activeChat} />
+            <ChatOptionToggle
+              id={activeChat}
+              toggleSearch={() => setShowSearch(!showSearch)}
+            />
           </Sider>
         )}
       </Layout>

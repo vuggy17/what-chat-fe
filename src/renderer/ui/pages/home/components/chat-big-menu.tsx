@@ -30,6 +30,7 @@ import AppSwitch from './switch';
 const { confirm } = Modal;
 interface ChatOptionToggleProps {
   id: Id;
+  toggleSearch: () => void;
 }
 
 type MenuItem = Required<MenuProps>['items'][number];
@@ -77,9 +78,11 @@ const items: MenuItem[] = [
 function Main({
   data,
   handleTabClick,
+  onSearchClick,
 }: {
   data: Conversation;
   handleTabClick: (key: string) => void;
+  onSearchClick: () => void;
 }) {
   return (
     <>
@@ -183,6 +186,7 @@ function Main({
                   icon={<SearchOutlined />}
                   type="text"
                   style={{ backgroundColor: '#EBEBEB' }}
+                  onClick={onSearchClick}
                 />
                 <p className="ant-badge block mt-1">Search</p>
               </span>
@@ -203,7 +207,10 @@ function Main({
   );
 }
 
-export default function ChatOptionToggle({ id }: ChatOptionToggleProps) {
+export default function ChatOptionToggle({
+  id,
+  toggleSearch,
+}: ChatOptionToggleProps) {
   const [data, setData] = useState<Conversation | undefined>();
   const [activeTab, setActiveTab] = useState('main');
   const prevChatId = usePrevious(id);
@@ -250,7 +257,13 @@ export default function ChatOptionToggle({ id }: ChatOptionToggleProps) {
             {
               key: 'main',
               label: undefined,
-              children: <Main data={data} handleTabClick={onTabClick} />,
+              children: (
+                <Main
+                  data={data}
+                  handleTabClick={onTabClick}
+                  onSearchClick={toggleSearch}
+                />
+              ),
             },
             {
               key: 'media',

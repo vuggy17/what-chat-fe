@@ -43,13 +43,14 @@ const Chats: React.FC = () => {
     <Layout style={{ height: '100vh', overflow: 'auto' }}>
       <Sider
         trigger={null}
-        breakpoint="xl"
+        // breakpoint="xl"
         collapsible
-        onBreakpoint={setCollapsed}
+        // onBreakpoint={setCollapsed}
         collapsed={collapsed}
+        defaultCollapsed
         theme="light"
         className="px-4"
-        width={220}
+        // width={!collapsed ? 220 : ''}
       >
         <div className="flex flex-col flex-1 h-full justify-between ">
           <div>

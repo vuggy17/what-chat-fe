@@ -58,7 +58,6 @@ export default function BubbleActionMenu({
     console.log('downloading');
     const file = messageManager.getMessageById(messageId) as FileMessage;
 
-    // const { ipcRenderer } = window.require('electron');
     message.loading({
       key: `download_${file.name}`,
       content: 'Downloading..',
