@@ -1,7 +1,7 @@
-import { Conversation } from 'renderer/entity';
+import { Conversation } from 'renderer/domain';
 import { CONV_PAGE_SIZE } from 'renderer/shared/constants';
 import { conversation as data, genMockChat } from 'renderer/mock/conversation';
-import { IHttp, OConveration } from 'renderer/shared/lib/network/type';
+import { IHttp, OConveration } from 'renderer/services/type';
 import HttpClient from 'renderer/services/http';
 
 export interface IConversationRepository {

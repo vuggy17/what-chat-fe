@@ -4,7 +4,7 @@ import {
   Message,
   TextMessage,
   FileMessage,
-} from 'renderer/entity/message.entity';
+} from 'renderer/domain/message.entity';
 import genId from 'renderer/utils/genid';
 import getBase64 from 'renderer/utils/readimg';
 

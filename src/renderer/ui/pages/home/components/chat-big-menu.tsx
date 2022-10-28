@@ -20,7 +20,7 @@ import TabPane from 'antd/lib/tabs/TabPane';
 import React, { useEffect, useState } from 'react';
 import ConversationController from 'renderer/controllers/conversation.controller';
 import conversationManager from 'renderer/data/conversation.manager';
-import { Conversation } from 'renderer/entity';
+import { Conversation } from 'renderer/domain';
 import usePrevious from 'renderer/utils/use-previous';
 import FileList from './file-list';
 import { Bell, BellOff, FileText, Photo, Pin, PinOff } from './icons';
@@ -213,7 +213,6 @@ export default function ChatOptionToggle({
 }: ChatOptionToggleProps) {
   const [data, setData] = useState<Conversation | undefined>();
   const [activeTab, setActiveTab] = useState('main');
-  const prevChatId = usePrevious(id);
 
   useEffect(() => {
     setData(conversationManager.getConversation(id));

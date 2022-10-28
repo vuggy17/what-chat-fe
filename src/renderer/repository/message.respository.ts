@@ -1,8 +1,8 @@
-import { Message } from 'renderer/entity';
+import { Message } from 'renderer/domain';
 import { genMockMsg, messages as data } from 'renderer/mock/message';
 import HttpClient from 'renderer/services/http';
 import { MSG_PAGE_SIZE } from 'renderer/shared/constants';
-import { IHttp, OMessage } from 'renderer/shared/lib/network/type';
+import { IHttp, OMessage } from 'renderer/services/type';
 
 export interface IMessageRespository {
   getMessages(chatId: Id, count: number, skip: number): Promise<Message[]>;

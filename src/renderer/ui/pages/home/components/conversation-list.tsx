@@ -14,7 +14,7 @@ import {
   Space,
   Typography,
 } from 'antd';
-import { Conversation } from 'renderer/entity';
+import { Conversation } from 'renderer/domain';
 import formatDTime from 'renderer/utils/time';
 import { BellFilled } from '@ant-design/icons';
 import { BellOff } from './icons';

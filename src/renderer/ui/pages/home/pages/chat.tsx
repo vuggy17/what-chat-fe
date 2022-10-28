@@ -5,7 +5,7 @@ import { genMockChat } from 'renderer/mock/conversation';
 import { SearchOutlined } from '@ant-design/icons';
 import { useOptionPanelContext } from 'renderer/shared/context/chatbox.context';
 import ConversationController from 'renderer/controllers/conversation.controller';
-import { Conversation } from 'renderer/entity';
+import { Conversation } from 'renderer/domain';
 
 import messageManager from 'renderer/data/message.manager';
 

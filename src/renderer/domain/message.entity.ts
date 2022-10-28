@@ -1,4 +1,4 @@
-export interface BaseMessage {
+interface BaseMessage {
   id: LocalId;
   globalId: Id | null;
   type: MessageType;

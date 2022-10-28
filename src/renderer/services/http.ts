@@ -2,7 +2,7 @@
 import axios, { Axios, AxiosError } from 'axios';
 import { BASEURL, HTTP_ERROR } from 'renderer/shared/constants';
 
-import { IHttp } from '../shared/lib/network/type';
+import { IHttp } from './type';
 // import "./interceptor";
 axios.defaults.withCredentials = true;
 class AppHttp implements IHttp {

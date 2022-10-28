@@ -2,7 +2,7 @@ import { DownOutlined } from '@ant-design/icons';
 import { Affix, Button, Skeleton, Tooltip } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
 import { Virtuoso } from 'react-virtuoso';
-import { Message } from 'renderer/entity';
+import { Message } from 'renderer/domain';
 import MessageBubble from './chat-bubble';
 
 type MessageListProps = {

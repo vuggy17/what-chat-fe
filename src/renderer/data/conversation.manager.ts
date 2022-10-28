@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
-import { Conversation } from 'renderer/entity';
+import { Conversation } from 'renderer/domain';
 
 export class ConversationManager {
   private static _instance: ConversationManager;

@@ -1,6 +1,6 @@
 /* eslint-disable max-classes-per-file */
-import { Conversation, Message } from 'renderer/entity';
-import { OConveration, OMessage } from 'renderer/shared/lib/network/type';
+import { Conversation, Message } from 'renderer/domain';
+import { OConveration, OMessage } from 'renderer/services/type';
 
 interface IParser<E, R> {
   fromEntity(v: E): R;

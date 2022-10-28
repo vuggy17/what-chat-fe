@@ -1,7 +1,6 @@
-import { Divider } from 'antd';
 import React, { ReactNode, useContext, useState } from 'react';
 
-type CbContextType = {
+type A = {
   toggleOpenConvOption: () => void;
   convOptionOpen: boolean;
 };
@@ -9,7 +8,7 @@ interface ChildrenProps {
   children: ReactNode;
 }
 
-const CContext = React.createContext<CbContextType>({} as CbContextType);
+const CContext = React.createContext<A>({} as A);
 
 export function useOptionPanelContext() {
   return useContext(CContext);

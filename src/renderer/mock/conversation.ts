@@ -1,4 +1,4 @@
-import { Conversation } from 'renderer/entity';
+import { Conversation } from 'renderer/domain';
 import { faker } from '@faker-js/faker';
 import { CONV_PAGE_SIZE } from 'renderer/shared/constants';
 

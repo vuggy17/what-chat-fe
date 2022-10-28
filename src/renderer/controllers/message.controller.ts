@@ -1,5 +1,5 @@
 import messageManager, { MessageManager } from 'renderer/data/message.manager';
-import { FileMessage, Message } from 'renderer/entity';
+import { FileMessage, Message } from 'renderer/domain';
 import { messages } from 'renderer/mock/message';
 import {
   IMessageRespository,

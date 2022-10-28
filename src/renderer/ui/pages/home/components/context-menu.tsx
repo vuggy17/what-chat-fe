@@ -11,7 +11,7 @@ import { Dropdown, Menu, Space, Modal, message } from 'antd';
 import React, { HtmlHTMLAttributes } from 'react';
 import messageController from 'renderer/controllers/message.controller';
 import messageManager from 'renderer/data/message.manager';
-import { FileMessage } from 'renderer/entity';
+import { FileMessage } from 'renderer/domain';
 import { ipcRenderer } from 'electron';
 
 const { confirm } = Modal;

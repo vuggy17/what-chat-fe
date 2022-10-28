@@ -2,14 +2,14 @@ import conversationManager, {
   ConversationManager,
 } from 'renderer/data/conversation.manager';
 import messageManager, { MessageManager } from 'renderer/data/message.manager';
-import { Conversation, Message } from 'renderer/entity';
+import { Conversation, Message } from 'renderer/domain';
 import { conversation, genMockChat } from 'renderer/mock/conversation';
 import {
   ConversationRepository,
   IConversationRepository,
 } from 'renderer/repository/conversation.repository';
 import { CONV_PAGE_SIZE } from 'renderer/shared/constants';
-import { OConveration, OMessage } from 'renderer/shared/lib/network/type';
+import { OConveration, OMessage } from 'renderer/services/type';
 import { createMsgPlaceholder } from 'renderer/usecase/message.usecase';
 import { quickSort } from 'renderer/utils/array';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';

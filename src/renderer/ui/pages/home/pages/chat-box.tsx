@@ -13,7 +13,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import ConversationController from 'renderer/controllers/conversation.controller';
 import messageController from 'renderer/controllers/message.controller';
-import { Conversation, Message } from 'renderer/entity';
+import { Conversation, Message } from 'renderer/domain';
 
 import { useOptionPanelContext } from 'renderer/shared/context/chatbox.context';
 import { createMsgPlaceholder } from 'renderer/usecase/message.usecase';

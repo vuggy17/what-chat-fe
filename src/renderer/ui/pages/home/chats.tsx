@@ -16,10 +16,12 @@ import {
   Divider,
   Layout,
   Menu,
+  message,
   Tooltip,
   Typography,
 } from 'antd';
 import Paragraph from 'antd/lib/skeleton/Paragraph';
+import axios from 'axios';
 import React, { useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import {
@@ -130,7 +132,19 @@ const Chats: React.FC = () => {
               }
             )}
             <div className="flex gap-2">
-              <Text>Vu Dang Khuong Duy</Text>
+              {/* <Text>Vu Dang Khuong Duy</Text> */}
+              <Button
+                onClick={() =>
+                  axios
+                    .post('/user/login', {
+                      username: 'Hope59',
+                      password: 'VK1qRgwYA1iReF2',
+                    })
+                    .then((res) => message.success('Login success'))
+                }
+              >
+                Get auth token
+              </Button>
               <Text>
                 <Avatar
                   style={{ backgroundColor: '#87d068' }}

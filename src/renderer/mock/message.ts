@@ -1,6 +1,6 @@
 /* eslint-disable import/prefer-default-export */
 import { faker } from '@faker-js/faker';
-import { Message } from 'renderer/entity';
+import { Message } from 'renderer/domain';
 import { MSG_PAGE_SIZE } from 'renderer/shared/constants';
 
 export function genMockMsg(): Message {
