@@ -1,11 +1,10 @@
-import React, { useEffect, useLayoutEffect, useState } from 'react';
-import { Button, Divider, Input, Layout, Skeleton, Typography } from 'antd';
+import { useEffect, useLayoutEffect, useState } from 'react';
+import { Divider, Input, Layout, Skeleton, Typography } from 'antd';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { genMockChat } from 'renderer/mock/conversation';
 import { SearchOutlined } from '@ant-design/icons';
 import { useOptionPanelContext } from 'renderer/shared/context/chatbox.context';
-import ConversationController from 'renderer/controllers/conversation.controller';
-import { Conversation } from 'renderer/domain';
+import ConversationController from 'renderer/controllers/chat.controller';
+import { Chat as ChatEntity } from 'renderer/domain';
 
 import messageManager from 'renderer/data/message.manager';
 
@@ -25,15 +24,15 @@ export function Conversations({
   active: Id;
   onChatIdChange: (v: Id) => void;
 }) {
-  const [data, setData] = useState<Conversation[]>([]);
+  const [data, setData] = useState<ChatEntity[]>([]);
 
   const loadMoreData = () => {
-    ConversationController.loadConversation(data.length - 1);
+    ConversationController.loadChat(data.length - 1);
   };
 
   useLayoutEffect(() => {
     // subscrible for converstaion added or removed
-    const subcription = ConversationController.conversations.subscribe({
+    const subcription = ConversationController.chats.subscribe({
       next: (v) => {
         console.log('conversation changed', v.length - 1);
 
@@ -93,7 +92,8 @@ export function Conversations({
 
 export default function Chat() {
   const { convOptionOpen } = useOptionPanelContext();
-  const [activeChat, setActiveChat] = useState<Id | undefined>();
+  // const [activeChat, setActiveChat] = useState<Id | undefined>();
+  const setActiveChat = useSetRecoilState(selectedChatState);
   const [showSearch, setShowSearch] = useState(false);
 
   const changeActiveChat = (nextId: Id) => {

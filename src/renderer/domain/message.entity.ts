@@ -1,3 +1,5 @@
+import IUser from 'renderer/domain/user.entity';
+
 interface BaseMessage {
   id: LocalId;
   globalId: Id | null;
@@ -22,3 +24,11 @@ export interface FileMessage extends BaseMessage {
 }
 
 export type Message = TextMessage | FileMessage;
+
+export interface TextMessageWithMetaData extends TextMessage {
+  sender: IUser;
+}
+
+export interface FileMessageWithMetaData extends FileMessage {
+  sender: IUser;
+}

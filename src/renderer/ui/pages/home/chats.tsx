@@ -137,8 +137,8 @@ const Chats: React.FC = () => {
                 onClick={() =>
                   axios
                     .post('/user/login', {
-                      username: 'Hope59',
-                      password: 'VK1qRgwYA1iReF2',
+                      username: 'Marguerite33',
+                      password: '6EyH6RhYnD9YVvD',
                     })
                     .then((res) => message.success('Login success'))
                 }

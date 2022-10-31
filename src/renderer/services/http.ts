@@ -1,24 +1,25 @@
+import { message } from 'antd';
 /* eslint-disable prefer-destructuring */
 import axios, { Axios, AxiosError } from 'axios';
+import IDataSource from 'renderer/repository/type';
 import { BASEURL, HTTP_ERROR } from 'renderer/shared/constants';
 
-import { IHttp } from './type';
 // import "./interceptor";
 axios.defaults.withCredentials = true;
-class AppHttp implements IHttp {
-  async get<T>(endpoint: string, query?: any): Promise<any> {
+class AppHttp implements IDataSource {
+  async get<T>(endpoint: any, query?: any): Promise<any> {
     return axios
       .get<T>(`${BASEURL}${endpoint}`, { params: query })
       .catch((error: AxiosError) => this.handleError(error));
   }
 
-  async patch<T>(endpoint: string, data: any): Promise<any> {
+  async update<T>(endpoint: string, data: any): Promise<any> {
     return axios
       .patch<T>(`${BASEURL}${endpoint}`, { data })
       .catch((error: AxiosError) => this.handleError(error));
   }
 
-  async post<T>(endpoint: string, data: any): Promise<any> {
+  async save<T>(endpoint: string, data: any): Promise<any> {
     return axios
       .post<T>(`${BASEURL}${endpoint}`, data)
       .catch((error: AxiosError) => this.handleError(error));
@@ -52,6 +53,7 @@ class AppHttp implements IHttp {
           currErr.message = HTTP_ERROR[500];
           break;
       }
+    message.error(currErr.message);
     return currErr;
   }
 

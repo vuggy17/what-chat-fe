@@ -14,16 +14,18 @@ import {
   Space,
   Typography,
 } from 'antd';
-import { Conversation } from 'renderer/domain';
+import { Chat } from 'renderer/domain';
 import formatDTime from 'renderer/utils/time';
 import { BellFilled } from '@ant-design/icons';
+import { useRecoilValue } from 'recoil';
+import { chatByIdState } from 'renderer/data/chat.managers';
 import { BellOff } from './icons';
 
 const { Paragraph, Title, Text } = Typography;
 const { useBreakpoint } = Grid;
 
 type SelectListProps = {
-  data: Conversation[];
+  data: Chat[];
   selectedKey: Id;
   onSelect: (key: any) => void;
 };
@@ -176,21 +178,32 @@ export function ConversationItem({
   );
 }
 
+export function ConversationItemWithState({
+  id,
+  onSelectItem,
+}: {
+  id: string;
+  onSelectItem: (key: any) => void;
+}) {
+  const data = useRecoilValue(chatByIdState(id));
+  return <ConversationItem {...data} onSelectItem={onSelectItem} />;
+}
 export default function ConversationList({ ...props }: SelectListProps) {
   return (
     <ul className="list-none p-0 overflow-hidden">
       {props.data.map((d, index) => {
         return (
           <ConversationItem
-            typing={d.typing}
-            avatar={d.avatar || 'https://source.unsplash.com/random/100×100'} // random image if avatar is not set
-            key={d.id}
-            id={d.id}
-            description={d.preview}
-            status={d.online}
-            name={d.name + index}
-            time={d.lastUpdate}
-            muted={d.muted}
+            // typing={d.typing}
+            // avatar={d.avatar || 'https://source.unsplash.com/random/100×100'} // random image if avatar is not set
+            // key={d.id}
+            // id={d.id}
+            // description={d.preview}
+            // status={d.online}
+            // name={d.name + index}
+            // time={d.lastUpdate}
+            // muted={d.muted}
+
             onSelectItem={(key) => {
               props.onSelect(key);
             }}

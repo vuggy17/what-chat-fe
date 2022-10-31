@@ -30,79 +30,44 @@ import Friends from './ui/pages/home/pages/friends';
 import ChatBoxProvider from './shared/context/chatbox.context';
 import Preload from './ui/pages/preload/preload';
 import './node-event';
-
-class ErrorBoundary extends React.Component<any, any> {
-  constructor(props: any) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError(error: any) {
-    // Update state so the next render will show the fallback UI.
-    return { hasError: true };
-  }
-
-  componentDidCatch(error: any, errorInfo: any) {
-    // You can also log the error to an error reporting service
-    // logErrorToMyService(error, errorInfo);
-    console.error(error, errorInfo);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      // You can render any custom fallback UI
-      return (
-        <>
-          <h1>Something went wrong.</h1>;
-          {this.state.error && this.state.error.toString()}
-          <br />
-          {this.state.errorInfo.componentStack}
-        </>
-      );
-    }
-
-    return this.props.children;
-  }
-}
+import ErrorBoundary from './ui/pages/components/ErrorBoundary/ErrorBoundary';
 
 export default function App() {
   return (
-    <ErrorBoundary className="scroll">
-      <Router>
-        <Routes>
-          <Route path={LOGIN} element={<Login />} />
-          <Route path={REGISTER} element={<Register />} />
+    <Router>
+      <Routes>
+        <Route path={LOGIN} element={<Login />} />
+        <Route path={REGISTER} element={<Register />} />
+        <Route
+          path={CHAT}
+          element={
+            <Preload userId="1">
+              <Chats />
+            </Preload>
+          }
+        >
           <Route
-            path={CHAT}
+            path={C_CONVERSATION}
             element={
-              <Preload userId="1">
-                <Chats />
-              </Preload>
+              <ChatBoxProvider>
+                <Chat />
+              </ChatBoxProvider>
             }
-          >
-            <Route
-              path={C_CONVERSATION}
-              element={
-                <ChatBoxProvider>
-                  <Chat />
-                </ChatBoxProvider>
-              }
-            />
-            <Route path={C_FRIEND} element={<Friends />} />
-            <Route path={C_PROFILE} element={<Profile />} />
-            <Route
-              index
-              element={
-                <ChatBoxProvider>
-                  <Chat />
-                </ChatBoxProvider>
-              }
-            />
-          </Route>
+          />
+          <Route path={C_FRIEND} element={<Friends />} />
+          <Route path={C_PROFILE} element={<Profile />} />
+          <Route
+            index
+            element={
+              <ChatBoxProvider>
+                <Chat />
+              </ChatBoxProvider>
+            }
+          />
+        </Route>
 
-          <Route path="*" element={<Navigate to={CHAT} />} />
-        </Routes>
-      </Router>
-    </ErrorBoundary>
+        <Route path="*" element={<Navigate to={CHAT} />} />
+      </Routes>
+    </Router>
   );
 }

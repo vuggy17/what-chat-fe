@@ -1,7 +1,7 @@
 import React, { ReactNode, useEffect, useState } from 'react';
-import ConversationController from 'renderer/controllers/conversation.controller';
+import ConversationController from 'renderer/controllers/chat.controller';
 import messageController from 'renderer/controllers/message.controller';
-import conversationManager from 'renderer/data/conversation.manager';
+import conversationManager from 'renderer/data/chat.manager';
 
 export default function Preload({
   children,

@@ -16,6 +16,7 @@ class AppSocketClient implements ISocketClient {
   constructor() {
     this.socketAdapter = io(BASEURL, {
       withCredentials: true,
+      reconnection: false,
     });
     this.socketAdapter.on('connect', () => {
       console.log('connected');
@@ -23,6 +24,12 @@ class AppSocketClient implements ISocketClient {
     this.socketAdapter.on('connect_error', (err) => {
       console.error('error', err);
     });
+  }
+
+  setup() {
+    if (this.socketAdapter.disconnected) {
+      this.socketAdapter.connect();
+    }
   }
 
   sendPrivateMessage(id: string): Promise<any> {
@@ -34,10 +41,20 @@ class AppSocketClient implements ISocketClient {
   }
 
   sendFriendRequest(id: string): Promise<any> {
+    this.setup();
     return new Promise((resolve, reject) => {
-      this.socketAdapter.emit(SocketEvents.ADD_FRIEND, id, (res) =>
-        resolve(res)
-      );
+      this.socketAdapter.emit(SocketEvents.ADD_FRIEND, id, (res) => {
+        resolve(res);
+      });
+    });
+  }
+
+  unFriend(id: string): Promise<any> {
+    this.setup();
+    return new Promise((resolve, reject) => {
+      this.socketAdapter.emit(SocketEvents.UN_FRIEND, id, (res) => {
+        resolve(res);
+      });
     });
   }
 }

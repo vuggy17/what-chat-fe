@@ -18,9 +18,9 @@ import {
 } from 'antd';
 import TabPane from 'antd/lib/tabs/TabPane';
 import React, { useEffect, useState } from 'react';
-import ConversationController from 'renderer/controllers/conversation.controller';
-import conversationManager from 'renderer/data/conversation.manager';
-import { Conversation } from 'renderer/domain';
+import ConversationController from 'renderer/controllers/chat.controller';
+import conversationManager from 'renderer/data/chat.manager';
+import { Chat } from 'renderer/domain';
 import usePrevious from 'renderer/utils/use-previous';
 import FileList from './file-list';
 import { Bell, BellOff, FileText, Photo, Pin, PinOff } from './icons';
@@ -80,7 +80,7 @@ function Main({
   handleTabClick,
   onSearchClick,
 }: {
-  data: Conversation;
+  data: Chat;
   handleTabClick: (key: string) => void;
   onSearchClick: () => void;
 }) {
@@ -211,7 +211,7 @@ export default function ChatOptionToggle({
   id,
   toggleSearch,
 }: ChatOptionToggleProps) {
-  const [data, setData] = useState<Conversation | undefined>();
+  const [data, setData] = useState<Chat | undefined>();
   const [activeTab, setActiveTab] = useState('main');
 
   useEffect(() => {

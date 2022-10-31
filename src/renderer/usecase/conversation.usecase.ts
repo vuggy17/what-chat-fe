@@ -1,5 +1,5 @@
-import { Conversation } from 'renderer/domain';
+import { Chat } from 'renderer/domain';
 
-export function createConversation(params: any) {
-  return {} as Conversation;
+export function createChat(params: any) {
+  return {} as Chat;
 }

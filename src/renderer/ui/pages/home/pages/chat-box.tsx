@@ -11,9 +11,9 @@ import {
 } from 'antd';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import ConversationController from 'renderer/controllers/conversation.controller';
+import ConversationController from 'renderer/controllers/chat.controller';
 import messageController from 'renderer/controllers/message.controller';
-import { Conversation, Message } from 'renderer/domain';
+import { Chat, Message } from 'renderer/domain';
 
 import { useOptionPanelContext } from 'renderer/shared/context/chatbox.context';
 import { createMsgPlaceholder } from 'renderer/usecase/message.usecase';
@@ -25,7 +25,7 @@ import SearchBox from '../components/search-box';
 
 function Header({ chatId }: { chatId: Id }) {
   const { toggleOpenConvOption } = useOptionPanelContext();
-  const [data, setData] = useState<Conversation>({} as Conversation);
+  const [data, setData] = useState<Chat>({} as Chat);
 
   useEffect(() => {
     const chatdata = ConversationController.getChatMeta(chatId);

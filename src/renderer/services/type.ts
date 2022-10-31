@@ -1,13 +1,3 @@
-import { AxiosError } from 'axios';
-
-interface IHttp {
-  get<T>(endpoint: string, query?: any): Promise<any>;
-  patch<T>(endpoint: string, data: any): Promise<any>;
-  post<T>(endpoint: string, data: any): Promise<any>;
-  delete<T>(endpoint: string, query?: any): Promise<any>;
-  handleError(error: AxiosError): void;
-}
-
 interface ISocketClient {
   /**
    *
@@ -32,6 +22,7 @@ interface ISocketClient {
 enum SocketEvents {
   SEND_PRIVATE_MESSAGE = 'send_private_message',
   ADD_FRIEND = 'add_friend',
+  UN_FRIEND = 'un_friend',
 }
 
 interface ServerToClientEvents {
@@ -42,6 +33,7 @@ interface ServerToClientEvents {
 
 interface ClientToServerEvents {
   [SocketEvents.ADD_FRIEND]: (id: string, onSuccess: (val) => any) => void;
+  [SocketEvents.UN_FRIEND]: (id: string, onSuccess: (val) => any) => void;
 }
 
 interface SocketData {
@@ -75,7 +67,7 @@ type OMessage = {
   id: LocalId;
   globalId: Id | null;
   senderId: Id;
-  conversationId: Id;
+  chatId: Id;
   content: string;
   createdAt: string;
   updatedAt: string;
@@ -90,7 +82,6 @@ interface SeenMessagePayload {
 }
 
 export {
-  IHttp,
   OContact,
   OConveration,
   OMessage,

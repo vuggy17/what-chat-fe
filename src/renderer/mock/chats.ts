@@ -1,9 +1,9 @@
-import { Conversation } from 'renderer/domain';
+import { Chat } from 'renderer/domain';
 import { faker } from '@faker-js/faker';
 import { CONV_PAGE_SIZE } from 'renderer/shared/constants';
 
 // eslint-disable-next-line import/prefer-default-export
-export function genMockChat(): Conversation {
+export function genMockChat(): Chat {
   return {
     id: faker.datatype.uuid(),
     typing: Math.random() * 10 > 5,
@@ -22,7 +22,7 @@ export function genMockChat(): Conversation {
   };
 }
 
-export const conversation: Conversation[] = Array.from(
+export const chat: Chat[] = Array.from(
   {
     length: CONV_PAGE_SIZE,
   },
