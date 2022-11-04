@@ -1,14 +1,104 @@
 /* eslint-disable promise/catch-or-return */
-import { Button, Divider, Image, message, Space, Typography } from 'antd';
+import { SendOutlined } from '@ant-design/icons';
+import { faker } from '@faker-js/faker';
+import {
+  Avatar,
+  Button,
+  Divider,
+  Image,
+  Input,
+  message,
+  Popover,
+  Space,
+  Typography,
+} from 'antd';
 import axios from 'axios';
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useRecoilCallback, useRecoilValue } from 'recoil';
 import { ALL_USER, FRIEND } from 'renderer/config/api.routes';
+import { Chat, ChatWithoutMeta, Message } from 'renderer/domain';
 import IUser from 'renderer/domain/user.entity';
+import { useChatItem } from 'renderer/hooks/use-chat';
+import { useMessage } from 'renderer/hooks/use-chat-message';
+import { userState } from 'renderer/hooks/use-user';
 import SocketClient from 'renderer/services/socket';
+import { CHAT } from 'renderer/shared/constants';
+import { useChatBoxContext } from 'renderer/shared/context/chatbox.context';
+import { parseParticipantToChatName } from 'renderer/ui/helper/string-converter';
+import { addMessageToChat } from 'renderer/usecase/conversation.usecase';
+import { createMsgPlaceholder } from 'renderer/usecase/message.usecase';
+
+const INITIAL_CHAT_ID = '';
+
+function TinyChatBox({ receiver }: { receiver: IUser }) {
+  const { upsertListItem, getItemIfExisted } = useChatItem(receiver.id);
+  const currentUser = useRecoilValue(userState);
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { insertOne_Draff } = useMessage();
+
+  const onSend = (text: string) => {
+    const msg = createMsgPlaceholder(receiver.id, text).text();
+    const chat = getItemIfExisted(receiver.id);
+    let chatUpdate: Partial<Chat> = {};
+    if (chat) {
+      chatUpdate = {
+        status: 'sending',
+        lastUpdate: msg.createdAt,
+        lastMessage: msg.id,
+      };
+    } else {
+      // if a chat not existed, create new one
+      chatUpdate = {
+        status: 'sending',
+        lastUpdate: msg.createdAt,
+        lastMessage: msg.id,
+        name: receiver.name,
+        avatar: receiver.avatar,
+        participants: [receiver.id, currentUser!.id],
+      };
+    }
+
+    // const fakefun = (arg: Id, arg2: Message) => {
+    //   console.log(arg, arg2);
+    // };
+
+    // we dont add message to chat here
+    addMessageToChat(receiver.id, msg, {
+      insertMessage: insertOne_Draff,
+      updateChat: upsertListItem,
+      updates: chatUpdate,
+    });
+  };
+  return (
+    <div>
+      <Space direction="horizontal">
+        <Avatar src={receiver.avatar} />
+        <div className="flex flex-col">
+          <Typography.Text>{receiver.name}</Typography.Text>
+          <Typography.Text className="text-sm" type="secondary">
+            @{receiver.userName}
+          </Typography.Text>
+        </div>
+      </Space>
+      <div className="h-8" />
+      <Input.Search
+        // size="small"
+        placeholder="Say hi."
+        enterButton={<SendOutlined />}
+        onSearch={onSend}
+        // suffix={<SendOutlined />}
+      />
+    </div>
+  );
+}
 
 export default function Friends() {
   const [users, setUsers] = useState(new Array<IUser>());
-  const [friends, setFriends] = useState(new Set<string>()); // array of IUser to enforce unique object
+  const [friends, setFriends] = useState(new Set<string>()); // array of IUser to enforce there is no duplicate friend
+  const { setNewChat } = useChatBoxContext();
+  const navigate = useNavigate();
+  const { changeActiveChat } = useChatItem(INITIAL_CHAT_ID);
   useEffect(() => {
     const cancelSignal = new AbortController();
     const cancelSignal1 = new AbortController();
@@ -57,33 +147,57 @@ export default function Friends() {
     });
   };
 
+  const addUserToChat = (us: IUser[]) => {
+    const newItem: ChatWithoutMeta = {
+      name: parseParticipantToChatName(us.map((u) => u.name)),
+      participants: us.map((u) => u.id),
+      lastUpdate: new Date(),
+    };
+    setNewChat(newItem);
+    changeActiveChat(INITIAL_CHAT_ID);
+    navigate(`/${CHAT}`);
+    return newItem;
+  };
+
+  // const sendMessage = (receiver: IUser) => {
+
+  // };
+
   return (
     <div>
       <Divider>Friends</Divider>
       <div className="grid grid-cols-4  gap-3">
         {friends.size > 0 ? (
           Array.from(friends).map((f) => {
-            const parsed = JSON.parse(f);
+            const user = JSON.parse(f);
             return (
               <div
                 className=" flex flex-col items-center gap-3 pb-2 justify-center bg-white shadow-sm rounded "
-                key={parsed.id}
+                key={user.id}
               >
                 <Image
-                  src={parsed.avatar || ''}
+                  src={user.avatar || ''}
                   placeholder
                   width="100%"
                   height="100%"
                   className="object-cover"
                 />
-                <Typography.Text>
-                  {parsed.name || parsed.userName}
-                </Typography.Text>
+                <Typography.Text>{user.name || user.userName}</Typography.Text>
                 <div className="flex w-full gap-2 justify-center">
-                  <Button onClick={() => unFriend(parsed.id)}>Unfriend</Button>
-                  <Button onClick={() => unFriend(parsed.id)} type="primary">
-                    Open chat
-                  </Button>
+                  <Button onClick={() => unFriend(user.id)}>Unfriend</Button>
+                  <Popover
+                    placement="topRight"
+                    title="Send a message"
+                    trigger="click"
+                    content={<TinyChatBox receiver={user} />}
+                  >
+                    <Button
+                      // onClick={() => addUserToChat([user])}
+                      type="primary"
+                    >
+                      Open chat
+                    </Button>
+                  </Popover>
                 </div>
               </div>
             );
@@ -110,6 +224,7 @@ export default function Friends() {
                 className="object-cover"
               />
               <Typography.Text>{f.name || f.userName}</Typography.Text>
+
               <Button onClick={() => addFriend(f.id)}>
                 Add friend + {f.id}
               </Button>

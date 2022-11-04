@@ -39,7 +39,6 @@ class ChatRepositoryImpl implements IChatRepository {
       },
       () => genMockChat()
     );
-    console.log('newitems', newitems.length);
 
     // return fake data
     return new Promise((resolve, reject) =>

@@ -1,8 +1,7 @@
-import { ArrowLeftOutlined, BackwardFilled } from '@ant-design/icons';
-import { Button, Col, Divider, List, Row, Skeleton } from 'antd';
-import React, { useState } from 'react';
+import { Col, Divider, Row, Skeleton } from 'antd';
+import { useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { groupBy } from 'renderer/utils/array';
+import { groupBy } from 'renderer/utils/common';
 
 const genMockImage = (count: number, lastIndex: number) => {
   return Array.from({ length: count }).map((_, i) => ({

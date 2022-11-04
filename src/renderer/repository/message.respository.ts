@@ -2,9 +2,11 @@ import { Message } from 'renderer/domain';
 import { genMockMsg, messages as data } from 'renderer/mock/message';
 import HttpClient from 'renderer/services/http';
 import { MSG_PAGE_SIZE } from 'renderer/shared/constants';
-import { IHttp, OMessage } from 'renderer/services/type';
+import { randomNumber } from 'renderer/utils/common';
+import { resolveAfter } from 'renderer/utils/debouce';
+import IDataSource from './type';
 
-export interface IMessageRespository {
+export interface IMessageRepository {
   getMessages(chatId: Id, count: number, skip: number): Promise<Message[]>;
   saveMessages(messages: Message[]): Promise<void>;
   uploadFile(file: File, meta: any): Promise<any>;
@@ -14,10 +16,10 @@ export interface IMessageRespository {
 
 const fileUploading: Map<Id, any> = new Map();
 
-export class MessageRespositoryImpl implements IMessageRespository {
-  private _dataSource: IHttp;
+export class MessageRepositoryImpl implements IMessageRepository {
+  private _dataSource: IDataSource;
 
-  constructor(dataSource: IHttp) {
+  constructor(dataSource: IDataSource) {
     this._dataSource = dataSource;
   }
 
@@ -88,13 +90,20 @@ export class MessageRespositoryImpl implements IMessageRespository {
     // save to local database
     // return messages;
 
-    return Array.from(
-      {
-        length: count,
-      },
-      genMockMsg
-    ); // return fake data
+    // return fake data
+    console.log('====================================');
+    console.log('re call this', chatId);
+    console.log('====================================');
+    return resolveAfter<Message[]>(
+      Array.from(
+        {
+          length: count,
+        },
+        genMockMsg
+      ),
+      randomNumber(100, 600)
+    );
   }
 }
 
-export const messsageRespository = new MessageRespositoryImpl(HttpClient);
+export const messageRepository = new MessageRepositoryImpl(HttpClient);

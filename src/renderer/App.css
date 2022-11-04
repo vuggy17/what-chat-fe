@@ -10,6 +10,9 @@
   .selected-conv-item {
     @apply before:absolute before:content-[''] before:!opacity-100 before:inset-y-0 before:left-0 before:border-0 before:border-r-[3px] before:h-[60%] before:top-1/2 before:transition-all before:transform before:duration-300 before:-translate-y-1/2 before:border-solid before:border-primary transition-colors transform duration-300 scale-y-100 bg-primary-1;
   }
+  .selected-conv-item-draff {
+    @apply transition-colors transform duration-300 scale-y-100 bg-primary-1;
+  }
 }
 
 body {
@@ -76,12 +79,11 @@ body {
 
 *::-webkit-scrollbar-thumb {
   border-radius: 8px;
-  background-color: #C0C0C0;
+  background-color: #c0c0c0;
 }
 *::-webkit-scrollbar-track {
   border-radius: 8px;
   background-color: #eee;
-
 }
 
 * {

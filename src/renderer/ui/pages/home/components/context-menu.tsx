@@ -8,26 +8,38 @@ import {
   ExclamationCircleOutlined,
 } from '@ant-design/icons';
 import { Dropdown, Menu, Space, Modal, message } from 'antd';
-import React, { HtmlHTMLAttributes } from 'react';
-import messageController from 'renderer/controllers/message.controller';
-import messageManager from 'renderer/data/message.manager';
-import { FileMessage } from 'renderer/domain';
-import { ipcRenderer } from 'electron';
+import { HtmlHTMLAttributes } from 'react';
+import IUser from 'renderer/domain/user.entity';
+
+// REMEMBER TO COPY THIS FROM chat-bubble.tsx DUE TO ESLINT NO CYCLE IMPORT RULE
+export interface MessageBubbleProps {
+  self: boolean;
+  type: MessageType;
+  content: any;
+  path?: string;
+  name?: string;
+  size?: number;
+  sender: IUser;
+  time: Date;
+  hasAvatar?: boolean;
+  uploaded?: boolean;
+  chatId: Id;
+  id: Id;
+}
 
 const { confirm } = Modal;
 
 interface ActionMenuProps extends HtmlHTMLAttributes<HTMLDivElement> {
-  chatId: Id;
-  messageId: Id;
   actions: Array<'delete' | 'edit' | 'download'>;
+  msg: MessageBubbleProps;
 }
 
 export default function BubbleActionMenu({
-  chatId,
-  messageId,
   actions,
+  msg,
   ...props
 }: ActionMenuProps) {
+  const { chatId, id, ...restProperties } = msg;
   const handleDelete = () => {
     confirm({
       title: 'Are you sure delete this message?',
@@ -56,24 +68,27 @@ export default function BubbleActionMenu({
 
   const download = () => {
     console.log('downloading');
-    const file = messageManager.getMessageById(messageId) as FileMessage;
 
     message.loading({
-      key: `download_${file.name}`,
+      key: `download_${restProperties.name}`,
       content: 'Downloading..',
       duration: 3,
     });
 
-    if (file) {
-      file.content?.arrayBuffer().then((buffer) => {
-        const buff = Buffer.from(buffer);
-        window.electron.ipcRenderer.sendMessage('save-file', [file.name, buff]);
-        console.log(
-          `Saving ${JSON.stringify({ name: file.name, size: file.size })}`
-        );
-        return null;
-      });
-    }
+    restProperties.content?.arrayBuffer().then((buffer) => {
+      const buff = Buffer.from(buffer);
+      window.electron.ipcRenderer.sendMessage('save-file', [
+        restProperties.name,
+        buff,
+      ]);
+      console.log(
+        `Saving ${JSON.stringify({
+          name: restProperties.name,
+          size: restProperties.size,
+        })}`
+      );
+      return null;
+    });
   };
 
   const menuItems = (

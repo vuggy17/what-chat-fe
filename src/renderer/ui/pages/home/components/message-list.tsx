@@ -1,44 +1,71 @@
 import { DownOutlined } from '@ant-design/icons';
-import { Affix, Button, Skeleton, Tooltip } from 'antd';
+import { Affix, Button, Skeleton, Spin, Tooltip } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
 import { Virtuoso } from 'react-virtuoso';
 import { Message } from 'renderer/domain';
+import IUser from 'renderer/domain/user.entity';
+import { useMessage } from 'renderer/hooks/use-chat-message';
+import { mockUsers } from 'renderer/mock/user';
+import { MSG_PAGE_SIZE } from 'renderer/shared/constants';
+import { getMessageOfChat } from 'renderer/usecase/message.usecase';
+import { RequiredField } from 'renderer/utils/type';
 import MessageBubble from './chat-bubble';
 
 type MessageListProps = {
-  messages: Message[];
+  messages: RequiredField<Message, 'chatId' | 'senderId'>[];
   chatId: Id;
   virtuoso: any;
-  onScrollOnTop: () => void;
+  totalCount: number;
 };
-
-const START_INDEX = 5000;
 
 export default function MessagesList({
   chatId,
   messages,
-  onScrollOnTop,
   virtuoso,
+  totalCount,
 }: MessageListProps) {
-  // START_INDEX starting value is the max value, makes figuring out the index in the messages array easier
+  // totalCount starting value is the max value, makes figuring out the index in the messages array easier
   const [firstItemIndex, setFirstItemIndex] = useState(
-    START_INDEX - messages.length
+    totalCount - messages.length
   );
+  const { prependMany } = useMessage();
   const [isAtBottom, setIsAtBottom] = useState(true);
+
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+  const loadMoreItem = useCallback(async () => {
+    setIsLoadingMore(true);
+    const newMsg = await getMessageOfChat(chatId, messages.length);
+    setIsLoadingMore(false);
+    prependMany(chatId, newMsg);
+  }, [chatId]);
 
   const toggleFloatingButton = (atBottom: boolean) => {
     setIsAtBottom(atBottom);
   };
 
+  // cache user by message senderId
+  const userChatMap: Record<Id, IUser> = useMemo(() => {
+    const record = {} as Record<Id, IUser>;
+    messages.forEach((message) => {
+      if (!record[message.senderId]) {
+        record[message.senderId] = mockUsers.find(
+          (u) => u.id === message.senderId
+        )!;
+      }
+    });
+    return record;
+  }, [messages]);
+
   const internalMessages = useMemo(() => {
-    const nextFirstItemIndex = START_INDEX - messages.length;
+    const nextFirstItemIndex = totalCount - messages.length;
     setFirstItemIndex(nextFirstItemIndex);
     return messages;
   }, [messages]);
 
   const itemContent = useCallback(
     (index: number, rowData: Message) => {
-      const currentIndex = internalMessages.length - (START_INDEX - index); // map the index to the messages array index
+      const currentIndex = internalMessages.length - (totalCount - index); // map the index to the messages array index
 
       // check if next messaage have the same sender
       const nextMessage = internalMessages[currentIndex + 1];
@@ -58,7 +85,7 @@ export default function MessagesList({
             time={rowData.createdAt}
             hasAvatar={!isSameSender} // if next message is from the same sender, don't render avatar
             key={rowData.id}
-            sender={rowData.senderId}
+            sender={userChatMap[rowData.senderId]}
             // eslint-disable-next-line react/jsx-props-no-spreading
             {...rowData}
           />
@@ -83,20 +110,18 @@ export default function MessagesList({
         computeItemKey={(_, rowdata) => rowdata.id}
         initialTopMostItemIndex={internalMessages.length - 1}
         firstItemIndex={Math.max(0, firstItemIndex)}
-        startReached={onScrollOnTop}
+        startReached={loadMoreItem}
         followOutput={followOutput}
         atBottomStateChange={toggleFloatingButton}
         style={{ overflow: 'auto' }}
         components={{
           Header: () => (
             <>
-              {Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton
-                  active
-                  avatar
-                  paragraph={{ rows: Math.floor(Math.random() * 2) }}
-                />
-              ))}
+              {isLoadingMore && (
+                <div className="flex justify-center pb-6 pt-2">
+                  <Spin spinning />
+                </div>
+              )}
             </>
           ),
         }}

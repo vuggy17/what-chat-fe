@@ -9567,6 +9567,11 @@ recoil@^0.7.6:
   dependencies:
     hamt_plus "1.0.2"
 
+recoilize@^3.1.6:
+  version "3.1.6"
+  resolved "https://registry.yarnpkg.com/recoilize/-/recoilize-3.1.6.tgz#4ceba2e84979a43d3fba6c18890a181372445dd0"
+  integrity sha512-UxdkpMvnEYvnUIcIbk5NAe9tZFBkxbMaP8BUKDj1DQ9ZBYO03c8xi/jnWYSsIvRV5D3eYO8rhTzmegI86o2FBw==
+
 redent@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/redent/-/redent-3.0.0.tgz#e557b7998316bb53c9f1f56fa626352c6963059f"

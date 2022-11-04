@@ -1,3 +1,4 @@
+import { useSetRecoilState } from 'recoil';
 import chatManager, { ChatManager } from 'renderer/data/chat.manager';
 import messageManager, { MessageManager } from 'renderer/data/message.manager';
 import { Chat, Message } from 'renderer/domain';
@@ -9,8 +10,8 @@ import {
 import { CONV_PAGE_SIZE } from 'renderer/shared/constants';
 import { OConveration, OMessage } from 'renderer/services/type';
 
-import { quickSort } from 'renderer/utils/array';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
+import { quickSort } from 'renderer/utils/common';
 import { chatParser } from './adapter';
 
 class C {
@@ -46,7 +47,6 @@ class C {
     this._chatManager.activeChatId = firstChatId;
 
     console.log('firstChatId', firstChatId);
-
     // trigger ui update
     this.chats.next(data);
     this.activeChat.next(firstChatId);
@@ -115,19 +115,6 @@ class C {
         "Skip can't be smaller than the length of the current chat list"
       );
     }
-  }
-
-  async createChat(ids: Id[]) {
-    // create chat
-    // const newchat = genMockChat();
-    const newChat = await this._convRespository.createChat(ids);
-    this._chatManager.chats = [...this._chatManager.chats, newChat];
-    // save to db
-    this._convRespository.saveChats([newChat]);
-
-    this.chats.next(this._chatManager.chats);
-    // update chat
-    // update message
   }
 }
 

@@ -1,8 +1,11 @@
 import React, { ReactNode, useContext, useState } from 'react';
+import { ChatWithoutMeta } from 'renderer/domain';
 
 type A = {
-  toggleOpenConvOption: () => void;
-  convOptionOpen: boolean;
+  toggleSideOpen: () => void;
+  setNewChat: (val: ChatWithoutMeta | null) => void;
+  sideOpen: boolean;
+  newChat: ChatWithoutMeta | null;
 };
 interface ChildrenProps {
   children: ReactNode;
@@ -10,17 +13,20 @@ interface ChildrenProps {
 
 const CContext = React.createContext<A>({} as A);
 
-export function useOptionPanelContext() {
+export function useChatBoxContext() {
   return useContext(CContext);
 }
 export default function ChatBoxProvider({ children }: ChildrenProps) {
-  const [optionPanelOpen, setOptionPanelOpen] = useState(false);
+  const [sideOpen, setSideOpen] = useState(false);
+  const [newChat, setNewChat] = useState<ChatWithoutMeta | null>(null);
   return (
     <CContext.Provider
       value={{
-        convOptionOpen: optionPanelOpen,
-        toggleOpenConvOption: () => {
-          setOptionPanelOpen(!optionPanelOpen);
+        sideOpen,
+        newChat,
+        setNewChat,
+        toggleSideOpen: () => {
+          setSideOpen(!sideOpen);
         },
       }}
     >

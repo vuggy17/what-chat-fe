@@ -24,6 +24,8 @@ import Paragraph from 'antd/lib/skeleton/Paragraph';
 import axios from 'axios';
 import React, { useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
+import { useRecoilCallback, useSetRecoilState } from 'recoil';
+import { userState } from 'renderer/hooks/use-user';
 import {
   CHAT,
   C_CONVERSATION,
@@ -37,10 +39,32 @@ import logo from '../../../../../assets/logo.png';
 const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
 
+// use this for debugging purpose only
+// TODO: remove this
+function DebugButton() {
+  const onClick = useRecoilCallback(
+    ({ snapshot }) =>
+      async () => {
+        console.debug('Atom values:');
+        // eslint-disable-next-line no-restricted-syntax
+        for (const node of snapshot.getNodes_UNSTABLE()) {
+          // eslint-disable-next-line no-await-in-loop
+          const value = await snapshot.getPromise(node);
+          console.debug(node.key, value);
+        }
+      },
+    []
+  );
+
+  if (process.env.NODE_ENV === 'production') return null;
+
+  return <Button onClick={onClick}>Dump State</Button>;
+}
+
 const Chats: React.FC = () => {
   const [collapsed, setCollapsed] = useState(true);
   const navigate = useNavigate();
-
+  const setCurrentUser = useSetRecoilState(userState);
   return (
     <Layout style={{ height: '100vh', overflow: 'auto' }}>
       <Sider
@@ -68,6 +92,7 @@ const Chats: React.FC = () => {
               )}
             </div>
             <Menu
+              tabIndex="-1" // disable keyboard navigation
               theme="light"
               mode="inline"
               defaultSelectedKeys={['1']}
@@ -133,6 +158,7 @@ const Chats: React.FC = () => {
             )}
             <div className="flex gap-2">
               {/* <Text>Vu Dang Khuong Duy</Text> */}
+              <DebugButton />
               <Button
                 onClick={() =>
                   axios
@@ -140,7 +166,11 @@ const Chats: React.FC = () => {
                       username: 'Marguerite33',
                       password: '6EyH6RhYnD9YVvD',
                     })
-                    .then((res) => message.success('Login success'))
+                    .then((res) => {
+                      message.success('Login success');
+                      setCurrentUser(res.data.data);
+                      return null;
+                    })
                 }
               >
                 Get auth token

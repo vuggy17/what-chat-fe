@@ -6,12 +6,10 @@ import {
   Route,
   Navigate,
 } from 'react-router-dom';
-import React from 'react';
-
-import icon from '../../assets/icon.svg';
 import './App.css';
 import 'antd/dist/antd.less';
 import 'tailwindcss/tailwind.css';
+import { Suspense } from 'react';
 import LoginCheckPoint from './shared/protected-route';
 import {
   CHAT,
@@ -30,7 +28,7 @@ import Friends from './ui/pages/home/pages/friends';
 import ChatBoxProvider from './shared/context/chatbox.context';
 import Preload from './ui/pages/preload/preload';
 import './node-event';
-import ErrorBoundary from './ui/pages/components/ErrorBoundary/ErrorBoundary';
+import HeaderFallback from './ui/pages/home/components/loaders/header.fallback';
 
 export default function App() {
   return (
@@ -54,7 +52,16 @@ export default function App() {
               </ChatBoxProvider>
             }
           />
-          <Route path={C_FRIEND} element={<Friends />} />
+          <Route
+            path={C_FRIEND}
+            element={
+              <Suspense fallback={<HeaderFallback />}>
+                <ChatBoxProvider>
+                  <Friends />
+                </ChatBoxProvider>
+              </Suspense>
+            }
+          />
           <Route path={C_PROFILE} element={<Profile />} />
           <Route
             index

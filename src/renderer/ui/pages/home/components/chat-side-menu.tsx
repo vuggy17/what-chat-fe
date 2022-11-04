@@ -16,14 +16,12 @@ import {
   Tooltip,
   Typography,
 } from 'antd';
-import TabPane from 'antd/lib/tabs/TabPane';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import ConversationController from 'renderer/controllers/chat.controller';
-import conversationManager from 'renderer/data/chat.manager';
 import { Chat } from 'renderer/domain';
-import usePrevious from 'renderer/utils/use-previous';
+import { useChatItem } from 'renderer/hooks/use-chat';
 import FileList from './file-list';
-import { Bell, BellOff, FileText, Photo, Pin, PinOff } from './icons';
+import { Bell, BellOff, FileText, Photo } from './icons';
 import MediaGalery from './media-galery';
 import AppSwitch from './switch';
 
@@ -84,6 +82,7 @@ function Main({
   handleTabClick: (key: string) => void;
   onSearchClick: () => void;
 }) {
+  const { upsertListItem } = useChatItem(data.id);
   return (
     <>
       {data && (
@@ -112,9 +111,7 @@ function Main({
               <AppSwitch
                 defaultChecked={data.muted}
                 onChange={(muted) =>
-                  ConversationController.updateConverstationMeta(data.id, {
-                    muted,
-                  })
+                  upsertListItem({ id: data.id, updates: { muted } })
                 }
                 CheckedComponent={({ toggleState }) => (
                   <span>
@@ -145,7 +142,7 @@ function Main({
               </AppSwitch>
             </Col>
             <Col flex="1" className="flex justify-center text-center">
-              <AppSwitch
+              {/* <AppSwitch
                 onChange={(pinned) =>
                   ConversationController.updateConverstationMeta(data.id, {
                     pinned,
@@ -178,7 +175,7 @@ function Main({
                     <p className="ant-badge block mt-1">Pin</p>
                   </span>
                 )}
-              </AppSwitch>
+              </AppSwitch> */}
             </Col>
             <Col flex="1" className="flex justify-center text-center">
               <span>
@@ -211,13 +208,10 @@ export default function ChatOptionToggle({
   id,
   toggleSearch,
 }: ChatOptionToggleProps) {
-  const [data, setData] = useState<Chat | undefined>();
-  const [activeTab, setActiveTab] = useState('main');
+  const { listItem: data } = useChatItem(id);
+  console.log(Boolean(data));
 
-  useEffect(() => {
-    setData(conversationManager.getConversation(id));
-    setActiveTab('main');
-  }, [id]);
+  const [activeTab, setActiveTab] = useState('main');
 
   const onTabClick = (key: string) => {
     if (key !== 'delete') {
@@ -254,7 +248,7 @@ export default function ChatOptionToggle({
           tabBarStyle={{ display: 'none' }}
           items={[
             {
-              key: 'main',
+              key: `main`,
               label: undefined,
               children: (
                 <Main
@@ -265,7 +259,7 @@ export default function ChatOptionToggle({
               ),
             },
             {
-              key: 'media',
+              key: `media`,
               label: undefined,
 
               children: (

@@ -5,35 +5,36 @@ import {
   Button,
   Divider,
   Input,
+  message,
   Skeleton,
   Space,
   Typography,
 } from 'antd';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useRecoilValue } from 'recoil';
 
-import ConversationController from 'renderer/controllers/chat.controller';
+// import ConversationController from 'renderer/controllers/chat.controller';
 import messageController from 'renderer/controllers/message.controller';
-import { Chat, Message } from 'renderer/domain';
+import { Chat as ChatEntity, Message } from 'renderer/domain';
+import { useChatItem } from 'renderer/hooks/use-chat';
+import { chatMessagesState, useMessage } from 'renderer/hooks/use-chat-message';
+import { MSG_PAGE_SIZE } from 'renderer/shared/constants';
 
-import { useOptionPanelContext } from 'renderer/shared/context/chatbox.context';
-import { createMsgPlaceholder } from 'renderer/usecase/message.usecase';
-import usePrevious from 'renderer/utils/use-previous';
+import { useChatBoxContext } from 'renderer/shared/context/chatbox.context';
+import { addMessageToChat } from 'renderer/usecase/conversation.usecase';
+import {
+  createMsgPlaceholder,
+  getMessageOfChat,
+} from 'renderer/usecase/message.usecase';
 
 import RichEditor from '../components/input';
 import MessageList from '../components/message-list';
 import SearchBox from '../components/search-box';
 
 function Header({ chatId }: { chatId: Id }) {
-  const { toggleOpenConvOption } = useOptionPanelContext();
-  const [data, setData] = useState<Chat>({} as Chat);
-
-  useEffect(() => {
-    const chatdata = ConversationController.getChatMeta(chatId);
-    if (chatdata) {
-      setData(chatdata);
-    }
-  }, [chatId]);
-
+  const { toggleSideOpen: toggleOpenConvOption } = useChatBoxContext();
+  // const [data, setData] = useState<ChatEntity>({} as ChatEntity);
+  const { listItem: data } = useChatItem(chatId);
   return (
     <>
       <div className="pt-4 flex justify-between items-center pl-4 pr-10 ">
@@ -73,40 +74,20 @@ function Header({ chatId }: { chatId: Id }) {
   );
 }
 
-const randomNumber = (min: number, max: number) =>
-  Math.floor(Math.random() * (max - min + 1)) + min;
+// tong so message trong doan chat cua nguoi dung, so cang lon thi load cang nhieu
+// TODO: change this to total of message in the database
+const TOTAL_MESSAGE_COUNT = 5 * MSG_PAGE_SIZE; // !!REMOVE THIS IN THE FUTURE
 
 export default function Chat({ chatId, hasSearch }: any) {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const {
+    messagesOfActiveChat: messages,
+    prependMany,
+    insertOne,
+  } = useMessage();
+  const { upsertListItem } = useChatItem(chatId);
   const virtuoso = useRef(null);
 
-  const prevChatId = usePrevious(chatId);
-
-  useEffect(() => {
-    const subcription = messageController.messages.subscribe({
-      next: (v) => {
-        // console.log('ChatBox: messages changed', v);
-        setMessages([...v]);
-      },
-    });
-    return () => {
-      subcription.unsubscribe();
-    };
-  }, [chatId]);
-
-  const startReached = useCallback(() => {
-    // console.log('Chat: startReached');
-    // console.log('prependItems');
-
-    // simulate network request with random timeout
-    const timeout = randomNumber(500, 1000);
-    setTimeout(() => {
-      messageController.loadMoreMessages(chatId);
-    }, timeout);
-  }, [chatId]);
-
   const onSendMessage = (msg: File | string, type: MessageType) => {
-    // create placeholder
     let newItem = {} as Message;
     switch (type) {
       case 'file':
@@ -119,13 +100,11 @@ export default function Chat({ chatId, hasSearch }: any) {
         newItem = createMsgPlaceholder(chatId, msg as string).text();
         break;
     }
-    console.log('onSendMessage', newItem);
 
-    messageController.addMessage(newItem); // add placeholder to list
-    // messageController.sendMessage(msg, { type, chatId }); // send message
-    ConversationController.updateConverstationMeta(chatId, {
-      lastUpdate: new Date(),
-      status: 'sending',
+    addMessageToChat(chatId, newItem, {
+      insertMessage: insertOne,
+      updateChat: upsertListItem,
+      updates: { status: 'sending', lastUpdate: newItem.createdAt },
     });
   };
 
@@ -134,21 +113,13 @@ export default function Chat({ chatId, hasSearch }: any) {
       <Header chatId={chatId} />
       <div className="flex-auto relative pl-4 pr-3 transition-all transform duration-700 overflow-hidden">
         {/* if switching lists, unmount virtuoso so internal state gets reset */}
-        {prevChatId === chatId ? (
-          <MessageList
-            messages={messages}
-            chatId={chatId}
-            virtuoso={virtuoso}
-            onScrollOnTop={startReached}
-          />
-        ) : (
-          Array.from({ length: 8 }).map((_, i) => (
-            <Skeleton
-              avatar
-              paragraph={{ rows: Math.floor(Math.random() * 2) + 1 }}
-            />
-          ))
-        )}
+        <MessageList
+          totalCount={TOTAL_MESSAGE_COUNT}
+          key={chatId}
+          messages={messages}
+          chatId={chatId}
+          virtuoso={virtuoso}
+        />
         {hasSearch && (
           <div className="absolute top-0 inset-x-0 z-50 [&_*]:rounded-none ">
             <SearchBox />

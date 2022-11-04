@@ -1,100 +1,120 @@
 /* eslint-disable react/jsx-props-no-spreading */
-import React, { useEffect, useRef, useState } from 'react';
-import {
-  Avatar,
-  Badge,
-  Col,
-  Descriptions,
-  Divider,
-  Grid,
-  Layout,
-  List,
-  Row,
-  Skeleton,
-  Space,
-  Typography,
-} from 'antd';
+import { QuestionOutlined } from '@ant-design/icons';
+import { Avatar, Badge, Col, Grid, Row, Space, Typography } from 'antd';
+import { memo, useEffect, useMemo, useRef } from 'react';
+import { useParams } from 'react-router-dom';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { selectedChatState } from 'renderer/data/chat.managers';
 import { Chat } from 'renderer/domain';
+import { useChatBoxContext } from 'renderer/shared/context/chatbox.context';
+import { parseDescription } from 'renderer/ui/helper/string-converter';
 import formatDTime from 'renderer/utils/time';
-import { BellFilled } from '@ant-design/icons';
-import { useRecoilValue } from 'recoil';
-import { chatByIdState } from 'renderer/data/chat.managers';
+import { activeChatIdState, useChatItem } from '../../../../hooks/use-chat';
 import { BellOff } from './icons';
 
-const { Paragraph, Title, Text } = Typography;
 const { useBreakpoint } = Grid;
+const { Title, Text } = Typography;
 
-type SelectListProps = {
-  data: Chat[];
-  selectedKey: Id;
-  onSelect: (key: any) => void;
-};
-
-type ConversationItemProps = {
-  id: any;
+type ItemProps = {
+  id: Id;
   avatar: string | undefined;
   name: string;
   description: string;
   time: Date;
-  status: 0 | 1;
-  typing: boolean;
-  selected: boolean;
-  muted: boolean;
-  onSelectItem: (key: any) => void;
+  hasDot?: boolean;
+  // status?: 'sending' | 'sent_error';
+  typing?: boolean;
+  muted?: boolean;
 };
 
-export function ConversationItem({
+type ItemSelectProps = {
+  onSelectItem: (key: any) => void;
+  active: boolean;
+};
+
+function Item({
   id,
-  avatar,
+  avatar: avatarUrl,
   name,
   description,
   time,
-  status,
   onSelectItem,
-  muted = false,
+  hasDot,
   typing,
-  selected,
-}: ConversationItemProps) {
+  muted,
+  active,
+}: ItemProps & ItemSelectProps) {
   const itemRef = useRef<HTMLLIElement>(null);
 
   const breakpoints = useBreakpoint();
 
   useEffect(() => {
-    if (selected && itemRef.current) {
+    if (active && itemRef.current) {
       itemRef.current.classList.add('selected-conv-item');
     }
 
-    if (!selected && itemRef.current) {
+    if (!active && itemRef.current) {
       itemRef.current.classList.remove('selected-conv-item');
     }
   });
 
+  const preview = typing ? (
+    <Text ellipsis className="text-primary" style={{ minWidth: 0 }}>
+      {description}
+    </Text>
+  ) : (
+    <Text ellipsis style={{ minWidth: 0 }}>
+      {description}
+    </Text>
+  );
+
+  const extra = (
+    <Space align="baseline">
+      {muted && (
+        <BellOff
+          color="rgba(92, 107, 119, .6)"
+          classname="align-middle scale-[.9]"
+        />
+      )}
+      <Badge
+        count={10}
+        overflowCount={9}
+        style={{
+          backgroundColor: '#DFF6F4',
+          color: '#128C7E',
+          border: '0px',
+          boxShadow: 'none',
+          fontWeight: 700,
+          fontSize: 10,
+        }}
+      />
+    </Space>
+  );
+
+  const avatar = hasDot ? (
+    <Badge color="green">
+      <Avatar
+        src={avatarUrl}
+        shape="circle"
+        size="large"
+        style={{ height: 50, width: 50, borderRadius: 8 }}
+      />
+    </Badge>
+  ) : (
+    <Avatar src={avatarUrl} shape="circle" size="large" />
+  );
+
   return (
     // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events
     <li
+      key={id}
       ref={itemRef}
       className=" relative py-2 pl-7 pr-2 before:opacity-0 cursor-pointer   "
       onClick={() => onSelectItem(id)}
     >
       {breakpoints.lg ? (
-        <Space
-          direction="horizontal"
-          size="middle"
-          style={{ width: '100%' }}
-          // className="last:flex-1 last:min-w-0"
-        >
-          {status === 1 ? (
-            <Badge color="green">
-              <Avatar
-                src={avatar}
-                shape="circle"
-                size="large"
-                style={{ height: 50, width: 50, borderRadius: 8 }}
-              />
-            </Badge>
-          ) : (
-            <Avatar src={avatar} shape="circle" size="large" />
-          )}
+        <Space direction="horizontal" size="middle" style={{ width: '100%' }}>
+          {avatar}
 
           <Row
             gutter={[16, 8]}
@@ -114,19 +134,7 @@ export function ConversationItem({
                 <Title level={5} ellipsis style={{ margin: 0, minWidth: 0 }}>
                   {name}
                 </Title>
-                {typing ? (
-                  <Text
-                    ellipsis
-                    className="text-primary"
-                    style={{ minWidth: 0 }}
-                  >
-                    Typing...
-                  </Text>
-                ) : (
-                  <Text ellipsis style={{ minWidth: 0 }}>
-                    {description}
-                  </Text>
-                )}
+                {preview}
               </Space>
             </Col>
             <Col flex="none">
@@ -134,83 +142,148 @@ export function ConversationItem({
                 <Text type="secondary" className="text-[12px]">
                   {formatDTime(time.toString())}
                 </Text>
-                <Space align="baseline">
-                  {muted && (
-                    <BellOff
-                      color="rgba(92, 107, 119, .6)"
-                      classname="align-middle scale-[.9]  "
-                    />
-                  )}
-                  <Badge
-                    count={10}
-                    overflowCount={9}
-                    style={{
-                      backgroundColor: '#DFF6F4',
-                      color: '#128C7E',
-                      border: '0px',
-                      boxShadow: 'none',
-                      fontWeight: 700,
-                      fontSize: 10,
-                    }}
-                  />
-                </Space>
+                {extra}
               </Space>
             </Col>
           </Row>
         </Space>
       ) : (
-        <>
-          {status === 1 ? (
-            <Badge color="green">
-              <Avatar
-                src={avatar}
-                shape="circle"
-                size="large"
-                style={{ height: 50, width: 50, borderRadius: 8 }}
-              />
-            </Badge>
-          ) : (
-            <Avatar src={avatar} shape="circle" size="large" />
-          )}
-        </>
+        <>{avatar}</>
       )}
     </li>
   );
 }
 
-export function ConversationItemWithState({
-  id,
-  onSelectItem,
-}: {
-  id: string;
-  onSelectItem: (key: any) => void;
-}) {
-  const data = useRecoilValue(chatByIdState(id));
-  return <ConversationItem {...data} onSelectItem={onSelectItem} />;
+Item.defaultProps = {
+  hasDot: false,
+  typing: false,
+  muted: false,
+};
+
+const MemorizedItem = memo(
+  Item,
+  (prev, next) => JSON.stringify(prev) === JSON.stringify(next)
+);
+interface ListProps {
+  data: Chat[];
 }
-export default function ConversationList({ ...props }: SelectListProps) {
+
+function InternalItem({ id }: { id: Id }) {
+  const { listItem } = useChatItem(id);
+  const [activeChatId, setActiveChatId] = useRecoilState(activeChatIdState);
+
+  if (!listItem) return <></>;
+  const processedData = (item: Chat) => {
+    const {
+      lastMessage,
+      id: internalId,
+      avatar,
+      name,
+      muted,
+      status,
+      typing,
+      preview,
+      lastUpdate,
+    } = item;
+
+    return {
+      id: internalId,
+      avatar,
+      name,
+      description: parseDescription({ preview, typing, status }),
+      muted,
+      time: lastUpdate,
+    };
+  };
+  return (
+    <MemorizedItem
+      {...processedData(listItem)}
+      onSelectItem={(key) => {
+        setActiveChatId(key);
+      }}
+      active={id === activeChatId}
+    />
+  );
+}
+
+function EmptyChatItem({
+  name,
+  lastUpdate,
+  active,
+}: {
+  name: string;
+  lastUpdate: Date;
+  active?: boolean;
+}) {
+  const itemRef = useRef<HTMLLIElement>(null);
+  const breakpoints = useBreakpoint();
+
+  useEffect(() => {
+    if (active && itemRef.current) {
+      itemRef.current.classList.add('selected-conv-item-draff');
+    }
+
+    if (!active && itemRef.current) {
+      itemRef.current.classList.remove('selected-conv-item-draff');
+    }
+  });
+
+  const avatar = (
+    <Avatar shape="circle" size="large" icon={<QuestionOutlined />} />
+  );
+
+  return (
+    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events
+    <li
+      key="new-chat-item-unique-key"
+      ref={itemRef}
+      className=" relative py-3 pl-7 pr-2 before:opacity-0 cursor-pointer   "
+    >
+      {breakpoints.lg ? (
+        <Space direction="horizontal" size="middle" style={{ width: '100%' }}>
+          {avatar}
+
+          <Row
+            gutter={[16, 8]}
+            style={{ minWidth: 0, flex: 1, marginRight: 0 }}
+            align="middle"
+          >
+            <Col flex="1" style={{ minWidth: 0 }}>
+              <Space
+                direction="vertical"
+                style={{
+                  width: '100%',
+                  columnGap: 0,
+                  justifyContent: 'center',
+                  minWidth: 0,
+                }}
+              >
+                <Title level={5} ellipsis style={{ margin: 0, minWidth: 0 }}>
+                  {name}
+                </Title>
+              </Space>
+            </Col>
+          </Row>
+        </Space>
+      ) : (
+        <>{avatar}</>
+      )}
+    </li>
+  );
+}
+
+EmptyChatItem.defaultProps = {
+  active: true,
+};
+
+function List({ data }: ListProps) {
   return (
     <ul className="list-none p-0 overflow-hidden">
-      {props.data.map((d, index) => {
-        return (
-          <ConversationItem
-            // typing={d.typing}
-            // avatar={d.avatar || 'https://source.unsplash.com/random/100×100'} // random image if avatar is not set
-            // key={d.id}
-            // id={d.id}
-            // description={d.preview}
-            // status={d.online}
-            // name={d.name + index}
-            // time={d.lastUpdate}
-            // muted={d.muted}
-
-            onSelectItem={(key) => {
-              props.onSelect(key);
-            }}
-            selected={props.selectedKey === d.id}
-          />
-        );
-      })}
+      {data.map((item, index) => (
+        <InternalItem key={item.id} id={item.id} />
+      ))}
     </ul>
   );
 }
+
+export default List;

@@ -2,14 +2,11 @@ import messageManager, { MessageManager } from 'renderer/data/message.manager';
 import { FileMessage, Message } from 'renderer/domain';
 import { messages } from 'renderer/mock/message';
 import {
-  IMessageRespository,
-  messsageRespository,
+  IMessageRepository,
+  messageRepository,
 } from 'renderer/repository/message.respository';
 import { MSG_PAGE_SIZE } from 'renderer/shared/constants';
-import {
-  createMessage,
-  createMsgPlaceholder,
-} from 'renderer/usecase/message.usecase';
+import { createMsgPlaceholder } from 'renderer/usecase/message.usecase';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
 
 // save uploading file for later retry
@@ -18,7 +15,7 @@ class MessageController {
 
   constructor(
     private manager: MessageManager,
-    private repo: IMessageRespository
+    private repo: IMessageRepository
   ) {
     this.messages = new BehaviorSubject(new Array<Message>());
   }
@@ -143,7 +140,7 @@ class MessageController {
 
 const messageController = new MessageController(
   messageManager,
-  messsageRespository
+  messageRepository
 );
 
 export default messageController;

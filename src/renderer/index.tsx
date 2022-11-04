@@ -1,14 +1,28 @@
+import { useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
-import { RecoilRoot } from 'recoil';
+import { RecoilRoot, useRecoilSnapshot } from 'recoil';
 import App from './App';
 import './config/axios.config';
 import ErrorBoundary from './ui/pages/components/ErrorBoundary/ErrorBoundary';
 
+function DebugObserver() {
+  const snapshot = useRecoilSnapshot();
+  useEffect(() => {
+    console.debug('The following atoms were modified:');
+    // eslint-disable-next-line no-restricted-syntax
+    for (const node of snapshot.getNodes_UNSTABLE({ isModified: true })) {
+      console.debug(node.key, snapshot.getLoadable(node));
+    }
+  }, [snapshot]);
+
+  return null;
+}
 const container = document.getElementById('root')!;
 const root = createRoot(container);
 root.render(
   <ErrorBoundary>
     <RecoilRoot>
+      <DebugObserver />
       <App />
     </RecoilRoot>
   </ErrorBoundary>
