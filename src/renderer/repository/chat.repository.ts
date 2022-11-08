@@ -2,10 +2,16 @@ import { Chat } from 'renderer/domain';
 import { CONV_PAGE_SIZE } from 'renderer/shared/constants';
 import { genMockChat } from 'renderer/mock/chats';
 import HttpClient from 'renderer/services/http';
+import { CHAT } from 'renderer/config/api.routes';
 import IDataSource from './type';
 
 export interface IChatRepository {
-  getChats(start?: number, count?: number): Promise<Chat[]>;
+  getChats(page?: number): Promise<{
+    data: Chat[];
+    pageNum: number;
+    totalCount: number;
+    totalPage: number;
+  }>;
   saveChats(chats: Chat[]): Promise<void>;
   // createChat(chat: Id[]): Promise<Chat>;
 }
@@ -23,29 +29,30 @@ class ChatRepositoryImpl implements IChatRepository {
     throw new Error('Method not implemented.');
   }
 
-  async getChats(
-    start: number | undefined = 0,
-    count: number | undefined = CONV_PAGE_SIZE
-  ): Promise<Chat[]> {
-    // const request = await this._dataSource.get('/chats', {
-    //   start,
-    //   count,
-    // });
-    // const chats = request.data;
-    // return chats
-    const newitems = Array.from(
-      {
-        length: count,
-      },
-      () => genMockChat()
-    );
+  async getChats(page = 1): Promise<{
+    data: Chat[];
+    pageNum: number;
+    totalCount: number;
+    totalPage: number;
+  }> {
+    console.trace();
 
+    const request = await this._dataSource.get(`${CHAT}?page=${page}`);
+    const chats = request.data;
+    return chats;
     // return fake data
-    return new Promise((resolve, reject) =>
-      setTimeout(() => {
-        resolve(newitems);
-      }, 500)
-    );
+    // const newitems = Array.from(
+    //   {
+    //     length: count,
+    //   },
+    //   () => genMockChat()
+    // );
+
+    // return new Promise((resolve, reject) =>
+    //   setTimeout(() => {
+    //     resolve(newitems);
+    //   }, 500)
+    // );
   }
 
   saveChat(chat: Chat): Promise<Chat> {

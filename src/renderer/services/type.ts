@@ -1,10 +1,12 @@
+import { Message } from 'renderer/domain';
+
 interface ISocketClient {
   /**
    *
-   * @param id chatId
+   * @param {Message} message
    * @return Promise<any> that resolve when request is success
    */
-  sendPrivateMessage(id: string): Promise<any>;
+  sendPrivateMessage(message: Message): Promise<any>;
   /**
    *
    * @param id chatId
@@ -34,6 +36,10 @@ interface ServerToClientEvents {
 interface ClientToServerEvents {
   [SocketEvents.ADD_FRIEND]: (id: string, onSuccess: (val) => any) => void;
   [SocketEvents.UN_FRIEND]: (id: string, onSuccess: (val) => any) => void;
+  [SocketEvents.SEND_PRIVATE_MESSAGE]: (
+    msg: Message,
+    onSuccess: (val) => any
+  ) => void;
 }
 
 interface SocketData {

@@ -9,6 +9,8 @@ type MessageStatus =
   | 'unsent'
   | 'received'
   | 'sending';
+
+type ChannelType = 'private' | 'group';
 type ImgThreshold = {
   width: number;
   height: number;

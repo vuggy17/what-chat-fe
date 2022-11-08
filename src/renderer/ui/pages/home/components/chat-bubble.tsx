@@ -18,8 +18,8 @@ export interface MessageBubbleProps {
   path?: string;
   name?: string;
   size?: number;
-  sender: IUser;
-  time: Date;
+  sender: IUser | any;
+  time: number;
   hasAvatar?: boolean;
   uploaded?: boolean;
   chatId: Id;
@@ -76,7 +76,7 @@ export default function MessageBubble({
       // self message
       <div className=" mr-3 float-right flex max-w-[90%] mb-3">
         <Tooltip
-          title={formatDTime(time.toString())}
+          title={formatDTime(time)}
           placement="left"
           mouseEnterDelay={0.5}
         >

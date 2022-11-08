@@ -9,21 +9,20 @@ import { createMsgPlaceholder } from './message.usecase';
  */
 export async function loadChat({
   repo,
-  skip,
-  total,
-  count = CONV_PAGE_SIZE,
+  page = 1,
 }: {
   repo: IChatRepository;
-  skip: number;
-  total: number;
-  count?: number;
+  page?: number;
 }) {
-  if (skip >= total) {
-    return repo.getChats(skip, count);
-  }
-  throw new Error(
-    "Skip can't be smaller than the length of the current chat list"
-  );
+  const {
+    data: internalchat,
+    pageNum,
+    totalCount,
+    totalPage,
+  } = await repo.getChats(page);
+
+  const data = quickSort<Chat>(internalchat, 'lastUpdate', 'desc');
+  return { data, extra: { pageNum, totalCount, totalPage } };
 }
 
 /**
@@ -32,9 +31,14 @@ export async function loadChat({
  * @returns chat item
  */
 export async function getInitialChat(repo: IChatRepository) {
-  const internalchat = await repo.getChats();
+  const {
+    data: internalchat,
+    pageNum,
+    totalCount,
+    totalPage,
+  } = await repo.getChats();
   const data = quickSort<Chat>(internalchat, 'lastUpdate', 'desc');
-  return data;
+  return { data, extra: { pageNum, totalCount, totalPage } };
 }
 
 export function addMessageToChat(

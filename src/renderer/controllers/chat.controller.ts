@@ -36,8 +36,8 @@ class C {
 
     // load chat list
     const internalchat = await this._convRespository.getChats();
-    const data = quickSort<Chat>(internalchat, 'lastUpdate', 'desc');
-
+    // const data = quickSort<Chat>(internalchat, 'lastUpdate', 'desc');
+    const data = [];
     // save to manager
     this._chatManager.chats = [...this._chatManager.chats, ...data];
 
@@ -103,7 +103,7 @@ class C {
    */
   async loadChat(skip: number, count = CONV_PAGE_SIZE) {
     if (skip >= this._chatManager.chats.length - 1) {
-      const data = await this._convRespository.getChats(skip, count);
+      // const data = await this._convRespository.getChats(skip, count);
 
       // save to manager
       this._chatManager.chats = this._chatManager.chats.concat(data);

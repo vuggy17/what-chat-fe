@@ -1,3 +1,4 @@
+import { IUser } from 'renderer/domain/user.entity';
 import { MSG_PAGE_SIZE } from 'renderer/shared/constants';
 /* eslint-disable promise/always-return */
 /* eslint-disable promise/catch-or-return */
@@ -5,6 +6,7 @@ import {
   Message,
   TextMessage,
   FileMessage,
+  MessageWithTotalCount,
 } from 'renderer/domain/message.entity';
 import {
   IMessageRepository,
@@ -12,13 +14,12 @@ import {
 } from 'renderer/repository/message.respository';
 import genId from 'renderer/utils/genid';
 import getBase64 from 'renderer/utils/readimg';
+import { ISocketClient } from 'renderer/services/type';
 
 // export function createMessage(content: string | any, id?: any): Message {
 //   return {
 //     id: id || genId(),
-//     globalId: null,
 //     content,
-//     fromMe: true,
 //     type: 'text',
 //     createdAt: new Date(),
 //     status: 'unsent',
@@ -31,8 +32,14 @@ import getBase64 from 'renderer/utils/readimg';
  * @param content can be a file or a string
  * @returns new message object to display in the UI
  */
-export function createMsgPlaceholder(chatId: Id, content: string | any) {
-  const uuid = genId();
+export function createMsgPlaceholder(
+  sender: IUser,
+  receiver: IUser | any,
+  content: string | any
+) {
+  if (!sender) throw new Error('User not logged in');
+
+  const uuid = genId(); // temp id used for UI mutation/updates
   return {
     image: (): FileMessage => {
       const file = content as File;
@@ -43,14 +50,12 @@ export function createMsgPlaceholder(chatId: Id, content: string | any) {
       };
       return {
         id: uuid,
-        globalId: null,
-        content,
+        attachments: content,
         type: 'photo',
         uploaded: false,
-        createdAt: new Date(),
-        fromMe: true,
-        senderId: '0',
-        chatId,
+        createdAt: Date.now(),
+        sender,
+        receiver,
         status: 'unsent',
         ...fileInfo,
       };
@@ -67,25 +72,22 @@ export function createMsgPlaceholder(chatId: Id, content: string | any) {
         uploaded: false,
         chatId,
         content: file,
-        globalId: null,
         type: 'file',
-        senderId: '0',
-        createdAt: new Date(),
-        fromMe: true,
+        senderId,
+        createdAt: Date.now(),
         status: 'unsent',
         ...fileInfo,
       };
     },
     text: (): TextMessage => ({
       id: uuid,
-      globalId: null,
-      content,
-      fromMe: true,
+      text: content,
       type: 'text',
-      createdAt: new Date(),
-      senderId: '0',
+      createdAt: Date.now(),
+      sender,
+      receiver,
       status: 'unsent',
-      chatId,
+      chatId: null,
     }),
   };
 }
@@ -93,17 +95,25 @@ export function createMsgPlaceholder(chatId: Id, content: string | any) {
 /**
  *  get messages of chat in reverse order
  * @param chatId chat id to get messages from
- * @param skip number messages to skip
- * @param count total amount of messages to get
+ * @param offset number messages to skip
  * @param repo repository to get messages from
- * @returns {Promise<Message[]>}
+ * @returns {Promise<{data:Message[], total: number}>}
  */
 export async function getMessageOfChat(
   chatId: Id,
-  skip: number,
-  count = MSG_PAGE_SIZE,
+  offset: number,
   repo: IMessageRepository = messageRepository
+): Promise<MessageWithTotalCount> {
+  return repo.getMessages(chatId, offset);
+}
+
+export async function sendMessageOnline(
+  message: Message,
+  sendService: ISocketClient
 ) {
-  const message = await repo.getMessages(chatId, count, skip);
-  return message;
+  if (message.type !== 'text') {
+    console.error('Cannot send message of type', message.type);
+  }
+  const msg = message as TextMessage;
+  return sendService.sendPrivateMessage(msg);
 }

@@ -21,8 +21,8 @@ export default function Preload({
   useEffect(() => {
     console.log('this rereun');
     (async () => {
-      const data = await getInitialChat(chatRepository);
-      setList(data);
+      const { data, extra } = await getInitialChat(chatRepository);
+      setList({ data, extra });
     })();
   }, []);
 

@@ -1,22 +1,21 @@
 import IUser from 'renderer/domain/user.entity';
 
 interface BaseMessage {
-  id: LocalId;
-  globalId: Id | null;
+  id: Id;
   type: MessageType;
-  fromMe: boolean;
-  senderId: Id;
-  createdAt: Date;
+  sender: IUser | any;
+  receiver: IUser | any;
+  createdAt: number; // Unix timestamp
   status: MessageStatus;
-  chatId: Id;
+  chatId: Id | null; // group chat id
 }
-
 export interface TextMessage extends BaseMessage {
-  content: string;
+  text: string;
 }
 
 export interface FileMessage extends BaseMessage {
-  content?: File; // file object
+  text: string;
+  attachments?: File; // file object
   uploaded: boolean;
   name: string;
   size: number;
@@ -32,3 +31,5 @@ export interface TextMessageWithMetaData extends TextMessage {
 export interface FileMessageWithMetaData extends FileMessage {
   sender: IUser;
 }
+
+export type MessageWithTotalCount = { data: Message[]; total: number };

@@ -1,4 +1,6 @@
-export function parseStatus(status: 'sending' | 'sent_error' | undefined) {
+export function parseStatus(
+  status: 'sending' | 'sent_error' | 'idle' | undefined
+) {
   console.log('parseStatus', status);
   switch (status) {
     case 'sending':
@@ -16,11 +18,11 @@ export function parseDescription({
   typing,
 }: {
   preview: string;
-  status: 'sending' | 'sent_error' | undefined;
+  status: 'sending' | 'sent_error' | 'idle' | undefined;
   typing: boolean;
 }) {
   if (typing) return 'Typing...';
-  if (status) return parseStatus(status);
+  if (status !== 'idle') return parseStatus(status);
   return preview;
 }
 

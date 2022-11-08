@@ -17,29 +17,22 @@ const initialChat = (id: string) =>
     name: '',
     avatar: '',
     status: 'sending',
-    lastMessage: null,
     participants: [],
-    preview: '',
-    lastUpdate: new Date(),
-    muted: false,
+    previewText: '',
+    lastUpdate: Date.now(),
     typing: false,
-    pinned: false,
-    unreadCount: 0,
   } as Chat);
 
-const chatIdsState = atom<Id[]>({
+const chatIdsState = atom<{
+  ids: Id[];
+  extra: {
+    pageNum: number;
+    totalCount: number;
+    totalPage: number;
+  };
+}>({
   key: 'chatIdsState',
-  default: [],
-});
-
-const getChatId = selectorFamily<Id, Id>({
-  key: 'getChatId',
-  get:
-    (id) =>
-    ({ get }) => {
-      const chatIds = get(chatIdsState);
-      return chatIds.find((chatId) => chatId === id) || '';
-    },
+  default: { ids: [], extra: { pageNum: 1, totalCount: 0, totalPage: 0 } },
 });
 
 const chatItemState = atomFamily<Chat, Id>({
@@ -62,16 +55,19 @@ export const chatItemSelector = selectorFamily<Chat, Id>({
       }
       set(chatItemState(id), newVal);
 
-      if (get(chatIdsState).find((i) => i === newVal.id)) return;
+      if (get(chatIdsState).ids.find((i) => i === newVal.id)) return;
 
-      set(chatIdsState, (prev) => [...prev, newVal.id]);
+      set(chatIdsState, ({ ids: prev, extra }) => {
+        const ids = [...prev, newVal.id];
+        return { ids, extra };
+      });
     },
 });
 
 const chatItemsState = selector<Chat[]>({
   key: 'chatItemsState',
   get: ({ get }) => {
-    const chatIds = get(chatIdsState);
+    const { ids: chatIds } = get(chatIdsState);
     return chatIds.map((id) => get(chatItemState(id)));
   },
 });
@@ -97,13 +93,28 @@ export const activeChatIdState = atom<Id>({
   default: getFirstChatId,
 });
 
+export const activeChatItem = selector<Chat>({
+  key: 'activeChatState',
+  get: ({ get }) => {
+    const activeChatId = get(activeChatIdState);
+    return get(chatItemState(activeChatId));
+  },
+});
+
 export const useChatList = () => {
-  const listIds = useRecoilValue(chatIdsState);
+  const listIds = useRecoilValue(chatIdsState).ids;
+  const { extra } = useRecoilValue(chatIdsState);
 
   const setList = useRecoilCallback(
     ({ set }) =>
-      (list: Chat[]) => {
-        list.forEach((l) => {
+      (payload: {
+        data: Chat[];
+        extra: { pageNum: number; totalCount: number; totalPage: number };
+      }) => {
+        const { data: chats, extra: internalExtra } = payload;
+        set(chatIdsState, (prev) => ({ ...prev, extra: internalExtra }));
+
+        chats.forEach((l) => {
           set(chatItemSelector(l.id), l);
         });
       },
@@ -112,6 +123,7 @@ export const useChatList = () => {
 
   return {
     listIds,
+    extra,
     setList,
   };
 };
@@ -128,6 +140,7 @@ export const useChatItem = (id: Id) => {
     []
   );
 
+  // get chat item with id if it exists
   const getItemIfExisted = useRecoilCallback(({ snapshot }) => (i: Id) => {
     const DEFAULT_NAME = '';
     const item = snapshot.getLoadable(chatItemSelector(i)).valueMaybe();

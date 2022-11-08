@@ -2,7 +2,7 @@ import { atom, atomFamily, selectorFamily } from 'recoil';
 import IUser from 'renderer/domain/user.entity';
 
 // current user info
-export const userState = atom<IUser | null>({
+export const currentUser = atom<IUser | null>({
   key: 'userState',
   default: null,
 });

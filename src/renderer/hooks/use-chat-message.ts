@@ -6,7 +6,7 @@ import {
   useRecoilCallback,
   useRecoilValue,
 } from 'recoil';
-import { Message } from 'renderer/domain';
+import { Message, MessageWithTotalCount } from 'renderer/domain';
 import { messageRepository } from '../repository/message.respository';
 // eslint-disable-next-line import/no-cycle
 import { activeChatIdState } from './use-chat';
@@ -17,16 +17,23 @@ export const draffMessageState = atomFamily<Message[], Id>({
   default: [],
 });
 
-export const fetchMessagesOfChatAsync = selectorFamily<Message[], Id>({
+export const fetchMessagesOfChatAsync = selectorFamily<
+  MessageWithTotalCount,
+  Id
+>({
   key: `fetchMessagesOfChatAsync-key`,
   get:
     (id) =>
     async ({ get }) => {
-      if (id === '') return [];
-      const messages = await messageRepository.getMessages(id);
+      if (id === '') return { data: [], total: 0 };
+      const { data, total } = await messageRepository.getMessages(id, 0);
+
       const draffMessage = get(draffMessageState(id));
 
-      return [...messages, ...draffMessage];
+      return {
+        data: [...data, ...draffMessage],
+        total,
+      };
     },
 });
 
@@ -34,21 +41,21 @@ export const fetchMessagesOfChatAsync = selectorFamily<Message[], Id>({
  * message of chat with id
  * @param id chat id
  */
-export const chatMessagesState = atomFamily<Message[], Id>({
+export const chatMessagesState = atomFamily<MessageWithTotalCount, Id>({
   key: `messageOfChat`,
   default: (id) => fetchMessagesOfChatAsync(id),
 });
 
-export const activeChatMessageSelector = selector<Message[]>({
+export const activeChatMessageSelector = selector<MessageWithTotalCount>({
   key: `activeChatMessage`,
   get: ({ get }) => {
     const activeChatId = get(activeChatIdState);
-    if (activeChatId === '') return [];
+    if (activeChatId === '') return { data: [], total: 0 };
     return get(chatMessagesState(activeChatId));
   },
 });
 
-export const chatMessageSelector = selectorFamily<Message[], Id>({
+export const chatMessageSelector = selectorFamily<MessageWithTotalCount, Id>({
   key: 'chatItemSelector',
   get:
     (id) =>
@@ -67,83 +74,45 @@ export const chatMessageSelector = selectorFamily<Message[], Id>({
 });
 
 export const useMessage = () => {
-  const messagesOfActiveChat = useRecoilValue(activeChatMessageSelector);
-
-  const addMany = useRecoilCallback(
-    ({ set, snapshot }) =>
-      (id: Id, messages: Message[]) => {
-        // pick an message in the incoming data
-        // if it not exist in the chat, append incoming messages to the chat
-        // otherwise, there is no message in the chat, save it as the initial value
-        const cachedMessages = snapshot
-          .getLoadable(chatMessagesState(id))
-          .getValue();
-        if (messages.length > 0 && cachedMessages?.length > 0) {
-          const randomMessageId = messages[0].id;
-          if (
-            cachedMessages.findIndex(
-              (message) => message.id === randomMessageId
-            ) === -1
-          ) {
-            set(chatMessagesState(id), (prev) => [...prev, ...messages]);
-            return;
-          }
-        }
-        set(chatMessageSelector(id), messages);
-      }
-  );
-
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const addMany_WithoutCheck = useRecoilCallback(
-    ({ set }) =>
-      (id: Id, message: Message) => {
-        set(chatMessageSelector(id), (prev) => [...prev, message]);
-      }
+  const { data: internalData, total: internalTotal } = useRecoilValue(
+    activeChatMessageSelector
   );
 
   const prependMany = useRecoilCallback(
     ({ set }) =>
-      (id: Id, messages: Message[]) => {
-        set(chatMessageSelector(id), (prev) => [...messages, ...prev]);
+      (id: Id, newItems: Message[]) => {
+        set(chatMessageSelector(id), (prev) => ({
+          ...prev,
+          data: [...newItems, ...prev.data],
+        }));
       }
   );
 
   const upsertOne = useRecoilCallback(
     ({ set }) =>
       (id: Id, message: Message) => {
-        set(chatMessageSelector(id), (prev) => {
-          const index = prev.findIndex((m) => m.id === message.id);
+        set(chatMessageSelector(id), ({ data, total }) => {
+          const index = data.findIndex((m) => m.id === message.id);
           if (index === -1) {
-            return [...prev, message];
+            return {
+              data: [...data, message],
+              total: total + 1,
+            };
           }
-          prev[index] = message;
-          return prev;
+          const mutableData = [...data];
+          mutableData[index] = message;
+          return {
+            data: [...mutableData],
+            total,
+          };
         });
       }
   );
 
-  const insertOne = useRecoilCallback(
-    ({ set }) =>
-      (id: Id, message: Message) => {
-        set(chatMessageSelector(id), (prev) => [...prev, message]);
-      }
-  );
-
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const insertOne_Draff = useRecoilCallback(
-    ({ set }) =>
-      (id: Id, message: Message) => {
-        set(draffMessageState(id), (prev) => [...prev, message]);
-      }
-  );
-
   return {
-    messagesOfActiveChat,
-    addMany,
-    addMany_WithoutCheck,
+    messagesOfActiveChat: internalData,
+    total: internalTotal,
     prependMany,
     upsertOne,
-    insertOne,
-    insertOne_Draff,
   };
 };

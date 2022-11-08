@@ -1,4 +1,5 @@
-import { Message } from 'renderer/domain';
+import { CHAT_MESSAGE } from 'renderer/config/api.routes';
+import { Message, MessageWithTotalCount } from 'renderer/domain';
 import { genMockMsg, messages as data } from 'renderer/mock/message';
 import HttpClient from 'renderer/services/http';
 import { MSG_PAGE_SIZE } from 'renderer/shared/constants';
@@ -7,7 +8,7 @@ import { resolveAfter } from 'renderer/utils/debouce';
 import IDataSource from './type';
 
 export interface IMessageRepository {
-  getMessages(chatId: Id, count: number, skip: number): Promise<Message[]>;
+  getMessages(chatId: Id, offset: number): Promise<MessageWithTotalCount>;
   saveMessages(messages: Message[]): Promise<void>;
   uploadFile(file: File, meta: any): Promise<any>;
   getUploadProgress(fileId: Id): any;
@@ -21,6 +22,16 @@ export class MessageRepositoryImpl implements IMessageRepository {
 
   constructor(dataSource: IDataSource) {
     this._dataSource = dataSource;
+  }
+
+  async getMessages(
+    chatId: string,
+    offset: number
+  ): Promise<MessageWithTotalCount> {
+    const res = await this._dataSource.get(
+      `${CHAT_MESSAGE}?channelId=${chatId}&offset=${offset}`
+    );
+    return res.data;
   }
 
   notifyFileReady(fileId: string): any {
@@ -75,35 +86,35 @@ export class MessageRepositoryImpl implements IMessageRepository {
     throw new Error('Method not implemented.');
   }
 
-  async getMessages(
-    chatId: string,
-    count: number = MSG_PAGE_SIZE,
-    skip = 0
-  ): Promise<Message[]> {
-    // const request = await this._dataSource.get('/messages', {
-    //   chatId,
-    //   count,
-    //   start,
-    // });
-    // const messages = request.data;
-    // parse data to Message
-    // save to local database
-    // return messages;
+  // async getMessages(
+  //   chatId: string,
+  //   count: number = MSG_PAGE_SIZE,
+  //   skip = 0
+  // ): Promise<Message[]> {
+  //   // const request = await this._dataSource.get('/messages', {
+  //   //   chatId,
+  //   //   count,
+  //   //   start,
+  //   // });
+  //   // const messages = request.data;
+  //   // parse data to Message
+  //   // save to local database
+  //   // return messages;
 
-    // return fake data
-    console.log('====================================');
-    console.log('re call this', chatId);
-    console.log('====================================');
-    return resolveAfter<Message[]>(
-      Array.from(
-        {
-          length: count,
-        },
-        genMockMsg
-      ),
-      randomNumber(100, 600)
-    );
-  }
+  //   // return fake data
+  //   console.log('====================================');
+  //   console.log('re call this', chatId);
+  //   console.log('====================================');
+  //   return resolveAfter<Message[]>(
+  //     Array.from(
+  //       {
+  //         length: count,
+  //       },
+  //       genMockMsg
+  //     ),
+  //     randomNumber(100, 600)
+  //   );
+  // }
 }
 
 export const messageRepository = new MessageRepositoryImpl(HttpClient);

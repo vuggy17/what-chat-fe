@@ -1,3 +1,4 @@
+import { Message } from 'renderer/domain';
 import {
   ClientToServerEvents,
   ISocketClient,
@@ -26,14 +27,24 @@ class AppSocketClient implements ISocketClient {
     });
   }
 
+  sendPrivateMessage(message: Message): Promise<any> {
+    this.setup();
+    console.log(message);
+    return new Promise((resolve, reject) => {
+      this.socketAdapter.emit(
+        SocketEvents.SEND_PRIVATE_MESSAGE,
+        message,
+        (res) => {
+          resolve(res);
+        }
+      );
+    });
+  }
+
   setup() {
     if (this.socketAdapter.disconnected) {
       this.socketAdapter.connect();
     }
-  }
-
-  sendPrivateMessage(id: string): Promise<any> {
-    throw new Error('Method not implemented.');
   }
 
   sendGroupMessage(id: string): Promise<any> {

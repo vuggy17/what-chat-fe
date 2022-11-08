@@ -20,7 +20,7 @@ type ItemProps = {
   avatar: string | undefined;
   name: string;
   description: string;
-  time: Date;
+  time: number;
   hasDot?: boolean;
   // status?: 'sending' | 'sent_error';
   typing?: boolean;
@@ -140,7 +140,7 @@ function Item({
             <Col flex="none">
               <Space direction="vertical" align="end">
                 <Text type="secondary" className="text-[12px]">
-                  {formatDTime(time.toString())}
+                  {formatDTime(time)}
                 </Text>
                 {extra}
               </Space>
@@ -174,24 +174,19 @@ function InternalItem({ id }: { id: Id }) {
 
   if (!listItem) return <></>;
   const processedData = (item: Chat) => {
-    const {
-      lastMessage,
-      id: internalId,
-      avatar,
-      name,
-      muted,
-      status,
-      typing,
-      preview,
-      lastUpdate,
-    } = item;
+    const { id: internalId, avatar, name, previewText, lastUpdate } = item;
+    console.log(item);
 
     return {
       id: internalId,
       avatar,
       name,
-      description: parseDescription({ preview, typing, status }),
-      muted,
+      description: parseDescription({
+        preview: previewText,
+        typing: false,
+        status: 'idle',
+      }), // TODO: not implement typing yet
+      muted: false, // TODO: not implement muted yet
       time: lastUpdate,
     };
   };

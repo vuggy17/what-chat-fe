@@ -8,16 +8,15 @@ import { chatItemsSortedState, useChatList } from '../../../../hooks/use-chat';
 import ConversationList from './conversation-list';
 
 export default function Conversations() {
-  const { listIds, setList } = useChatList();
+  const { listIds, extra: listExtra, setList } = useChatList();
   const conversationItems = useRecoilValue(chatItemsSortedState);
 
   const loadMoreData = async () => {
-    const data = await loadChat({
+    const { data, extra } = await loadChat({
       repo: chatRepository,
-      skip: listIds.length - 1,
-      total: listIds.length - 1,
+      page: listExtra.pageNum + 1,
     });
-    setList(data);
+    setList({ data, extra });
   };
 
   return (
@@ -41,7 +40,7 @@ export default function Conversations() {
           style={{ minWidth: 0 }}
           dataLength={listIds.length}
           next={loadMoreData}
-          hasMore
+          hasMore={listExtra.totalPage !== listExtra.pageNum}
           loader={
             <Skeleton
               avatar
@@ -51,7 +50,7 @@ export default function Conversations() {
               active
             />
           }
-          endMessage={<Divider plain>It is all, nothing more 🤐</Divider>}
+          // endMessage={<Divider plain>It is all, nothing more 🤐</Divider>}
           scrollableTarget="scrollableDiv"
         >
           <ConversationList data={conversationItems} />

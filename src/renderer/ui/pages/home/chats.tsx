@@ -22,10 +22,15 @@ import {
 } from 'antd';
 import Paragraph from 'antd/lib/skeleton/Paragraph';
 import axios from 'axios';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { useRecoilCallback, useSetRecoilState } from 'recoil';
-import { userState } from 'renderer/hooks/use-user';
+import {
+  useRecoilCallback,
+  useRecoilState,
+  useResetRecoilState,
+  useSetRecoilState,
+} from 'recoil';
+import { currentUser } from 'renderer/hooks/use-user';
 import {
   CHAT,
   C_CONVERSATION,
@@ -58,13 +63,42 @@ function DebugButton() {
 
   if (process.env.NODE_ENV === 'production') return null;
 
-  return <Button onClick={onClick}>Dump State</Button>;
+  return (
+    <Button
+      onClick={() => {
+        axios
+          .get('chat/messages?channelId=6369bf85fc711638f3b40257&offset=0')
+          .then((res) => console.log(res.data))
+          .catch((err) => console.error('err', err));
+      }}
+    >
+      get messagese
+    </Button>
+  );
 }
 
 const Chats: React.FC = () => {
   const [collapsed, setCollapsed] = useState(true);
   const navigate = useNavigate();
-  const setCurrentUser = useSetRecoilState(userState);
+  const [user, setCurrentUser] = useRecoilState(currentUser);
+  useEffect(() => {
+    if (!user) {
+      (async () => {
+        axios
+          .post('/user/login', {
+            username: 'Karl_Jones',
+            password: '44lwA5KFn15pNCk',
+          })
+          .then((res) => {
+            message.success('Login success');
+            setCurrentUser(res.data.data);
+            return null;
+          })
+          .catch((err) => console.error('error', err));
+      })();
+    }
+  }, []);
+
   return (
     <Layout style={{ height: '100vh', overflow: 'auto' }}>
       <Sider
@@ -157,14 +191,13 @@ const Chats: React.FC = () => {
               }
             )}
             <div className="flex gap-2">
-              {/* <Text>Vu Dang Khuong Duy</Text> */}
               <DebugButton />
               <Button
                 onClick={() =>
                   axios
                     .post('/user/login', {
-                      username: 'Marguerite33',
-                      password: '6EyH6RhYnD9YVvD',
+                      username: 'Karl_Jones',
+                      password: '44lwA5KFn15pNCk',
                     })
                     .then((res) => {
                       message.success('Login success');
@@ -175,12 +208,29 @@ const Chats: React.FC = () => {
               >
                 Get auth token
               </Button>
-              <Text>
-                <Avatar
-                  style={{ backgroundColor: '#87d068' }}
-                  icon={<UserOutlined />}
-                />
-              </Text>
+              <Button
+                onClick={() =>
+                  axios
+                    .get('/chat?page=1')
+                    .then((res) => {
+                      message.success('get chat success');
+                      console.log('dsad', res.data);
+                    })
+                    .catch((err) => message.error(err.message))
+                }
+              >
+                Get chatlist
+              </Button>
+            </div>
+            <div className="flex gap-2 items-center">
+              {/* <Text>Vu Dang Khuong Duy</Text> */}
+              <Text>{user?.name}</Text>
+
+              <Avatar
+                src={user?.avatar}
+                style={{ backgroundColor: '#87d068' }}
+                icon={<UserOutlined />}
+              />
             </div>
           </div>
         </Header>

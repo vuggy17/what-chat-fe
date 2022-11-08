@@ -4,7 +4,7 @@ import { useChatBoxContext } from 'renderer/shared/context/chatbox.context';
 
 import { useRecoilValue } from 'recoil';
 
-import { activeChatIdState } from 'renderer/hooks/use-chat';
+import { activeChatIdState, activeChatItem } from 'renderer/hooks/use-chat';
 import { FormOutlined } from '@ant-design/icons';
 import ChatOptionToggle from '../components/chat-side-menu';
 import Conversations from '../components/conversations';
@@ -15,7 +15,8 @@ const { Header, Footer, Sider, Content } = Layout;
 
 export default function Chat() {
   const { sideOpen } = useChatBoxContext();
-  const chatId = useRecoilValue(activeChatIdState);
+  // const chatId = useRecoilValue(activeChatIdState);
+  const activeChat = useRecoilValue(activeChatItem);
   const [showSearch, setShowSearch] = useState(false);
 
   return (
@@ -43,12 +44,12 @@ export default function Chat() {
         <Divider type="vertical" className="h-full ml-0" />
         <Content className="h-full w-full">
           <Suspense fallback={<ChatBoxFallback />}>
-            <ChatBox chatId={chatId} hasSearch={showSearch} />
+            <ChatBox chat={activeChat} hasSearch={showSearch} />
           </Suspense>
         </Content>
         <Divider type="vertical" className="h-full ml-0 mr-0" />
         {/* option menu */}
-        {sideOpen && chatId && (
+        {sideOpen && activeChat && (
           <Sider
             className="max-h-full overflow-auto h-full "
             theme="light"
@@ -59,7 +60,7 @@ export default function Chat() {
             width={360}
           >
             <ChatOptionToggle
-              id={chatId}
+              id={activeChat.id}
               toggleSearch={() => setShowSearch(!showSearch)}
             />
           </Sider>

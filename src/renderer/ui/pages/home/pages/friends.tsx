@@ -1,6 +1,5 @@
 /* eslint-disable promise/catch-or-return */
 import { SendOutlined } from '@ant-design/icons';
-import { faker } from '@faker-js/faker';
 import {
   Avatar,
   Button,
@@ -13,62 +12,77 @@ import {
   Typography,
 } from 'antd';
 import axios from 'axios';
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { useRecoilCallback, useRecoilValue } from 'recoil';
 import { ALL_USER, FRIEND } from 'renderer/config/api.routes';
-import { Chat, ChatWithoutMeta, Message } from 'renderer/domain';
+import { Chat, Message } from 'renderer/domain';
 import IUser from 'renderer/domain/user.entity';
 import { useChatItem } from 'renderer/hooks/use-chat';
-import { useMessage } from 'renderer/hooks/use-chat-message';
-import { userState } from 'renderer/hooks/use-user';
+import { draffMessageState } from 'renderer/hooks/use-chat-message';
+import { currentUser as userState } from 'renderer/hooks/use-user';
 import SocketClient from 'renderer/services/socket';
-import { CHAT } from 'renderer/shared/constants';
-import { useChatBoxContext } from 'renderer/shared/context/chatbox.context';
-import { parseParticipantToChatName } from 'renderer/ui/helper/string-converter';
 import { addMessageToChat } from 'renderer/usecase/conversation.usecase';
-import { createMsgPlaceholder } from 'renderer/usecase/message.usecase';
+import {
+  createMsgPlaceholder,
+  sendMessageOnline,
+} from 'renderer/usecase/message.usecase';
 
 const INITIAL_CHAT_ID = '';
 
 function TinyChatBox({ receiver }: { receiver: IUser }) {
-  const { upsertListItem, getItemIfExisted } = useChatItem(receiver.id);
+  const { upsertListItem: updateOrInsertChatItem, getItemIfExisted } =
+    useChatItem(receiver.id);
   const currentUser = useRecoilValue(userState);
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { insertOne_Draff } = useMessage();
-
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const insertOne_Draff = useRecoilCallback(
+    ({ set }) =>
+      (id: Id, m: Message) => {
+        set(draffMessageState(id), (prev) => [...prev, m]);
+      }
+  );
   const onSend = (text: string) => {
-    const msg = createMsgPlaceholder(receiver.id, text).text();
-    const chat = getItemIfExisted(receiver.id);
-    let chatUpdate: Partial<Chat> = {};
-    if (chat) {
-      chatUpdate = {
-        status: 'sending',
-        lastUpdate: msg.createdAt,
-        lastMessage: msg.id,
-      };
-    } else {
-      // if a chat not existed, create new one
-      chatUpdate = {
-        status: 'sending',
-        lastUpdate: msg.createdAt,
-        lastMessage: msg.id,
-        name: receiver.name,
-        avatar: receiver.avatar,
-        participants: [receiver.id, currentUser!.id],
-      };
+    if (currentUser) {
+      const msg = createMsgPlaceholder(
+        currentUser?.id,
+        receiver.id,
+        text
+      ).text();
+
+      const chat = getItemIfExisted(receiver.id);
+      let chatUpdate: Partial<Chat> = {};
+      if (chat) {
+        chatUpdate = {
+          status: 'sending',
+          lastUpdate: msg.createdAt,
+          previewText: msg.text,
+        };
+      } else {
+        // if a chat not existed, create new one
+        chatUpdate = {
+          status: 'sending',
+          lastUpdate: msg.createdAt,
+          name: receiver.name,
+          avatar: receiver.avatar,
+          participants: [receiver, currentUser],
+        };
+        console.log('my chat update', chatUpdate);
+      }
+
+      // we don't add message to chat here
+      addMessageToChat(receiver.id, msg, {
+        insertMessage: insertOne_Draff,
+        updateChat: updateOrInsertChatItem,
+        updates: chatUpdate,
+      });
+
+      sendMessageOnline(msg, SocketClient)
+        .then((res) => {
+          console.log('message successfully delivered to server', res);
+          return null;
+        })
+        .catch((err) => console.error(err));
     }
-
-    // const fakefun = (arg: Id, arg2: Message) => {
-    //   console.log(arg, arg2);
-    // };
-
-    // we dont add message to chat here
-    addMessageToChat(receiver.id, msg, {
-      insertMessage: insertOne_Draff,
-      updateChat: upsertListItem,
-      updates: chatUpdate,
-    });
   };
   return (
     <div>
@@ -96,9 +110,7 @@ function TinyChatBox({ receiver }: { receiver: IUser }) {
 export default function Friends() {
   const [users, setUsers] = useState(new Array<IUser>());
   const [friends, setFriends] = useState(new Set<string>()); // array of IUser to enforce there is no duplicate friend
-  const { setNewChat } = useChatBoxContext();
-  const navigate = useNavigate();
-  const { changeActiveChat } = useChatItem(INITIAL_CHAT_ID);
+
   useEffect(() => {
     const cancelSignal = new AbortController();
     const cancelSignal1 = new AbortController();
@@ -146,22 +158,6 @@ export default function Friends() {
       return null;
     });
   };
-
-  const addUserToChat = (us: IUser[]) => {
-    const newItem: ChatWithoutMeta = {
-      name: parseParticipantToChatName(us.map((u) => u.name)),
-      participants: us.map((u) => u.id),
-      lastUpdate: new Date(),
-    };
-    setNewChat(newItem);
-    changeActiveChat(INITIAL_CHAT_ID);
-    navigate(`/${CHAT}`);
-    return newItem;
-  };
-
-  // const sendMessage = (receiver: IUser) => {
-
-  // };
 
   return (
     <div>
