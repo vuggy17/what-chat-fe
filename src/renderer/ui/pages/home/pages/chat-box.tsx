@@ -1,30 +1,30 @@
-import { LoadingOutlined, MoreOutlined, UserOutlined } from '@ant-design/icons';
+import { MoreOutlined, UserOutlined } from '@ant-design/icons';
 import {
   Avatar,
   Badge,
   Button,
   Divider,
-  Input,
-  message,
-  Skeleton,
+  message as notification,
   Space,
   Typography,
 } from 'antd';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 
 // import ConversationController from 'renderer/controllers/chat.controller';
-import messageController from 'renderer/controllers/message.controller';
 import { Chat as ChatEntity, Message } from 'renderer/domain';
-import { useChatItem } from 'renderer/hooks/use-chat';
-import { chatMessagesState, useMessage } from 'renderer/hooks/use-chat-message';
+import { useUpdateChatItem } from 'renderer/hooks/use-chat';
+import { useMessage } from 'renderer/hooks/use-chat-message';
 import { currentUser as userState } from 'renderer/hooks/use-user';
 import SocketClient from 'renderer/services/socket';
 import { MSG_PAGE_SIZE } from 'renderer/shared/constants';
 
 import { useChatBoxContext } from 'renderer/shared/context/chatbox.context';
-import { addMessageToChat } from 'renderer/usecase/conversation.usecase';
 import {
+  addMessageToChat,
+  updateChat,
+} from 'renderer/usecase/conversation.usecase';
+import {
+  convertToPreview,
   createMsgPlaceholder,
   sendMessageOnline,
 } from 'renderer/usecase/message.usecase';
@@ -79,46 +79,90 @@ function Header({ data }: { data: ChatEntity }) {
 const TOTAL_MESSAGE_COUNT = 5 * MSG_PAGE_SIZE; // !!REMOVE THIS IN THE FUTURE
 
 export default function Chat({ chat, hasSearch }: any) {
-  const { messagesOfActiveChat: messages, total, upsertOne } = useMessage();
-  const { upsertListItem } = useChatItem(chat.id);
+  const {
+    messagesOfActiveChat: messages,
+    total,
+    updateOrInsertMessage,
+  } = useMessage();
+  const updateChatItem = useUpdateChatItem();
   const currentUser = useRecoilValue(userState);
 
   const onSendMessage = (msg: File | string, type: MessageType) => {
-    let newItem = {} as Message;
+    // SETUP: construct message
+    let clientMessage = {} as Message;
+    if (currentUser) {
+      const receiver = chat.participants.find((p) => p.id !== currentUser.id);
 
-    switch (type) {
-      case 'file':
-        newItem = createMsgPlaceholder(
-          currentUser?.id,
-          chat.id,
-          msg as File
-        ).file();
-        break;
-      case 'photo':
-        newItem = createMsgPlaceholder(
-          currentUser?.id,
-          chat.id,
-          msg as File
-        ).image();
-        break;
-      default:
-        newItem = createMsgPlaceholder(
-          currentUser?.id,
-          chat.id,
-          msg as string
-        ).text();
-        break;
+      switch (type) {
+        case 'file':
+          clientMessage = createMsgPlaceholder(
+            currentUser,
+            receiver,
+            msg as File
+          ).file();
+          break;
+        case 'photo':
+          clientMessage = createMsgPlaceholder(
+            currentUser,
+            receiver,
+            msg as File
+          ).image();
+          break;
+        default:
+          clientMessage = createMsgPlaceholder(
+            currentUser,
+            receiver,
+            msg as string
+          ).text();
+          break;
+      }
     }
 
-    addMessageToChat(chat.id, newItem, {
-      insertMessage: upsertOne,
-      updateChat: upsertListItem,
-      updates: { status: 'sending', lastUpdate: newItem.createdAt },
+    // ACTION: update UI
+    addMessageToChat(chat.id, clientMessage, {
+      insertMessage: updateOrInsertMessage,
     });
+    updateChat(
+      chat.id,
+      {
+        status: 'sending',
+        lastUpdate: clientMessage.createdAt,
+        lastMessage: convertToPreview(clientMessage),
+      },
+      {
+        updateChatItem,
+      }
+    );
 
-    sendMessageOnline(newItem, SocketClient)
+    // ACTION: send message
+    sendMessageOnline(clientMessage, SocketClient)
       .then((res) => {
-        console.log('messag sent', res);
+        const { data, message } = res;
+
+        // FINAL: update chat
+        updateChat(
+          chat.id,
+          {
+            status: 'idle',
+            lastUpdate: data.message.createdAt,
+            lastMessage: convertToPreview(data.message),
+          },
+          {
+            updateChatItem,
+          }
+        );
+
+        // FINAL: update message status
+        updateOrInsertMessage(
+          chat.id,
+          {
+            id: data.message.id,
+            status: 'sent',
+            createdAt: data.message.createdAt,
+          },
+          clientMessage.id
+        );
+
         return null;
       })
       .catch((err) => console.error(err));
@@ -127,7 +171,7 @@ export default function Chat({ chat, hasSearch }: any) {
   return (
     <div className=" flex flex-col min-h-0 h-full pb-4 pr-2">
       <Header data={chat} />
-      <div className="flex-auto relative pl-4 pr-3 transition-all transform duration-700 overflow-hidden">
+      <div className="flex-auto relative px-2 mb-1 transition-all transform duration-700 overflow-hidden">
         {/* if switching lists, unmount virtuoso so internal state gets reset */}
         <MessageList
           totalCount={total}

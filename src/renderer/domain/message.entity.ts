@@ -1,10 +1,10 @@
-import IUser from 'renderer/domain/user.entity';
+import User from 'renderer/domain/user.entity';
 
 interface BaseMessage {
   id: Id;
   type: MessageType;
-  sender: IUser | any;
-  receiver: IUser | any;
+  sender: User | any;
+  receiver: User | any;
   createdAt: number; // Unix timestamp
   status: MessageStatus;
   chatId: Id | null; // group chat id
@@ -22,14 +22,15 @@ export interface FileMessage extends BaseMessage {
   path: string;
 }
 
-export type Message = TextMessage | FileMessage;
+export type Message = TextMessage;
 
-export interface TextMessageWithMetaData extends TextMessage {
-  sender: IUser;
-}
-
-export interface FileMessageWithMetaData extends FileMessage {
-  sender: IUser;
-}
+export type PreviewMessage = {
+  createdAt: number;
+  id: string;
+  receiverName: string; // receiver name
+  senderName: string; // sender name
+  text: string;
+  updatedAt: number;
+};
 
 export type MessageWithTotalCount = { data: Message[]; total: number };

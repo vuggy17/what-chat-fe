@@ -1,16 +1,17 @@
 import { DownOutlined } from '@ant-design/icons';
-import { Affix, Button, Spin, Tooltip } from 'antd';
+import { Affix, Button, message, Spin, Tooltip } from 'antd';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { Virtuoso } from 'react-virtuoso';
 import { useRecoilValue } from 'recoil';
 import { Chat, Message } from 'renderer/domain';
 import { useMessage } from 'renderer/hooks/use-chat-message';
 import { currentUser as userState } from 'renderer/hooks/use-user';
-import { RequiredField } from 'renderer/utils/type';
+import { getMessageOfChat } from 'renderer/usecase/message.usecase';
+
 import MessageBubble from './chat-bubble';
 
 type MessageListProps = {
-  messages: RequiredField<Message, 'sender'>[];
+  messages: WithRequired<Message, 'sender'>[];
   chat: Chat;
   totalCount: number;
 };
@@ -28,15 +29,17 @@ export default function MessagesList({
   const [isAtBottom, setIsAtBottom] = useState(true);
   const virtuosoRef = useRef<any>(null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-
   const currentUser = useRecoilValue(userState);
 
   const loadMoreItem = useCallback(async () => {
-    // setIsLoadingMore(true);
-    // const res = await getMessageOfChat(chat.id, messages.length);
-    // setIsLoadingMore(false);
-    // prependMany(chat.id, newMsg);
-    // console.log('ds', res);
+    if (totalCount > messages.length + 1) {
+      setIsLoadingMore(true);
+      const { data } = await getMessageOfChat(chat.id, messages.length + 1);
+
+      prependMany(chat.id, data);
+      setIsLoadingMore(false);
+      // console.log('ds', res);
+    }
   }, [chat, prependMany]);
 
   const toggleFloatingButton = (atBottom: boolean) => {

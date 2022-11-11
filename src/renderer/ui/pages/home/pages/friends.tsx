@@ -16,7 +16,7 @@ import { useState, useEffect } from 'react';
 import { useRecoilCallback, useRecoilValue } from 'recoil';
 import { ALL_USER, FRIEND } from 'renderer/config/api.routes';
 import { Chat, Message } from 'renderer/domain';
-import IUser from 'renderer/domain/user.entity';
+import User from 'renderer/domain/user.entity';
 import { useChatItem } from 'renderer/hooks/use-chat';
 import { draffMessageState } from 'renderer/hooks/use-chat-message';
 import { currentUser as userState } from 'renderer/hooks/use-user';
@@ -29,8 +29,8 @@ import {
 
 const INITIAL_CHAT_ID = '';
 
-function TinyChatBox({ receiver }: { receiver: IUser }) {
-  const { upsertListItem: updateOrInsertChatItem, getItemIfExisted } =
+function TinyChatBox({ receiver }: { receiver: User }) {
+  const { upsertListItem: updateOrInsertChatItem, getChatItemByParticipants } =
     useChatItem(receiver.id);
   const currentUser = useRecoilValue(userState);
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -43,45 +43,38 @@ function TinyChatBox({ receiver }: { receiver: IUser }) {
   );
   const onSend = (text: string) => {
     if (currentUser) {
-      const msg = createMsgPlaceholder(
-        currentUser?.id,
-        receiver.id,
-        text
-      ).text();
-
-      const chat = getItemIfExisted(receiver.id);
-      let chatUpdate: Partial<Chat> = {};
-      if (chat) {
-        chatUpdate = {
-          status: 'sending',
-          lastUpdate: msg.createdAt,
-          previewText: msg.text,
-        };
-      } else {
-        // if a chat not existed, create new one
-        chatUpdate = {
-          status: 'sending',
-          lastUpdate: msg.createdAt,
-          name: receiver.name,
-          avatar: receiver.avatar,
-          participants: [receiver, currentUser],
-        };
-        console.log('my chat update', chatUpdate);
-      }
-
-      // we don't add message to chat here
-      addMessageToChat(receiver.id, msg, {
-        insertMessage: insertOne_Draff,
-        updateChat: updateOrInsertChatItem,
-        updates: chatUpdate,
-      });
-
-      sendMessageOnline(msg, SocketClient)
-        .then((res) => {
-          console.log('message successfully delivered to server', res);
-          return null;
-        })
-        .catch((err) => console.error(err));
+      // const msg = createMsgPlaceholder(currentUser, receiver, text).text();
+      // const chat = getChatItemByParticipants([currentUser, receiver]);
+      // let chatUpdate: Partial<Chat> = {};
+      // if (chat) {
+      //   chatUpdate = {
+      //     status: 'sending',
+      //     lastUpdate: msg.createdAt,
+      //     previewText: msg.text,
+      //   };
+      // } else {
+      //   // if a chat not existed, create new one
+      //   chatUpdate = {
+      //     status: 'sending',
+      //     lastUpdate: msg.createdAt,
+      //     name: receiver.name,
+      //     avatar: receiver.avatar,
+      //     participants: [receiver, currentUser],
+      //   };
+      //   console.log('my chat update', chatUpdate);
+      // }
+      // // we don't add message to chat here
+      // addMessageToChat(receiver.id, msg, {
+      //   insertMessage: insertOne_Draff,
+      //   updateChat: updateOrInsertChatItem,
+      //   updates: chatUpdate,
+      // });
+      // sendMessageOnline(msg, SocketClient)
+      //   .then((res) => {
+      //     console.log('message successfully delivered to server', res);
+      //     return null;
+      //   })
+      //   .catch((err) => console.error(err));
     }
   };
   return (
@@ -108,7 +101,7 @@ function TinyChatBox({ receiver }: { receiver: IUser }) {
 }
 
 export default function Friends() {
-  const [users, setUsers] = useState(new Array<IUser>());
+  const [users, setUsers] = useState(new Array<User>());
   const [friends, setFriends] = useState(new Set<string>()); // array of IUser to enforce there is no duplicate friend
 
   useEffect(() => {

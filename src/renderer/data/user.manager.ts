@@ -1,21 +1,21 @@
-import IUser from 'renderer/domain/user.entity';
+import User from 'renderer/domain/user.entity';
 
 class UserManager {
-  private _users: IUser[];
+  private _users: User[];
 
-  constructor(users: IUser[] = []) {
+  constructor(users: User[] = []) {
     this._users = users;
   }
 
-  public get users(): IUser[] {
+  public get users(): User[] {
     return this._users;
   }
 
-  public set users(v: IUser[]) {
+  public set users(v: User[]) {
     this._users = v;
   }
 
-  public getById(id: Id): IUser | undefined {
+  public getById(id: Id): User | undefined {
     return this._users.find((user) => user.id === id);
   }
 }

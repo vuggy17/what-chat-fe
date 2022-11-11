@@ -4,9 +4,9 @@ import { UserOutlined } from '@ant-design/icons';
 import { Avatar, message, Tooltip, Typography } from 'antd';
 import React from 'react';
 import formatDTime from 'renderer/utils/time';
-import IUser from 'renderer/domain/user.entity';
+import User from 'renderer/domain/user.entity';
 import FileBubble from './file-bubble';
-import { CircleChecked } from './icons';
+import { CircleChecked, CircleDashed } from './icons';
 import ImageBubble from './image-bubble';
 import BubbleActionMenu from './context-menu';
 
@@ -18,21 +18,32 @@ export interface MessageBubbleProps {
   path?: string;
   name?: string;
   size?: number;
-  sender: IUser | any;
+  sender: User | any;
   time: number;
   hasAvatar?: boolean;
   uploaded?: boolean;
-  chatId: Id;
+  chatId: Id | null;
   id: Id;
+  status: MessageStatus;
 }
 
 export default function MessageBubble({
   hasAvatar = false,
   ...props
 }: MessageBubbleProps) {
-  const { self, type, content, time, ...messageMeta } = props;
-
+  const { self, type, content, time, status, ...messageMeta } = props;
   if (self) {
+    const indicator = () => {
+      switch (status) {
+        case 'sending':
+          return <CircleDashed />;
+        case 'sent':
+          return <CircleChecked />;
+        default:
+          return null;
+      }
+    };
+
     const selfMessage = () => {
       switch (type) {
         case 'file':
@@ -65,9 +76,7 @@ export default function MessageBubble({
                   </Typography.Paragraph>
                 </BubbleActionMenu>
               </div>
-              <div className="invisible">
-                <CircleChecked />
-              </div>
+              <div className="flex items-end">{indicator()}</div>
             </div>
           );
       }
@@ -135,7 +144,7 @@ export default function MessageBubble({
           src={props.sender?.avatar}
         />
       </div>
-      <Tooltip title={formatDTime(time.toString())} placement="left">
+      <Tooltip title={formatDTime(time)} placement="left">
         {othersMessage()}
       </Tooltip>
     </div>

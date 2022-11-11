@@ -45,14 +45,18 @@ export function addMessageToChat(
   chatId: Id,
   msg: Message,
   updater: {
-    insertMessage: (chatId: Id, msg: Message) => void;
-    updateChat: (item: { id: Id; updates: Partial<Chat> }) => void;
-    updates: Partial<Chat>;
+    insertMessage: (chatId: Id, msg: Message, oldId: Id) => void;
   }
 ) {
-  updater.insertMessage(chatId, msg);
-  updater.updateChat({
-    id: chatId,
-    updates: updater.updates,
-  });
+  updater.insertMessage(chatId, msg, msg.id);
+}
+
+export function updateChat(
+  chatId: Id,
+  updates: WithRequired<Partial<Chat>, 'lastMessage' | 'status' | 'lastUpdate'>,
+  updater: {
+    updateChatItem: (item: { id: Id; updates: Partial<Chat> }) => void;
+  }
+) {
+  updater.updateChatItem({ id: chatId, updates });
 }

@@ -1,7 +1,6 @@
 export function parseStatus(
   status: 'sending' | 'sent_error' | 'idle' | undefined
 ) {
-  console.log('parseStatus', status);
   switch (status) {
     case 'sending':
       return 'Sending...';
@@ -31,4 +30,9 @@ export function parseParticipantToChatName(participants: string[]): string {
     return participants[0];
   }
   return participants.map((p) => p).join(', ');
+}
+
+export function parseMessageToPreviewText(message: string | File): string {
+  if (typeof message === 'string') return message;
+  return message.name;
 }

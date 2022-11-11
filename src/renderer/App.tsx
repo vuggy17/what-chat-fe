@@ -10,6 +10,7 @@ import './App.css';
 import 'antd/dist/antd.less';
 import 'tailwindcss/tailwind.css';
 import { Suspense } from 'react';
+import { useRecoilState } from 'recoil';
 import LoginCheckPoint from './shared/protected-route';
 import {
   CHAT,
@@ -39,7 +40,7 @@ export default function App() {
         <Route
           path={CHAT}
           element={
-            <Preload userId="1">
+            <Preload>
               <Chats />
             </Preload>
           }

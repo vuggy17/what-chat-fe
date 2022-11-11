@@ -1,4 +1,5 @@
-import IUser from './user.entity';
+import { PreviewMessage } from './message.entity';
+import User from './user.entity';
 
 export type Chat = {
   id: Id;
@@ -6,20 +7,10 @@ export type Chat = {
   avatar?: string;
   status?: 'sending' | 'sent_error' | 'idle';
   lastMessage?: PreviewMessage;
-  participants: IUser[];
-  previewText: string;
+  participants: User[];
   lastUpdate: number;
   // unreadCount: number;
   // pinned: boolean;
-};
-
-export type PreviewMessage = {
-  createdAt: number;
-  id: string;
-  receiver: string;
-  sender: string;
-  text: string;
-  updatedAt: number;
 };
 
 // use this to instance a new chat

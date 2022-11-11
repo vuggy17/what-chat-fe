@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import {
   atom,
   atomFamily,
@@ -9,6 +8,7 @@ import {
   selector,
 } from 'recoil';
 import { Chat } from 'renderer/domain';
+import User from 'renderer/domain/user.entity';
 import { quickSort } from 'renderer/utils/common';
 
 const initialChat = (id: string) =>
@@ -23,7 +23,7 @@ const initialChat = (id: string) =>
     typing: false,
   } as Chat);
 
-const chatIdsState = atom<{
+export const chatIdsState = atom<{
   ids: Id[];
   extra: {
     pageNum: number;
@@ -128,6 +128,29 @@ export const useChatList = () => {
   };
 };
 
+export const useSetChatList = () => {
+  return useRecoilCallback(
+    ({ set }) =>
+      (payload: {
+        data: Chat[];
+        extra: { pageNum: number; totalCount: number; totalPage: number };
+      }) => {
+        const { data: chats, extra: internalExtra } = payload;
+        set(chatIdsState, (prev) => ({ ...prev, extra: internalExtra }));
+
+        chats.forEach((l) => {
+          set(chatItemSelector(l.id), l);
+        });
+      },
+    []
+  );
+};
+
+/**
+ *
+ * @name useChatItem
+ *
+ */
 export const useChatItem = (id: Id) => {
   const listItem = useRecoilValue(chatItemSelector(id));
   const activeChatId = useRecoilValue(activeChatIdState);
@@ -141,18 +164,47 @@ export const useChatItem = (id: Id) => {
   );
 
   // get chat item with id if it exists
-  const getItemIfExisted = useRecoilCallback(({ snapshot }) => (i: Id) => {
-    const DEFAULT_NAME = '';
-    const item = snapshot.getLoadable(chatItemSelector(i)).valueMaybe();
+  const getChatItemByParticipants = useRecoilCallback(
+    ({ snapshot }) =>
+      (participants: User[]) => {
+        const DEFAULT_NAME = '';
+        const items = snapshot.getLoadable(chatItemsState).valueMaybe();
 
-    // if item is a default atom's value, return null instead return item it self
-    if (item !== undefined && item.name !== DEFAULT_NAME) {
-      return item;
-    }
-    return null;
-  });
+        const result = items?.find((item) => {
+          if (item.participants.length === participants.length) {
+            return item.participants.every((p) =>
+              participants.some((pp) => pp.id === p.id)
+            );
+          }
+          return false;
+        });
 
-  const upsertListItem = useRecoilCallback(
+        // if item is a default atom's value, return null instead return item it self
+        if (result && result.name !== DEFAULT_NAME) {
+          return result;
+        }
+        return null;
+      }
+  );
+
+  return {
+    listItem,
+
+    activeChatId,
+    changeActiveChat,
+    getChatItemByParticipants,
+  };
+};
+
+/**
+ *
+ * update chat item
+ * if there is no chat item with id, create new one
+ * @param id: chat id
+ * @param updates: see function declaration
+ */
+export const useUpdateChatItem = () => {
+  return useRecoilCallback(
     ({ set, snapshot }) =>
       (payload: { id: Id; updates: Partial<Chat> }) => {
         const currentItem = snapshot
@@ -169,12 +221,4 @@ export const useChatItem = (id: Id) => {
       },
     []
   );
-
-  return {
-    listItem,
-    upsertListItem,
-    activeChatId,
-    changeActiveChat,
-    getItemIfExisted,
-  };
 };

@@ -34,3 +34,20 @@ type OperationResult = MakeOptional<Result, 'reason' | 'data'>;
 declare module 'react-tiny-link';
 
 // ({ toggleState }: { toggleState: () => void }) => JSX.Element;
+
+/**
+ * Mark some properties as required
+ * @example
+ * type User = {
+  id: string
+  name?: string
+  email?: string
+}
+type UserWithName = WithRequired<User, 'name'>
+
+// error: missing name
+const user: UserWithName = {
+  id: '12345',
+}
+ */
+type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };

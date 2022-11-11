@@ -9,7 +9,7 @@ import {
 } from '@ant-design/icons';
 import { Dropdown, Menu, Space, Modal, message } from 'antd';
 import { HtmlHTMLAttributes } from 'react';
-import IUser from 'renderer/domain/user.entity';
+import User from 'renderer/domain/user.entity';
 
 // REMEMBER TO COPY THIS FROM chat-bubble.tsx DUE TO ESLINT NO CYCLE IMPORT RULE
 export interface MessageBubbleProps {
@@ -19,12 +19,13 @@ export interface MessageBubbleProps {
   path?: string;
   name?: string;
   size?: number;
-  sender: IUser;
-  time: Date;
+  sender: User | any;
+  time: number;
   hasAvatar?: boolean;
   uploaded?: boolean;
   chatId: Id;
   id: Id;
+  status: MessageStatus;
 }
 
 const { confirm } = Modal;

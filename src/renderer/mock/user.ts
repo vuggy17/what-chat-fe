@@ -1,8 +1,8 @@
-import IUser from 'renderer/domain/user.entity';
+import User from 'renderer/domain/user.entity';
 import { faker } from '@faker-js/faker';
 
 // eslint-disable-next-line import/prefer-default-export
-export function genMockUser(): IUser {
+export function genMockUser(): User {
   return {
     id: faker.helpers.arrayElement(['1', '2', '3']),
     name: faker.name.fullName(),
@@ -11,7 +11,7 @@ export function genMockUser(): IUser {
   };
 }
 
-export const mockUsers: IUser[] = Array.from(
+export const mockUsers: User[] = Array.from(
   {
     length: 10,
   },

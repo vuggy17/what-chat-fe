@@ -1,15 +1,13 @@
 /* eslint-disable react/jsx-props-no-spreading */
 import { QuestionOutlined } from '@ant-design/icons';
 import { Avatar, Badge, Col, Grid, Row, Space, Typography } from 'antd';
-import { memo, useEffect, useMemo, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { memo, useEffect, useRef } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { selectedChatState } from 'renderer/data/chat.managers';
 import { Chat } from 'renderer/domain';
-import { useChatBoxContext } from 'renderer/shared/context/chatbox.context';
 import { parseDescription } from 'renderer/ui/helper/string-converter';
 import formatDTime from 'renderer/utils/time';
-import { activeChatIdState, useChatItem } from '../../../../hooks/use-chat';
+import { activeChatIdState, useChatItem } from 'renderer/hooks/use-chat';
+import { currentUser } from 'renderer/hooks/use-user';
 import { BellOff } from './icons';
 
 const { useBreakpoint } = Grid;
@@ -171,20 +169,33 @@ interface ListProps {
 function InternalItem({ id }: { id: Id }) {
   const { listItem } = useChatItem(id);
   const [activeChatId, setActiveChatId] = useRecoilState(activeChatIdState);
+  const user = useRecoilValue(currentUser);
 
   if (!listItem) return <></>;
-  const processedData = (item: Chat) => {
-    const { id: internalId, avatar, name, previewText, lastUpdate } = item;
-    console.log(item);
+
+  const getProperties = (item: Chat) => {
+    const {
+      id: internalId,
+      avatar,
+      name,
+      lastMessage,
+      lastUpdate,
+      status,
+    } = item;
+
+    const getPreviewMessage = (text: string) => {
+      if (user?.name === lastMessage?.senderName) return `You: ${text}`;
+      return text;
+    };
 
     return {
       id: internalId,
       avatar,
       name,
       description: parseDescription({
-        preview: previewText,
+        preview: lastMessage ? getPreviewMessage(lastMessage.text) : '',
         typing: false,
-        status: 'idle',
+        status: status || 'idle',
       }), // TODO: not implement typing yet
       muted: false, // TODO: not implement muted yet
       time: lastUpdate,
@@ -192,7 +203,7 @@ function InternalItem({ id }: { id: Id }) {
   };
   return (
     <MemorizedItem
-      {...processedData(listItem)}
+      {...getProperties(listItem)}
       onSelectItem={(key) => {
         setActiveChatId(key);
       }}
@@ -201,14 +212,18 @@ function InternalItem({ id }: { id: Id }) {
   );
 }
 
-function EmptyChatItem({
+export function EmptyChatItem({
+  id,
   name,
-  lastUpdate,
+  avatarUrl,
   active,
+  onPress,
 }: {
+  id?: Id;
   name: string;
-  lastUpdate: Date;
   active?: boolean;
+  avatarUrl?: string;
+  onPress?: (key: Id) => void;
 }) {
   const itemRef = useRef<HTMLLIElement>(null);
   const breakpoints = useBreakpoint();
@@ -224,13 +239,19 @@ function EmptyChatItem({
   });
 
   const avatar = (
-    <Avatar shape="circle" size="large" icon={<QuestionOutlined />} />
+    <Avatar
+      shape="circle"
+      size="large"
+      icon={<QuestionOutlined />}
+      src={avatarUrl}
+    />
   );
 
   return (
     // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events
     <li
-      key="new-chat-item-unique-key"
+      onClick={() => onPress?.(id!)}
+      key={`new-chat-item-unique-key${id}`}
       ref={itemRef}
       className=" relative py-3 pl-7 pr-2 before:opacity-0 cursor-pointer   "
     >
@@ -269,6 +290,9 @@ function EmptyChatItem({
 
 EmptyChatItem.defaultProps = {
   active: true,
+  id: null,
+  avatarUrl: null,
+  onPress: null,
 };
 
 function List({ data }: ListProps) {

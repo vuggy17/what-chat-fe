@@ -2,7 +2,7 @@ import { Chat } from 'renderer/domain';
 import { CONV_PAGE_SIZE } from 'renderer/shared/constants';
 import { genMockChat } from 'renderer/mock/chats';
 import HttpClient from 'renderer/services/http';
-import { CHAT } from 'renderer/config/api.routes';
+import { CHAT, CHAT_WITH_NAME } from 'renderer/config/api.routes';
 import IDataSource from './type';
 
 export interface IChatRepository {
@@ -29,14 +29,16 @@ class ChatRepositoryImpl implements IChatRepository {
     throw new Error('Method not implemented.');
   }
 
+  async findChatByParticipantName(key: string) {
+    return this._dataSource.get(`${CHAT_WITH_NAME}?name=${key}`);
+  }
+
   async getChats(page = 1): Promise<{
     data: Chat[];
     pageNum: number;
     totalCount: number;
     totalPage: number;
   }> {
-    console.trace();
-
     const request = await this._dataSource.get(`${CHAT}?page=${page}`);
     const chats = request.data;
     return chats;

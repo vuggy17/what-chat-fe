@@ -1,4 +1,3 @@
-import { IUser } from 'renderer/domain/user.entity';
 import { MSG_PAGE_SIZE } from 'renderer/shared/constants';
 /* eslint-disable promise/always-return */
 /* eslint-disable promise/catch-or-return */
@@ -7,6 +6,7 @@ import {
   TextMessage,
   FileMessage,
   MessageWithTotalCount,
+  PreviewMessage,
 } from 'renderer/domain/message.entity';
 import {
   IMessageRepository,
@@ -15,6 +15,9 @@ import {
 import genId from 'renderer/utils/genid';
 import getBase64 from 'renderer/utils/readimg';
 import { ISocketClient } from 'renderer/services/type';
+import User from 'renderer/domain/user.entity';
+import { blob } from 'stream/consumers';
+import SocketClient from 'renderer/services/socket';
 
 // export function createMessage(content: string | any, id?: any): Message {
 //   return {
@@ -33,8 +36,8 @@ import { ISocketClient } from 'renderer/services/type';
  * @returns new message object to display in the UI
  */
 export function createMsgPlaceholder(
-  sender: IUser,
-  receiver: IUser | any,
+  sender: User,
+  receiver: User | any,
   content: string | any
 ) {
   if (!sender) throw new Error('User not logged in');
@@ -86,8 +89,8 @@ export function createMsgPlaceholder(
       createdAt: Date.now(),
       sender,
       receiver,
-      status: 'unsent',
-      chatId: null,
+      status: 'sending',
+      chatId: receiver.id,
     }),
   };
 }
@@ -116,4 +119,28 @@ export async function sendMessageOnline(
   }
   const msg = message as TextMessage;
   return sendService.sendPrivateMessage(msg);
+}
+
+export function convertToPreview(message: Message): PreviewMessage {
+  const previewText = `${message.text}`; // TODO: get preview text from message
+
+  const preview: PreviewMessage = {
+    createdAt: message.createdAt,
+    id: message.id,
+    receiverName: (message.receiver as User).name,
+    senderName: (message.sender as User).name,
+    text: previewText,
+    updatedAt: message.createdAt,
+  };
+
+  return preview;
+}
+
+export function sendMessageReceivedAck(
+  chatId: Id,
+  receiverId: Id,
+  messageId: Id,
+  sendService: ISocketClient = SocketClient
+) {
+  return sendService.sendReceivedMessageAck(chatId, receiverId, messageId);
 }

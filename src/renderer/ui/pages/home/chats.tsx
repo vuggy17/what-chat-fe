@@ -31,6 +31,7 @@ import {
   useSetRecoilState,
 } from 'recoil';
 import { currentUser } from 'renderer/hooks/use-user';
+import SocketClient from 'renderer/services/socket';
 import {
   CHAT,
   C_CONVERSATION,
@@ -81,23 +82,6 @@ const Chats: React.FC = () => {
   const [collapsed, setCollapsed] = useState(true);
   const navigate = useNavigate();
   const [user, setCurrentUser] = useRecoilState(currentUser);
-  useEffect(() => {
-    if (!user) {
-      (async () => {
-        axios
-          .post('/user/login', {
-            username: 'Karl_Jones',
-            password: '44lwA5KFn15pNCk',
-          })
-          .then((res) => {
-            message.success('Login success');
-            setCurrentUser(res.data.data);
-            return null;
-          })
-          .catch((err) => console.error('error', err));
-      })();
-    }
-  }, []);
 
   return (
     <Layout style={{ height: '100vh', overflow: 'auto' }}>
@@ -167,6 +151,7 @@ const Chats: React.FC = () => {
                 ghost
                 danger
                 onClick={() => {
+                  SocketClient.disconnect();
                   navigate(`/${LOGIN}`);
                 }}
               >
@@ -196,8 +181,8 @@ const Chats: React.FC = () => {
                 onClick={() =>
                   axios
                     .post('/user/login', {
-                      username: 'Karl_Jones',
-                      password: '44lwA5KFn15pNCk',
+                      username: 'Glennie_Swaniawski63',
+                      password: 'bSj2x325DhkjQqb',
                     })
                     .then((res) => {
                       message.success('Login success');
@@ -211,15 +196,16 @@ const Chats: React.FC = () => {
               <Button
                 onClick={() =>
                   axios
-                    .get('/chat?page=1')
+                    .get('/chat/by-name?name=rene')
                     .then((res) => {
                       message.success('get chat success');
                       console.log('dsad', res.data);
+                      return null;
                     })
                     .catch((err) => message.error(err.message))
                 }
               >
-                Get chatlist
+                Get chat by name
               </Button>
             </div>
             <div className="flex gap-2 items-center">

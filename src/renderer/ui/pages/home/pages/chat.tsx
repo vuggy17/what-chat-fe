@@ -11,7 +11,7 @@ import Conversations from '../components/conversations';
 import ChatBoxFallback from '../components/loaders/chatbox.fallback';
 import ChatBox from './chat-box';
 
-const { Header, Footer, Sider, Content } = Layout;
+const { Header, Sider, Content } = Layout;
 
 export default function Chat() {
   const { sideOpen } = useChatBoxContext();

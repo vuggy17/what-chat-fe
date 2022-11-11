@@ -11,39 +11,51 @@ import { messageRepository } from '../repository/message.respository';
 // eslint-disable-next-line import/no-cycle
 import { activeChatIdState } from './use-chat';
 
-// Draff state for message
-export const draffMessageState = atomFamily<Message[], Id>({
-  key: 'draffMessageState',
-  default: [],
-});
-
+/**
+ * @deprecated now message list is being initialized with the chat in effect function
+ *
+ * @return a promise that suspense the component until the messages are loaded with the chat messages
+ */
 export const fetchMessagesOfChatAsync = selectorFamily<
   MessageWithTotalCount,
   Id
 >({
   key: `fetchMessagesOfChatAsync-key`,
-  get:
-    (id) =>
-    async ({ get }) => {
-      if (id === '') return { data: [], total: 0 };
-      const { data, total } = await messageRepository.getMessages(id, 0);
-
-      const draffMessage = get(draffMessageState(id));
-
-      return {
-        data: [...data, ...draffMessage],
-        total,
-      };
-    },
+  get: (id) => async () => {
+    if (id === '') return { data: [], total: 0 };
+    const { data, total } = await messageRepository.getMessages(id, 0);
+    return {
+      data,
+      total,
+    };
+  },
 });
 
+const getChatMessages =
+  (id) =>
+  ({ setSelf, onSet, trigger }) => {
+    // If there's a persisted value - set it on load
+    const loadRemote = async () => {
+      const res = await messageRepository.getMessages(id, 0);
+
+      if (res != null) {
+        setSelf({ ...res });
+      }
+    };
+
+    // Asynchronously set the persisted data
+    if (trigger === 'get') {
+      loadRemote();
+    }
+  };
 /**
  * message of chat with id
  * @param id chat id
  */
 export const chatMessagesState = atomFamily<MessageWithTotalCount, Id>({
   key: `messageOfChat`,
-  default: (id) => fetchMessagesOfChatAsync(id),
+  default: (id) => ({ data: [], total: 0 }),
+  effects: (id) => [getChatMessages(id)],
 });
 
 export const activeChatMessageSelector = selector<MessageWithTotalCount>({
@@ -82,25 +94,34 @@ export const useMessage = () => {
     ({ set }) =>
       (id: Id, newItems: Message[]) => {
         set(chatMessageSelector(id), (prev) => ({
-          ...prev,
+          total: prev.total,
           data: [...newItems, ...prev.data],
         }));
       }
   );
 
-  const upsertOne = useRecoilCallback(
+  /**
+   * append message to chat or update it if already exists
+   */
+  const updateOrInsertMessage = useRecoilCallback(
     ({ set }) =>
-      (id: Id, message: Message) => {
-        set(chatMessageSelector(id), ({ data, total }) => {
-          const index = data.findIndex((m) => m.id === message.id);
+      (
+        chatId: Id,
+        message: WithRequired<Partial<Message>, 'id'>,
+        oldId: Id
+      ) => {
+        set(chatMessageSelector(chatId), ({ data, total }) => {
+          const index = data.findIndex((m) => m.id === oldId);
+          console.log('update message', index, oldId, message);
           if (index === -1) {
             return {
-              data: [...data, message],
+              data: [...data, message as Message],
               total: total + 1,
             };
           }
           const mutableData = [...data];
-          mutableData[index] = message;
+
+          mutableData[index] = { ...mutableData[index], ...message };
           return {
             data: [...mutableData],
             total,
@@ -113,6 +134,6 @@ export const useMessage = () => {
     messagesOfActiveChat: internalData,
     total: internalTotal,
     prependMany,
-    upsertOne,
+    updateOrInsertMessage,
   };
 };

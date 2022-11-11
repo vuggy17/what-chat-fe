@@ -1,52 +1,79 @@
-import { Message } from 'renderer/domain';
+import { Message, TextMessage } from 'renderer/domain';
 
 interface ISocketClient {
+  sendReceivedMessageAck(chatId: Id, receiverId: Id, message: Id): void;
   /**
    *
    * @param {Message} message
    * @return Promise<any> that resolve when request is success
    */
-  sendPrivateMessage(message: Message): Promise<any>;
+  sendPrivateMessage(message: Message): Promise<SendMessageResponse>;
   /**
    *
    * @param id chatId
    * @return Promise<any> that resolve when request is success
    */
-  sendGroupMessage(id: string): Promise<any>;
+  sendGroupMessage(id: string): Promise<unknown>;
   /**
    *
    * @param id chatId
    * @return Promise<any> that resolve when request is success
    */
-  sendFriendRequest(id: string): Promise<any>;
+  sendFriendRequest(id: string): Promise<unknown>;
 }
 
-enum SocketEvents {
+export enum ClientToServerEvent {
   SEND_PRIVATE_MESSAGE = 'send_private_message',
+  PRIVATE_MESSAGE_ACK = 'private_message_ack',
   ADD_FRIEND = 'add_friend',
   UN_FRIEND = 'un_friend',
 }
-
-interface ServerToClientEvents {
-  noArg: () => void;
-  basicEmit: (a: number, b: string, c: Buffer) => void;
-  withAck: (d: string, callback: (e: number) => void) => void;
+export enum ServerToClientEvent {
+  HAS_NEW_MESSAGE = 'has_new_message',
+  ADD_FRIEND_RES = 'add_friend_res',
+  UN_FRIEND_RES = 'un_friend_res',
 }
 
-interface ClientToServerEvents {
-  [SocketEvents.ADD_FRIEND]: (id: string, onSuccess: (val) => any) => void;
-  [SocketEvents.UN_FRIEND]: (id: string, onSuccess: (val) => any) => void;
-  [SocketEvents.SEND_PRIVATE_MESSAGE]: (
-    msg: Message,
-    onSuccess: (val) => any
+type EventListenerWithAck = (payload: any, ack: (res: any) => void) => void;
+export interface IServerToClientEvent {
+  [ServerToClientEvent.HAS_NEW_MESSAGE]: EventListenerWithAck;
+}
+
+export interface IClientToServerEvent {
+  [ClientToServerEvent.SEND_PRIVATE_MESSAGE]: (
+    payload: Message,
+    onSuccess: (val) => void
+  ) => void;
+  [ClientToServerEvent.ADD_FRIEND]: (
+    id: string,
+    onSuccess: (val) => void
+  ) => void;
+  [ClientToServerEvent.UN_FRIEND]: (
+    id: string,
+    onSuccess: (val) => void
+  ) => void;
+  [ClientToServerEvent.PRIVATE_MESSAGE_ACK]: (
+    { chatId, receiverId, messageId }: PrivateMessageAcknowledgePayload,
+    onSuccess: (val) => void
   ) => void;
 }
 
-interface SocketData {
-  name: string;
-  age: number;
-}
+export type HasNewMessagePayload = {
+  chatId: Id;
+  message: Message;
+};
 
+export type PrivateMessageAcknowledgePayload = {
+  chatId: string;
+  receiverId: string;
+  messageId: string;
+};
+
+export type SendMessageResponse = {
+  code: number;
+  message: string;
+  data: HasNewMessagePayload;
+};
 /** Type returned from remote server */
 type OContact = {
   id: Id;
@@ -87,13 +114,4 @@ interface SeenMessagePayload {
   messageId?: number;
 }
 
-export {
-  OContact,
-  OConveration,
-  OMessage,
-  SeenMessagePayload,
-  ISocketClient,
-  ServerToClientEvents,
-  ClientToServerEvents,
-  SocketEvents,
-};
+export { OContact, OConveration, OMessage, SeenMessagePayload, ISocketClient };
