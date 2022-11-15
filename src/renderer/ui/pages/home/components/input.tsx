@@ -12,6 +12,7 @@ export default function Input({
   ...props
 }: {
   onSubmit(content: string | File, type: 'file' | 'photo' | 'text'): void;
+  onFocus(): void;
 }) {
   const inputRef = useRef<any>();
 
@@ -77,7 +78,11 @@ export default function Input({
       style={{ bottom: 0 }}
     >
       {/* input */}
-      <div className="flex items-center flex-1 " onSubmit={handleEnter}>
+      <div
+        className="flex items-center flex-1 "
+        onSubmit={handleEnter}
+        onFocus={() => props.onFocus()}
+      >
         <div
           ref={inputRef}
           className="input-pl grow overflow-y-auto leading-relaxed text-neutral-900  px-2 pl-3 py-2 break-words max-h-[150px] focus:outline-none font-normal text-sm"

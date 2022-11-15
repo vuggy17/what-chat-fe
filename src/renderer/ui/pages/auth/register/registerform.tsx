@@ -15,22 +15,28 @@ import {
   Upload,
   UploadProps,
 } from 'antd';
+import axios from 'axios';
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { REGISTER_USER } from 'renderer/config/api.routes';
+import HttpClient from 'renderer/services/http';
+import { BASEURL, LOGIN } from 'renderer/shared/constants';
 
 const { Option } = Select;
 const props: UploadProps = {
   name: 'file',
-  action: 'https://www.mocky.io/v2/5cc8019d300000980a055e76',
-  headers: {
-    authorization: 'authorization-text',
-  },
+  action: `${BASEURL}/upload`,
+  maxCount: 1,
+  multiple: false,
   onChange(info) {
     if (info.file.status !== 'uploading') {
       console.log(info.file, info.fileList);
     }
     if (info.file.status === 'done') {
+      message.destroy('msg_register_forcewait');
       message.success(`${info.file.name} file uploaded successfully`);
     } else if (info.file.status === 'error') {
+      message.destroy('msg_register_forcewait');
       message.error(`${info.file.name} file upload failed.`);
     }
   },
@@ -67,11 +73,50 @@ const tailFormItemLayout = {
   },
 };
 
-const Register = () => {
-  const [form] = Form.useForm();
+type RegisterPayload = {
+  username: string;
+  password: string;
+  repeatPassword: string;
+  name: string;
+  avatar: any;
+};
 
-  const onFinish = (values) => {
-    console.log('Received values of form: ', values);
+const Register = () => {
+  const [form] = Form.useForm<RegisterPayload>();
+  const navigate = useNavigate();
+  const [formLoading, setLoading] = useState(false);
+  const onFinish = (values: RegisterPayload) => {
+    try {
+      const avatarUrl = values.avatar.file.response.url;
+      setLoading(true);
+      axios
+        .post('/user/register', {
+          ...values,
+          avatar: avatarUrl,
+        })
+        .then((res) => {
+          message.destroy('msg_register_forcewait');
+          message.success({
+            content: 'Registration successful. You can now login.',
+            key: 'msg_register_success',
+          });
+
+          setTimeout(() => {
+            message.destroy('msg_register_success');
+            navigate(`/${LOGIN}`);
+          }, 700);
+          return -1;
+        })
+        .catch((err) => {
+          message.error('Register failed, please try again');
+          setLoading(false);
+        });
+    } catch (error) {
+      message.info({
+        content: 'Please wait until avatar is uploaded',
+        key: 'msg_register_forcewait',
+      });
+    }
   };
 
   const prefixSelector = (
@@ -114,20 +159,18 @@ const Register = () => {
       scrollToFirstError
     >
       <Form.Item
-        name="email"
-        label="E-mail"
+        name="username"
+        label="Username"
         rules={[
           {
-            type: 'email',
-            message: 'The input is not valid E-mail!',
-          },
-          {
+            min: 6,
+            max: 20,
             required: true,
             message: 'Please input your E-mail!',
           },
         ]}
       >
-        <Input />
+        <Input showCount maxLength={20} minLength={6} />
       </Form.Item>
 
       <Form.Item
@@ -135,13 +178,15 @@ const Register = () => {
         label="Password"
         rules={[
           {
+            min: 6,
+            max: 30,
             required: true,
             message: 'Please input your password!',
           },
         ]}
         hasFeedback
       >
-        <Input.Password />
+        <Input.Password showCount maxLength={30} minLength={6} />
       </Form.Item>
 
       <Form.Item
@@ -167,10 +212,10 @@ const Register = () => {
           }),
         ]}
       >
-        <Input.Password />
+        <Input.Password showCount maxLength={30} minLength={6} />
       </Form.Item>
 
-      <Form.Item
+      {/* <Form.Item
         name="nickname"
         label="Nickname"
         tooltip="What do you want others to call you?"
@@ -183,9 +228,9 @@ const Register = () => {
         ]}
       >
         <Input />
-      </Form.Item>
+      </Form.Item> */}
 
-      <Form.Item
+      {/* <Form.Item
         name="phone"
         label="Phone Number"
         rules={[
@@ -201,9 +246,9 @@ const Register = () => {
             width: '100%',
           }}
         />
-      </Form.Item>
+      </Form.Item> */}
 
-      <Form.Item
+      {/* <Form.Item
         name="gender"
         label="Gender"
         rules={[
@@ -218,11 +263,11 @@ const Register = () => {
           <Option value="female">Female</Option>
           <Option value="other">Other</Option>
         </Select>
-      </Form.Item>
+      </Form.Item> */}
 
-      <Form.Item name="intro" label="Intro">
+      {/* <Form.Item name="intro" label="Intro">
         <Input.TextArea showCount maxLength={100} />
-      </Form.Item>
+      </Form.Item> */}
 
       <Form.Item
         name="avatar"
@@ -240,7 +285,12 @@ const Register = () => {
       </Form.Item>
 
       <Form.Item {...tailFormItemLayout}>
-        <Button type="primary" htmlType="submit" style={{ marginRight: 8 }}>
+        <Button
+          type="primary"
+          htmlType="submit"
+          style={{ marginRight: 8 }}
+          loading={formLoading}
+        >
           Register
         </Button>
         <Button

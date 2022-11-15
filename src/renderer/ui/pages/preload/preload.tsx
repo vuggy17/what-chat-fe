@@ -8,7 +8,13 @@ import { useMessage } from 'renderer/hooks/use-chat-message';
 import { currentUser } from 'renderer/hooks/use-user';
 import { chatRepository } from 'renderer/repository/chat.repository';
 import SocketClient from 'renderer/services/socket';
-import { HasNewMessagePayload } from 'renderer/services/type';
+import {
+  EventListener,
+  EventListenerWithAck,
+  HasNewMessagePayload,
+  PrivateMessageReceivedByPayload,
+  ServerToClientEvent,
+} from 'renderer/services/type';
 import {
   addMessageToChat,
   getInitialChat,
@@ -26,7 +32,10 @@ export default function Preload({ children }: { children: ReactNode }) {
 
   const [user, setCurrentUser] = useRecoilState(currentUser);
 
-  const onHasNewMessageReceived = (payload: HasNewMessagePayload) => {
+  const onHasNewMessage: EventListenerWithAck<HasNewMessagePayload> = (
+    payload,
+    ack
+  ) => {
     const { chatId, message } = payload;
     console.log('[HAS_NEW_MESSAGE]: ', payload);
 
@@ -47,14 +56,47 @@ export default function Preload({ children }: { children: ReactNode }) {
       });
     }, 100);
     // send ack signal
-    // if (user) {
-    //   sendMessageReceivedAck(chatId, user?.id, message.id);
-    // }
+    if (user) {
+      // if (typeof ack === 'function') ack({ chatId, message });
+      sendMessageReceivedAck(message.sender.id, {
+        chatId,
+        receiverId: user.id,
+        messageId: message.id,
+      });
+    }
+  };
+
+  const onMessageReceived: EventListener<PrivateMessageReceivedByPayload> = (
+    payload: PrivateMessageReceivedByPayload
+  ) => {
+    const { chatId, messageId } = payload;
+    updateOrInsertMessage(
+      chatId,
+      { id: messageId, status: 'received' },
+      messageId
+    );
+  };
+
+  const onMessageRead: EventListener<PrivateMessageReceivedByPayload> = (
+    payload: PrivateMessageReceivedByPayload
+  ) => {
+    const { chatId, messageId } = payload;
+    updateOrInsertMessage(chatId, { id: messageId, status: 'seen' }, messageId);
   };
 
   useEffect(() => {
-    SocketClient.addListenToPrivateMessageEvent(onHasNewMessageReceived);
-
+    SocketClient.addEventHandler(
+      ServerToClientEvent.HAS_NEW_MESSAGE,
+      onHasNewMessage
+    );
+    SocketClient.addEventHandler(
+      ServerToClientEvent.MESSAGE_RECEIVED_BY,
+      onMessageReceived
+    );
+    SocketClient.addEventHandler(
+      ServerToClientEvent.SEEN_MESSAGE,
+      onMessageRead
+    );
     (async () => {
       if (!user) {
         const res = await axios.post('/user/login', {

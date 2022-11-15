@@ -64,7 +64,7 @@ body {
   border: 1px solid #2c9989;
   transition: all;
   cursor: auto;
-  transition-duration: 0.3s;
+  transition-duration: 0.1s;
   box-sizing: border-box;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;

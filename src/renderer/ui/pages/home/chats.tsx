@@ -1,44 +1,24 @@
 /* eslint-disable react/button-has-type */
 import {
   ApiOutlined,
-  LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   MessageOutlined,
   SmileOutlined,
-  UploadOutlined,
   UserOutlined,
-  VideoCameraOutlined,
 } from '@ant-design/icons';
-import {
-  Avatar,
-  Button,
-  Divider,
-  Layout,
-  Menu,
-  message,
-  Tooltip,
-  Typography,
-} from 'antd';
-import Paragraph from 'antd/lib/skeleton/Paragraph';
+import { Avatar, Button, Layout, Menu, Tooltip, Typography } from 'antd';
 import axios from 'axios';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import {
-  useRecoilCallback,
-  useRecoilState,
-  useResetRecoilState,
-  useSetRecoilState,
-} from 'recoil';
+import { useRecoilCallback, useRecoilValue } from 'recoil';
 import { currentUser } from 'renderer/hooks/use-user';
 import SocketClient from 'renderer/services/socket';
 import {
-  CHAT,
   C_CONVERSATION,
   C_FRIEND,
   C_PROFILE,
   LOGIN,
-  REGISTER,
 } from 'renderer/shared/constants';
 import logo from '../../../../../assets/logo.png';
 
@@ -81,7 +61,7 @@ function DebugButton() {
 const Chats: React.FC = () => {
   const [collapsed, setCollapsed] = useState(true);
   const navigate = useNavigate();
-  const [user, setCurrentUser] = useRecoilState(currentUser);
+  const user = useRecoilValue(currentUser);
 
   return (
     <Layout style={{ height: '100vh', overflow: 'auto' }}>
@@ -105,7 +85,7 @@ const Chats: React.FC = () => {
               <img src={logo} alt="logo" className="w-[32px]" />
               {!collapsed && (
                 <p className="font-semibold duration-300 transition-opacity  text-green-700 ml-3 mb-0">
-                  Tailwind
+                  What Chat
                 </p>
               )}
             </div>
@@ -175,39 +155,6 @@ const Chats: React.FC = () => {
                 onClick: () => setCollapsed(!collapsed),
               }
             )}
-            <div className="flex gap-2">
-              <DebugButton />
-              <Button
-                onClick={() =>
-                  axios
-                    .post('/user/login', {
-                      username: 'Glennie_Swaniawski63',
-                      password: 'bSj2x325DhkjQqb',
-                    })
-                    .then((res) => {
-                      message.success('Login success');
-                      setCurrentUser(res.data.data);
-                      return null;
-                    })
-                }
-              >
-                Get auth token
-              </Button>
-              <Button
-                onClick={() =>
-                  axios
-                    .get('/chat/by-name?name=rene')
-                    .then((res) => {
-                      message.success('get chat success');
-                      console.log('dsad', res.data);
-                      return null;
-                    })
-                    .catch((err) => message.error(err.message))
-                }
-              >
-                Get chat by name
-              </Button>
-            </div>
             <div className="flex gap-2 items-center">
               {/* <Text>Vu Dang Khuong Duy</Text> */}
               <Text>{user?.name}</Text>

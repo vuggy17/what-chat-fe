@@ -1,7 +1,3 @@
-import { message } from 'antd';
-import { Message, TextMessage } from 'renderer/domain';
-import { BASEURL } from 'renderer/shared/constants';
-import { io, Socket } from 'socket.io-client';
 import {
   ISocketClient,
   HasNewMessagePayload,
@@ -9,7 +5,15 @@ import {
   IClientToServerEvent,
   ServerToClientEvent,
   ClientToServerEvent,
-} from './type';
+  EventListenerWithAck,
+  EventListener,
+  PrivateMessageReceivedByPayload,
+  SeenMessagePayload,
+} from 'renderer/services/type';
+import { message } from 'antd';
+import { Message, TextMessage } from 'renderer/domain';
+import { BASEURL } from 'renderer/shared/constants';
+import { io, Socket } from 'socket.io-client';
 
 class AppSocketClient implements ISocketClient {
   private readonly socketAdapter: Socket<
@@ -26,17 +30,44 @@ class AppSocketClient implements ISocketClient {
     this.socketAdapter.on('connect', () => {
       console.log('connected');
     });
-    this.socketAdapter.on('connect_error', (err) => {
-      console.error('error', err);
-    });
+    // this.socketAdapter.on('connect_error', (err) => {
+    //   console.error('error', err);
+    // });
+    // this.socketAdapter.on(ServerToClientEvent.SEEN_MESSAGE, (data) => {
+    //   console.log('seen_message', data);
+    // });
+    // this.socketAdapter.on(ServerToClientEvent.TEST, (data, ack) => {
+    //   if (typeof ack === 'function') {
+    //     console.log('cc func');
+    //     ack('ack');
+    //   }
+    // });
+    // this.socketAdapter.on('disconnect', (reason) => {
+    //   if (reason === 'io server disconnect') {
+    //     // the disconnection was initiated by the server, you need to reconnect manually
+    //     this.socketAdapter.connect();
+    //   }
+    //   message.error('Chat server disconnected');
+    //   console.error('Client disconnected', reason);
+    // });
+  }
 
-    this.socketAdapter.on('disconnect', (reason) => {
-      if (reason === 'io server disconnect') {
-        // the disconnection was initiated by the server, you need to reconnect manually
-        this.socketAdapter.connect();
-      }
-      message.error('Chat server disconnected');
-      console.error('Client disconnected', reason);
+  /** send seen signal to chat
+   * @param userId my user id
+   */
+  seenMessage(
+    chatId: Id,
+    messageId: Id,
+    userId: Id,
+    toId: Id,
+    time: number
+  ): void {
+    this.socketAdapter.volatile.emit(ClientToServerEvent.SEEN_MESSAGE, {
+      chatId,
+      messageId,
+      userId,
+      toId,
+      time,
     });
   }
 
@@ -47,18 +78,13 @@ class AppSocketClient implements ISocketClient {
    * @param messageId
    */
   sendReceivedMessageAck(
-    chatId: string,
-    receiverId: string,
-    messageId: string
+    address: string,
+    meta: { chatId: string; receiverId: string; messageId: string }
   ): void {
     this.socketAdapter.emit(
       ClientToServerEvent.PRIVATE_MESSAGE_ACK,
-      {
-        chatId,
-        receiverId,
-        messageId,
-      },
-      () => console.log('Message ack received by server')
+      { address, meta },
+      (args) => console.log('Message ACK received with', args)
     );
   }
 
@@ -69,13 +95,13 @@ class AppSocketClient implements ISocketClient {
     return AppSocketClient.instance;
   }
 
-  sendPrivateMessage(message: Message): Promise<any> {
+  sendPrivateMessage(msg: Message): Promise<any> {
     // this.setup();
-
+    this.socketAdapter.emit(ClientToServerEvent.TEST, 'data');
     return new Promise((resolve, reject) => {
       this.socketAdapter.emit(
         ClientToServerEvent.SEND_PRIVATE_MESSAGE,
-        message,
+        msg,
         (res) => {
           resolve(res);
         }
@@ -97,23 +123,29 @@ class AppSocketClient implements ISocketClient {
     this.socketAdapter.off(eventName);
   }
 
+  // /**
+  //  * function that will be called when client received message from server
+  //  * @param handler function that handle the event
+  //  */
+  // addListenToPrivateMessageEvent(
+  //   handler: (payload: HasNewMessagePayload) => void
+  // ) {
+  //   this.socketAdapter.on(ServerToClientEvent.HAS_NEW_MESSAGE, handler);
+  // }
+
   /**
-   * function that will be called when client received message from server
-   * @param handler function that handle the event
+   * Register a callback to handle event from server
+   * @param eventName Server to client event name
+   * @param handler handler func
    */
-  addListenToPrivateMessageEvent(
-    handler: (payload: HasNewMessagePayload) => void
+  addEventHandler(
+    eventName: ServerToClientEvent,
+    handler:
+      | EventListenerWithAck<HasNewMessagePayload>
+      | EventListener<PrivateMessageReceivedByPayload>
+      | EventListener<SeenMessagePayload>
   ) {
-    this.socketAdapter.on(
-      ServerToClientEvent.HAS_NEW_MESSAGE,
-      // (payload: any) => console.log('HAS NEW MESSAGE PAYLOAD', payload)
-      (payload: HasNewMessagePayload, ack: any) => {
-        handler(payload);
-        ack('received');
-        console.log(ack);
-      }
-      // handler(payload)
-    );
+    this.socketAdapter.on(eventName, handler);
   }
 
   sendGroupMessage(id: string): Promise<unknown> {

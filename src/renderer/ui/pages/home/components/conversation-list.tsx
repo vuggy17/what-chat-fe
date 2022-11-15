@@ -84,6 +84,7 @@ function Item({
           boxShadow: 'none',
           fontWeight: 700,
           fontSize: 10,
+          display: 'none',
         }}
       />
     </Space>
@@ -227,6 +228,7 @@ export function EmptyChatItem({
 }) {
   const itemRef = useRef<HTMLLIElement>(null);
   const breakpoints = useBreakpoint();
+  console.log(active);
 
   useEffect(() => {
     if (active && itemRef.current) {
@@ -289,7 +291,7 @@ export function EmptyChatItem({
 }
 
 EmptyChatItem.defaultProps = {
-  active: true,
+  active: false,
   id: null,
   avatarUrl: null,
   onPress: null,

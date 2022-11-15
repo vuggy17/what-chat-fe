@@ -7,6 +7,7 @@ interface IconProps {
   strokeWidth?: number;
   strokelinejoin?: 'inherit' | 'round' | 'miter' | 'bevel' | undefined;
   strokelinecap?: 'inherit' | 'round' | 'butt' | 'square' | undefined;
+  background?: string;
 }
 function BellOff({
   color,
@@ -14,6 +15,7 @@ function BellOff({
   strokeWidth = 1.75,
   strokelinejoin = 'round',
   strokelinecap = 'round',
+  background = 'none',
 }: IconProps) {
   return (
     <span className={`anticon ${classname}`}>
@@ -44,6 +46,7 @@ function Bell({
   strokeWidth = 1.75,
   strokelinejoin = 'round',
   strokelinecap = 'round',
+  background = 'none',
 }: IconProps) {
   return (
     <span className={`anticon ${classname}`}>
@@ -72,6 +75,7 @@ function Pin({
   strokeWidth = 1.75,
   strokelinejoin = 'round',
   strokelinecap = 'round',
+  background,
 }: IconProps) {
   return (
     <span className={`anticon ${classname}`}>
@@ -101,6 +105,7 @@ function PinOff({
   strokeWidth = 1.75,
   strokelinejoin = 'round',
   strokelinecap = 'round',
+  background = 'none',
 }: IconProps) {
   return (
     <span className={`anticon ${classname}`}>
@@ -132,6 +137,7 @@ function CircleDashed({
   strokeWidth = 1.75,
   strokelinejoin = 'round',
   strokelinecap = 'round',
+  background = 'none',
 }: IconProps) {
   return (
     <span className={`anticon ${classname}`}>
@@ -166,6 +172,7 @@ function Photo({
   strokeWidth = 1.75,
   strokelinejoin = 'round',
   strokelinecap = 'round',
+  background = 'none',
 }: IconProps) {
   return (
     <span className={`anticon ${classname}`}>
@@ -196,6 +203,7 @@ function CircleChecked({
   strokeWidth = 1.75,
   strokelinejoin = 'round',
   strokelinecap = 'round',
+  background = 'none',
 }: IconProps) {
   return (
     <span className={`anticon ${classname}`}>
@@ -212,12 +220,42 @@ function CircleChecked({
         strokeLinejoin={strokelinejoin}
       >
         <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-        <circle cx="12" cy="12" r="9" />
-        <path d="M9 12l2 2l4 -4" />
+        <circle cx="12" cy="12" r="9" fill={background} color={background} />
+        <path d="M9 12l2 2l4 -4" color="white" />
       </svg>
     </span>
   );
 }
+function CircleSent({
+  color,
+  classname = '',
+  strokeWidth = 1.75,
+  strokelinejoin = 'round',
+  strokelinecap = 'round',
+  background = 'none',
+}: IconProps) {
+  return (
+    <span className={`anticon ${classname}`}>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        fill="none"
+        color={color || undefined}
+        strokeWidth={strokeWidth}
+        strokeLinecap={strokelinecap}
+        strokeLinejoin={strokelinejoin}
+      >
+        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+        <circle cx="12" cy="12" r="9" color={background} />
+        <path d="M9 12l2 2l4 -4" color={background} />
+      </svg>
+    </span>
+  );
+}
+
 function FileText({
   color,
   classname = '',
@@ -259,4 +297,5 @@ export {
   CircleChecked,
   Photo,
   FileText,
+  CircleSent,
 };

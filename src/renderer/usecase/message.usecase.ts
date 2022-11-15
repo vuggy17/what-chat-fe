@@ -60,10 +60,12 @@ export function createMsgPlaceholder(
         sender,
         receiver,
         status: 'unsent',
+        chatId: receiver.id,
+        text: '',
         ...fileInfo,
       };
     },
-    file: (): Message => {
+    file: (): FileMessage => {
       const file = content as File;
       const fileInfo = {
         path: URL.createObjectURL(file),
@@ -73,10 +75,12 @@ export function createMsgPlaceholder(
       return {
         id: uuid,
         uploaded: false,
-        chatId,
-        content: file,
+        chatId: receiver.id,
+        attachments: content,
         type: 'file',
-        senderId,
+        receiver,
+        text: '',
+        sender,
         createdAt: Date.now(),
         status: 'unsent',
         ...fileInfo,
@@ -136,11 +140,40 @@ export function convertToPreview(message: Message): PreviewMessage {
   return preview;
 }
 
+/**
+ *
+ * @param address sender Id
+ * @param meta
+ * @param sendService
+ */
 export function sendMessageReceivedAck(
-  chatId: Id,
-  receiverId: Id,
-  messageId: Id,
+  address: Id,
+  meta: {
+    chatId: Id;
+    receiverId: Id;
+    messageId: Id;
+  },
   sendService: ISocketClient = SocketClient
 ) {
-  return sendService.sendReceivedMessageAck(chatId, receiverId, messageId);
+  return sendService.sendReceivedMessageAck(address, meta);
+}
+
+/**
+ *
+ * @param chatId
+ * @param messageId
+ * @param userId who is reading the message
+ * @param toId to whom the message is sent
+ * @param time unix timestamp
+ * @param sendService
+ */
+export function seenMessage(
+  chatId: Id,
+  messageId: Id,
+  userId: Id,
+  toId: Id,
+  time: number,
+  sendService: ISocketClient = SocketClient
+) {
+  return sendService.seenMessage(chatId, messageId, userId, toId, time);
 }

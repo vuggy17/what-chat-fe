@@ -155,7 +155,7 @@ export default function Friends() {
   return (
     <div>
       <Divider>Friends</Divider>
-      <div className="grid grid-cols-4  gap-3">
+      <div className="grid grid-cols-8 gap-3">
         {friends.size > 0 ? (
           Array.from(friends).map((f) => {
             const user = JSON.parse(f);
@@ -174,7 +174,7 @@ export default function Friends() {
                 <Typography.Text>{user.name || user.userName}</Typography.Text>
                 <div className="flex w-full gap-2 justify-center">
                   <Button onClick={() => unFriend(user.id)}>Unfriend</Button>
-                  <Popover
+                  {/* <Popover
                     placement="topRight"
                     title="Send a message"
                     trigger="click"
@@ -186,7 +186,7 @@ export default function Friends() {
                     >
                       Open chat
                     </Button>
-                  </Popover>
+                  </Popover> */}
                 </div>
               </div>
             );
@@ -198,7 +198,7 @@ export default function Friends() {
 
       <Space />
       <Divider>Users</Divider>
-      <div className="grid grid-cols-4  gap-3">
+      <div className="grid grid-cols-8 gap-3">
         {users && users.length > 0 ? (
           users.map((f) => (
             <div
@@ -214,9 +214,7 @@ export default function Friends() {
               />
               <Typography.Text>{f.name || f.userName}</Typography.Text>
 
-              <Button onClick={() => addFriend(f.id)}>
-                Add friend + {f.id}
-              </Button>
+              <Button onClick={() => addFriend(f.id)}>Add friend</Button>
             </div>
           ))
         ) : (

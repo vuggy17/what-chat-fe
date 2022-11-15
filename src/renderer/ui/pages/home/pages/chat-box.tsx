@@ -4,10 +4,12 @@ import {
   Badge,
   Button,
   Divider,
+  message,
   message as notification,
   Space,
   Typography,
 } from 'antd';
+import { useCallback } from 'react';
 import { useRecoilValue } from 'recoil';
 
 // import ConversationController from 'renderer/controllers/chat.controller';
@@ -26,6 +28,7 @@ import {
 import {
   convertToPreview,
   createMsgPlaceholder,
+  seenMessage,
   sendMessageOnline,
 } from 'renderer/usecase/message.usecase';
 
@@ -74,11 +77,13 @@ function Header({ data }: { data: ChatEntity }) {
   );
 }
 
-// tong so message trong doan chat cua nguoi dung, so cang lon thi load cang nhieu
-// TODO: change this to total of message in the database
-const TOTAL_MESSAGE_COUNT = 5 * MSG_PAGE_SIZE; // !!REMOVE THIS IN THE FUTURE
-
-export default function Chat({ chat, hasSearch }: any) {
+export default function Chat({
+  chat,
+  hasSearch,
+}: {
+  chat: ChatEntity;
+  hasSearch?: boolean;
+}) {
   const {
     messagesOfActiveChat: messages,
     total,
@@ -168,24 +173,47 @@ export default function Chat({ chat, hasSearch }: any) {
       .catch((err) => console.error(err));
   };
 
+  const onEditorGotFocused = useCallback(() => {
+    if (currentUser && messages.length > 0) {
+      seenMessage(
+        chat.id,
+        messages[messages.length - 1].id,
+        currentUser?.id,
+        chat.participants.find((p) => p.id !== currentUser.id)!.id,
+        Date.now()
+      );
+    }
+  }, [messages, currentUser, chat.id]);
+
   return (
     <div className=" flex flex-col min-h-0 h-full pb-4 pr-2">
       <Header data={chat} />
       <div className="flex-auto relative px-2 mb-1 transition-all transform duration-700 overflow-hidden">
         {/* if switching lists, unmount virtuoso so internal state gets reset */}
-        <MessageList
-          totalCount={total}
-          key={chat.id}
-          messages={messages}
-          chat={chat}
-        />
+        {messages.length > 0 ? (
+          <MessageList
+            totalCount={total}
+            key={chat.id}
+            messages={messages}
+            chat={chat}
+          />
+        ) : (
+          <div className="flex w-full items-center justify-center pt-2 flex-col">
+            <Avatar src={chat.avatar} size={56} />
+            <Typography.Text>{chat.name}</Typography.Text>
+          </div>
+        )}
         {hasSearch && (
           <div className="absolute top-0 inset-x-0 z-50 [&_*]:rounded-none ">
             <SearchBox />
           </div>
         )}
       </div>
-      <RichEditor onSubmit={onSendMessage} />
+      <RichEditor onSubmit={onSendMessage} onFocus={onEditorGotFocused} />
     </div>
   );
 }
+
+Chat.defaultProps = {
+  hasSearch: false,
+};

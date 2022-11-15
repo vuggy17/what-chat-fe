@@ -72,6 +72,7 @@ export default function Conversations() {
               id={item.id}
               key={item.id}
               avatarUrl={item.avatar}
+              active={false}
             />
           ))}
         </ul>

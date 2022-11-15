@@ -37,7 +37,7 @@ function Login() {
 
   return (
     <div className=" flex items-center justify-center h-screen w-screen">
-      <div className="bg-amber-50 flex flex-col  md:flex-row items-center justify-center p-16 rounded">
+      <div className="mx-4 bg-amber-50 flex flex-col  md:flex-row items-center justify-center p-16 rounded">
         <img src={sapiens} alt="" className="sm:w-1/2 md:w-[40%]" />
         <div className="bg-white w-full rounded-3xl border sm:w-2/3 md:w-[480px] pt-[58px] pb-[48px] text-center">
           <h2 className="font-bold text-3xl rounded text-center mb-2 mt-8 tracking-wide text-orange-600">
@@ -87,7 +87,7 @@ function Login() {
           </Form>
           <p className="font-bold text-xs tracking-wide mb-5 ">
             -- Or
-            <Link to={REGISTER} className="text-orange-600 m-1">
+            <Link to={`/${REGISTER}`} className="text-orange-600 m-1">
               register
             </Link>
             for an account --
