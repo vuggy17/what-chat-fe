@@ -74,7 +74,7 @@ export default function App() {
           />
         </Route>
 
-        <Route path="*" element={<Navigate to={CHAT} />} />
+        <Route path="*" element={<Navigate to={LOGIN} />} />
       </Routes>
     </Router>
   );

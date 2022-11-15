@@ -22,17 +22,15 @@ function Login() {
       .post('/user/login', { username, password })
       .then((res) => {
         setCurrentUser(res.data.data);
-
-        navigate(CHAT);
         return null;
       })
       .catch((err) => console.error('cant login'));
   };
 
   useEffect(() => {
-    return () => {
-      resetList();
-    };
+    if (user) {
+      navigate(`/${CHAT}`);
+    }
   }, []);
 
   return (

@@ -11,7 +11,13 @@ import { Avatar, Button, Layout, Menu, Tooltip, Typography } from 'antd';
 import axios from 'axios';
 import React, { useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { useRecoilCallback, useRecoilValue } from 'recoil';
+import {
+  useRecoilCallback,
+  useRecoilState,
+  useRecoilValue,
+  useResetRecoilState,
+} from 'recoil';
+import { chatIdsState } from 'renderer/hooks/use-chat';
 import { currentUser } from 'renderer/hooks/use-user';
 import SocketClient from 'renderer/services/socket';
 import {
@@ -61,8 +67,20 @@ function DebugButton() {
 const Chats: React.FC = () => {
   const [collapsed, setCollapsed] = useState(true);
   const navigate = useNavigate();
-  const user = useRecoilValue(currentUser);
+  const [user, setUser] = useRecoilState(currentUser);
 
+  const resetRecoilState = useRecoilCallback(
+    ({ reset, set, snapshot }) =>
+      () => {
+        const chats = snapshot.getLoadable(chatIdsState).contents;
+        set(chatIdsState, {
+          ids: [],
+          extra: { pageNum: 1, totalCount: 0, totalPage: 0 },
+        });
+      }
+  );
+
+  console.log('user', user);
   return (
     <Layout style={{ height: '100vh', overflow: 'auto' }}>
       <Sider
@@ -132,6 +150,8 @@ const Chats: React.FC = () => {
                 danger
                 onClick={() => {
                   SocketClient.disconnect();
+                  setUser(null);
+                  resetRecoilState();
                   navigate(`/${LOGIN}`);
                 }}
               >

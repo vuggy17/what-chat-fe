@@ -1,10 +1,14 @@
 import { message as antMessage } from 'antd';
 import axios from 'axios';
 import { ReactNode, useEffect, useState } from 'react';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useResetRecoilState } from 'recoil';
 import { Message } from 'renderer/domain';
-import { useSetChatList, useUpdateChatItem } from 'renderer/hooks/use-chat';
-import { useMessage } from 'renderer/hooks/use-chat-message';
+import {
+  chatIdsState,
+  useSetChatList,
+  useUpdateChatItem,
+} from 'renderer/hooks/use-chat';
+import { chatMessagesState, useMessage } from 'renderer/hooks/use-chat-message';
 import { currentUser } from 'renderer/hooks/use-user';
 import { chatRepository } from 'renderer/repository/chat.repository';
 import SocketClient from 'renderer/services/socket';
@@ -29,7 +33,6 @@ export default function Preload({ children }: { children: ReactNode }) {
   const setList = useSetChatList();
   const { updateOrInsertMessage } = useMessage();
   const updateChatItem = useUpdateChatItem();
-
   const [user, setCurrentUser] = useRecoilState(currentUser);
 
   const onHasNewMessage: EventListenerWithAck<HasNewMessagePayload> = (
@@ -98,15 +101,15 @@ export default function Preload({ children }: { children: ReactNode }) {
       onMessageRead
     );
     (async () => {
-      if (!user) {
-        const res = await axios.post('/user/login', {
-          username: 'Glennie_Swaniawski63',
-          password: 'bSj2x325DhkjQqb',
-        });
+      // if (!user) {
+      //   const res = await axios.post('/user/login', {
+      //     username: 'Glennie_Swaniawski63',
+      //     password: 'bSj2x325DhkjQqb',
+      //   });
 
-        antMessage.success('Login success');
-        setCurrentUser(res.data.data);
-      }
+      //   antMessage.success('Login success');
+      //   setCurrentUser(res.data.data);
+      // }
 
       const { data, extra } = await getInitialChat(chatRepository);
       setList({ data, extra });
