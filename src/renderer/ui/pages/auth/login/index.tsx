@@ -8,13 +8,13 @@ import { useRecoilState, useResetRecoilState } from 'recoil';
 import { chatIdsState } from 'renderer/hooks/use-chat';
 import { currentUser } from 'renderer/hooks/use-user';
 import SocketClient from 'renderer/services/socket';
-import { CHAT, REGISTER } from 'renderer/shared/constants';
+import { APP, REGISTER } from 'renderer/shared/constants';
 import sapiens from '../../../../../../assets/sapiens.svg';
 
 function Login() {
   const navigate = useNavigate();
   const [user, setCurrentUser] = useRecoilState(currentUser);
-  const resetList = useResetRecoilState(chatIdsState);
+  // const resetList = useResetRecoilState(chatIdsState);
 
   const handleSubmit = (values) => {
     const { username, password } = values;
@@ -29,7 +29,7 @@ function Login() {
 
   useEffect(() => {
     if (user) {
-      navigate(`/${CHAT}`);
+      navigate(`/${APP}`);
     }
   }, []);
 
@@ -103,7 +103,7 @@ function Login() {
                   setCurrentUser(res.data.data);
 
                   SocketClient.setup();
-                  navigate(`/${CHAT}`);
+                  navigate(`/${APP}`);
                   return null;
                 })
                 .catch((err) => console.error('cant login'));
@@ -123,7 +123,7 @@ function Login() {
                   setCurrentUser(res.data.data);
 
                   SocketClient.setup();
-                  navigate(`/${CHAT}`);
+                  navigate(`/${APP}`);
 
                   return null;
                 })

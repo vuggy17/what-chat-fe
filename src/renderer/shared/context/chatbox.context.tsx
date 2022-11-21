@@ -2,9 +2,9 @@ import React, { ReactNode, useContext, useState } from 'react';
 import { ChatWithoutMeta } from 'renderer/domain';
 
 type A = {
-  toggleSideOpen: () => void;
+  toggleInfoOpen: () => void;
   setNewChat: (val: ChatWithoutMeta | null) => void;
-  sideOpen: boolean;
+  infoOpen: boolean;
   newChat: ChatWithoutMeta | null;
 };
 interface ChildrenProps {
@@ -17,16 +17,16 @@ export function useChatBoxContext() {
   return useContext(CContext);
 }
 export default function ChatBoxProvider({ children }: ChildrenProps) {
-  const [sideOpen, setSideOpen] = useState(false);
+  const [infoOpen, setInfoOpen] = useState(false);
   const [newChat, setNewChat] = useState<ChatWithoutMeta | null>(null);
   return (
     <CContext.Provider
       value={{
-        sideOpen,
+        infoOpen,
         newChat,
         setNewChat,
-        toggleSideOpen: () => {
-          setSideOpen(!sideOpen);
+        toggleInfoOpen: () => {
+          setInfoOpen(!infoOpen);
         },
       }}
     >

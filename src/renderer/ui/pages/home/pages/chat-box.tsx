@@ -1,29 +1,22 @@
 import { MoreOutlined, UserOutlined } from '@ant-design/icons';
-import {
-  Avatar,
-  Badge,
-  Button,
-  Divider,
-  message,
-  message as notification,
-  Space,
-  Typography,
-} from 'antd';
+import { Avatar, Badge, Button, Divider, Space, Typography } from 'antd';
 import { useCallback } from 'react';
 import { useRecoilValue } from 'recoil';
 
 // import ConversationController from 'renderer/controllers/chat.controller';
 import { Chat as ChatEntity, Message } from 'renderer/domain';
-import { useUpdateChatItem } from 'renderer/hooks/use-chat';
-import { useMessage } from 'renderer/hooks/use-chat-message';
+import {
+  ChatWithMessages,
+  useChat,
+  useChatMessage,
+} from 'renderer/hooks/new-store';
 import { currentUser as userState } from 'renderer/hooks/use-user';
 import SocketClient from 'renderer/services/socket';
-import { MSG_PAGE_SIZE } from 'renderer/shared/constants';
 
 import { useChatBoxContext } from 'renderer/shared/context/chatbox.context';
 import {
   addMessageToChat,
-  updateChat,
+  updateChat as updateChatUseCase,
 } from 'renderer/usecase/conversation.usecase';
 import {
   convertToPreview,
@@ -33,11 +26,10 @@ import {
 } from 'renderer/usecase/message.usecase';
 
 import RichEditor from '../components/input';
-import MessageList from '../components/message-list';
 import SearchBox from '../components/search-box';
 
-function Header({ data }: { data: ChatEntity }) {
-  const { toggleSideOpen: toggleOpenConvOption } = useChatBoxContext();
+export function Header({ data }: { data: ChatEntity }) {
+  const { toggleInfoOpen: toggleOpenConvOption } = useChatBoxContext();
   return (
     <>
       <div className="pt-4 flex justify-between items-center pl-4 pr-10 ">
@@ -80,17 +72,21 @@ function Header({ data }: { data: ChatEntity }) {
 export default function Chat({
   chat,
   hasSearch,
+  header,
+  hasEditor,
+  messagesContainer,
 }: {
-  chat: ChatEntity;
+  chat: ChatWithMessages;
   hasSearch?: boolean;
+  header: React.ReactNode;
+  messagesContainer: React.ReactNode;
+  hasEditor?: boolean;
 }) {
-  const {
-    messagesOfActiveChat: messages,
-    total,
-    updateOrInsertMessage,
-  } = useMessage();
-  const updateChatItem = useUpdateChatItem();
+  const { appendMessage, insertMessage } = useChatMessage();
+  // const updateChatItem = useUpdateChatItem();
+  const { updateChat } = useChat();
   const currentUser = useRecoilValue(userState);
+  const { messages } = chat;
 
   const onSendMessage = (msg: File | string, type: MessageType) => {
     // SETUP: construct message
@@ -125,9 +121,9 @@ export default function Chat({
 
     // ACTION: update UI
     addMessageToChat(chat.id, clientMessage, {
-      insertMessage: updateOrInsertMessage,
+      insertMessage: appendMessage,
     });
-    updateChat(
+    updateChatUseCase(
       chat.id,
       {
         status: 'sending',
@@ -135,35 +131,34 @@ export default function Chat({
         lastMessage: convertToPreview(clientMessage),
       },
       {
-        updateChatItem,
+        updateChatItem: updateChat,
       }
     );
 
+    console.log('SENDING MESASGE: ', clientMessage);
     // ACTION: send message
     sendMessageOnline(clientMessage, SocketClient)
       .then((res) => {
-        const { data, message } = res;
-
         // FINAL: update chat
-        updateChat(
+        updateChatUseCase(
           chat.id,
           {
             status: 'idle',
-            lastUpdate: data.message.createdAt,
-            lastMessage: convertToPreview(data.message),
+            lastUpdate: res.data.message.createdAt,
+            lastMessage: convertToPreview(res.data.message),
           },
           {
-            updateChatItem,
+            updateChatItem: updateChat,
           }
         );
 
         // FINAL: update message status
-        updateOrInsertMessage(
+        insertMessage(
           chat.id,
           {
-            id: data.message.id,
+            id: res.data.message.id,
             status: 'sent',
-            createdAt: data.message.createdAt,
+            createdAt: res.data.message.createdAt,
           },
           clientMessage.id
         );
@@ -183,37 +178,33 @@ export default function Chat({
         Date.now()
       );
     }
-  }, [messages, currentUser, chat.id]);
+  }, [messages, currentUser, chat.id, chat.participants]);
 
   return (
-    <div className=" flex flex-col min-h-0 h-full pb-4 pr-2">
-      <Header data={chat} />
-      <div className="flex-auto relative px-2 mb-1 transition-all transform duration-700 overflow-hidden">
-        {/* if switching lists, unmount virtuoso so internal state gets reset */}
-        {messages.length > 0 ? (
-          <MessageList
-            totalCount={total}
-            key={chat.id}
-            messages={messages}
-            chat={chat}
-          />
-        ) : (
-          <div className="flex w-full items-center justify-center pt-2 flex-col">
-            <Avatar src={chat.avatar} size={56} />
-            <Typography.Text>{chat.name}</Typography.Text>
-          </div>
-        )}
+    <div className="flex flex-col min-h-0 h-full pb-2 ">
+      {header}
+      <div className="flex-1 relative px-2 mb-1 transition-all transform duration-700 overflow-hidden min-h-0">
+        {messages.length > 0
+          ? messagesContainer
+          : // <div className="flex w-full items-center justify-center pt-2 flex-col">
+            //   <Avatar src={chat.avatar} size={56} />
+            //   <Typography.Text>{chat.name}</Typography.Text>
+            // </div>
+            null}
         {hasSearch && (
           <div className="absolute top-0 inset-x-0 z-50 [&_*]:rounded-none ">
             <SearchBox />
           </div>
         )}
       </div>
-      <RichEditor onSubmit={onSendMessage} onFocus={onEditorGotFocused} />
+      {hasEditor && (
+        <RichEditor onSubmit={onSendMessage} onFocus={onEditorGotFocused} />
+      )}
     </div>
   );
 }
 
 Chat.defaultProps = {
   hasSearch: false,
+  hasEditor: true,
 };

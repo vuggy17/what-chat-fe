@@ -7,7 +7,7 @@ import {
   EditOutlined,
   ExclamationCircleOutlined,
 } from '@ant-design/icons';
-import { Dropdown, Menu, Space, Modal, message } from 'antd';
+import { Dropdown, Menu, Space, Modal, message, MenuProps } from 'antd';
 import { HtmlHTMLAttributes } from 'react';
 import User from 'renderer/domain/user.entity';
 
@@ -92,51 +92,47 @@ export default function BubbleActionMenu({
     });
   };
 
-  const menuItems = (
-    <Menu
-      items={actions.map((action) => {
-        switch (action) {
-          case 'edit':
-            return {
-              key: 'edit',
-              onClick: handleEdit,
-              label: (
-                <Space>
-                  <EditOutlined />
-                  Edit
-                </Space>
-              ),
-            };
-          case 'download':
-            return {
-              key: 'download',
-              onClick: download,
-              label: (
-                <Space>
-                  <DownloadOutlined />
-                  Save
-                </Space>
-              ),
-            };
-          default:
-            return {
-              key: 'delete',
-              danger: true,
-              onClick: handleDelete,
-              label: (
-                <Space>
-                  <DeleteOutlined />
-                  Delete
-                </Space>
-              ),
-            };
-        }
-      })}
-    />
-  );
+  const menuItems: MenuProps['items'] = actions.map((action) => {
+    switch (action) {
+      case 'edit':
+        return {
+          key: 'edit',
+          onClick: handleEdit,
+          label: (
+            <Space>
+              <EditOutlined />
+              Edit
+            </Space>
+          ),
+        };
+      case 'download':
+        return {
+          key: 'download',
+          onClick: download,
+          label: (
+            <Space>
+              <DownloadOutlined />
+              Save
+            </Space>
+          ),
+        };
+      default:
+        return {
+          key: 'delete',
+          danger: true,
+          onClick: handleDelete,
+          label: (
+            <Space>
+              <DeleteOutlined />
+              Delete
+            </Space>
+          ),
+        };
+    }
+  });
 
   return (
-    <Dropdown overlay={menuItems} trigger={['contextMenu']}>
+    <Dropdown menu={{ items: menuItems }} trigger={['contextMenu']}>
       <div {...props}>{props.children}</div>
     </Dropdown>
   );

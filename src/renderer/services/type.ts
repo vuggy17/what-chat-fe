@@ -1,4 +1,4 @@
-import { Message, TextMessage } from 'renderer/domain';
+import { Chat, Message, TextMessage } from 'renderer/domain';
 import { ids } from 'webpack';
 
 interface ISocketClient {
@@ -148,6 +148,12 @@ interface SeenMessagePayload {
   messageId: Id;
   toId: Id;
   time: number; // seen unix timestamp
+}
+
+// chat interface that is used by indexdb
+export interface InternalChat extends Chat {
+  lastReadTime: number; // unix timestamp
+  lastReadMessageId: string; // message id
 }
 
 export { OContact, OConveration, OMessage, SeenMessagePayload, ISocketClient };

@@ -1,25 +1,26 @@
 import { SearchOutlined } from '@ant-design/icons';
-import { Divider, Input, Skeleton } from 'antd';
-import { stringify } from 'querystring';
+import { Input, Skeleton } from 'antd';
 import { useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { Chat } from 'renderer/domain';
-import User from 'renderer/domain/user.entity';
-import { chatRepository } from 'renderer/repository/chat.repository';
-import { loadChat } from 'renderer/usecase/conversation.usecase';
-import useDebounce from 'renderer/utils/debouce';
 import {
-  activeChatIdState,
-  chatItemsSortedState,
-  useChatList,
-} from '../../../../hooks/use-chat';
+  chatExtraState,
+  currentChatIdState,
+  sortedChatsQuery,
+} from 'renderer/hooks/new-store';
+import { chatRepository } from 'renderer/repository/chat/chat.repository';
+import useDebounce from 'renderer/utils/debouce';
 import ConversationList, { EmptyChatItem } from './conversation-list';
 
 export default function Conversations() {
-  const { listIds, extra: listExtra, setList } = useChatList();
-  const setActiveChat = useSetRecoilState(activeChatIdState);
-  const conversationItems = useRecoilValue(chatItemsSortedState);
+  // const { listIds, extra: listExtra, setList } = useChatList();
+  const listExtra = useRecoilValue(chatExtraState);
+  const conversationItems = useRecoilValue(sortedChatsQuery);
+  const setActiveChat = useSetRecoilState(currentChatIdState);
+  // const setActiveChat = useSetRecoilState(activeChatIdState);
+  // const conversationItems = useRecoilValue(chatItemsSortedState);
   const [chatResult, setChatResult] = useState<
     Pick<Chat, 'name' | 'id' | 'avatar'>[]
   >([]);
@@ -29,25 +30,37 @@ export default function Conversations() {
       setChatResult([]);
       return;
     }
-    console.log(key);
     const data = await chatRepository.findChatByParticipantName(key);
-    console.log(data.data);
     setChatResult(data.data);
   };
   const debounceSearch = useDebounce(findChat, 500);
 
   const loadMoreData = async () => {
-    const { data, extra } = await loadChat({
-      repo: chatRepository,
-      page: listExtra.pageNum + 1,
-    });
-    setList({ data, extra });
+    // const { data, extra } = await loadChat({
+    //   repo: chatRepository,
+    //   page: listExtra.pageNum + 1,
+    // });
+    // setList({ data, extra });
+    alert('cc');
   };
+
+  console.log('====================================');
+  console.log('conversationItems', conversationItems);
+  console.log('====================================');
+
+  const location = useLocation();
+  const navigate = useNavigate();
 
   return (
     <div className="h-full flex flex-col  ">
-      <div className="ml-7 mr-6 pt-5 pb-8">
+      <div className="ml-7 mr-6 pt-6 pb-8">
         <Input
+          onClick={() => {
+            console.log(location.pathname);
+            if (location.pathname.includes('new-chat')) {
+              navigate('/app/conversations');
+            }
+          }}
           onChange={(e) => debounceSearch(e.target.value)}
           size="large"
           style={{ padding: '8px 11px', color: '#171717' }}
@@ -86,7 +99,7 @@ export default function Conversations() {
         >
           <InfiniteScroll
             style={{ minWidth: 0 }}
-            dataLength={listIds.length}
+            dataLength={conversationItems.length}
             next={loadMoreData}
             hasMore={listExtra.totalPage !== listExtra.pageNum}
             loader={

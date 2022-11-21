@@ -97,7 +97,7 @@ class AppSocketClient implements ISocketClient {
 
   sendPrivateMessage(msg: Message): Promise<any> {
     // this.setup();
-    this.socketAdapter.emit(ClientToServerEvent.TEST, 'data');
+    // this.socketAdapter.emit(ClientToServerEvent.TEST, 'data');
     return new Promise((resolve, reject) => {
       this.socketAdapter.emit(
         ClientToServerEvent.SEND_PRIVATE_MESSAGE,

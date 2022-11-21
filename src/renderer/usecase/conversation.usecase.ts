@@ -1,8 +1,8 @@
+import { CHAT_WITH_MESSAGE } from 'renderer/config/api.routes';
 import { Chat, Message } from 'renderer/domain';
-import { IChatRepository } from 'renderer/repository/chat.repository';
-import { CONV_PAGE_SIZE } from 'renderer/shared/constants';
+import { IChatRepository } from 'renderer/repository/chat/chat.repository';
+import HttpClient from 'renderer/services/http';
 import { quickSort } from 'renderer/utils/common';
-import { createMsgPlaceholder } from './message.usecase';
 
 /** get more chat
  * @param from: the number of chat to skip
@@ -14,15 +14,10 @@ export async function loadChat({
   repo: IChatRepository;
   page?: number;
 }) {
-  const {
-    data: internalchat,
-    pageNum,
-    totalCount,
-    totalPage,
-  } = await repo.getChats(page);
+  const { data, extra } = await repo.getChats(page);
 
-  const data = quickSort<Chat>(internalchat, 'lastUpdate', 'desc');
-  return { data, extra: { pageNum, totalCount, totalPage } };
+  const sortedData = quickSort<Chat>(data, 'lastUpdate', 'desc');
+  return { sortedData, extra };
 }
 
 /**
@@ -31,14 +26,19 @@ export async function loadChat({
  * @returns chat item
  */
 export async function getInitialChat(repo: IChatRepository) {
-  const {
-    data: internalchat,
-    pageNum,
-    totalCount,
-    totalPage,
-  } = await repo.getChats();
+  const { data: internalchat, extra } = await repo.getChats();
   const data = quickSort<Chat>(internalchat, 'lastUpdate', 'desc');
-  return { data, extra: { pageNum, totalCount, totalPage } };
+  return { data, extra };
+}
+
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export async function getInitialChat_v1() {
+  const response = await HttpClient.get<Chat[]>(`${CHAT_WITH_MESSAGE}?page=1`);
+  const { data, pageNum, totalCount, totalPage } = response.data;
+  return {
+    data,
+    extra: { pageNum, totalCount, totalPage },
+  };
 }
 
 export function addMessageToChat(

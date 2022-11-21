@@ -5,7 +5,7 @@ import HeaderFallback from './header.fallback';
 
 export default function ChatBoxFallback() {
   return (
-    <div className=" flex flex-col min-h-0 h-full pb-4 pr-2">
+    <div className=" flex flex-col min-h-0 h-full pb-2 ">
       <HeaderFallback />
       <div className="flex-auto relative pl-4 pr-3 transition-all transform duration-700 overflow-hidden">
         {/* if switching lists, unmount virtuoso so internal state gets reset */}

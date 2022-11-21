@@ -11,13 +11,7 @@ import { Avatar, Button, Layout, Menu, Tooltip, Typography } from 'antd';
 import axios from 'axios';
 import React, { useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import {
-  useRecoilCallback,
-  useRecoilState,
-  useRecoilValue,
-  useResetRecoilState,
-} from 'recoil';
-import { chatIdsState } from 'renderer/hooks/use-chat';
+import { useRecoilCallback, useRecoilState } from 'recoil';
 import { currentUser } from 'renderer/hooks/use-user';
 import SocketClient from 'renderer/services/socket';
 import {
@@ -27,6 +21,7 @@ import {
   LOGIN,
 } from 'renderer/shared/constants';
 import logo from '../../../../../assets/logo.png';
+import Preload from '../preload/preload-old';
 
 const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
@@ -64,23 +59,19 @@ function DebugButton() {
   );
 }
 
-const Chats: React.FC = () => {
+const AppContainer: React.FC = () => {
   const [collapsed, setCollapsed] = useState(true);
   const navigate = useNavigate();
   const [user, setUser] = useRecoilState(currentUser);
 
-  const resetRecoilState = useRecoilCallback(
-    ({ reset, set, snapshot }) =>
-      () => {
-        const chats = snapshot.getLoadable(chatIdsState).contents;
-        set(chatIdsState, {
-          ids: [],
-          extra: { pageNum: 1, totalCount: 0, totalPage: 0 },
-        });
-      }
-  );
+  // const resetRecoilState = useRecoilCallback(({ reset, snapshot }) => () => {
+  //   const chats = snapshot.getLoadable(chatIdsState).contents;
+  //   chats.ids.forEach((id) => {
+  //     reset(chatMessagesState(id));
+  //   });
+  //   reset(chatIdsState);
+  // });
 
-  console.log('user', user);
   return (
     <Layout style={{ height: '100vh', overflow: 'auto' }}>
       <Sider
@@ -108,7 +99,7 @@ const Chats: React.FC = () => {
               )}
             </div>
             <Menu
-              tabIndex="-1" // disable keyboard navigation
+              tabIndex={-1} // disable keyboard navigation
               theme="light"
               mode="inline"
               defaultSelectedKeys={['1']}
@@ -151,7 +142,7 @@ const Chats: React.FC = () => {
                 onClick={() => {
                   SocketClient.disconnect();
                   setUser(null);
-                  resetRecoilState();
+                  // resetRecoilState();
                   navigate(`/${LOGIN}`);
                 }}
               >
@@ -201,4 +192,12 @@ const Chats: React.FC = () => {
   );
 };
 
-export default Chats;
+const AppContainerWithPreload: React.FC = () => {
+  return (
+    <Preload>
+      <AppContainer />
+    </Preload>
+  );
+};
+
+export default AppContainerWithPreload;
