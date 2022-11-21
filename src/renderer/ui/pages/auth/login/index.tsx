@@ -1,26 +1,41 @@
 import { Button, Form, Input } from 'antd';
-import React, { BaseSyntheticEvent } from 'react';
+import axios from 'axios';
+import React, { BaseSyntheticEvent, useEffect } from 'react';
 // import { AuthProvider, useAuth } from '@contexts';
 
 import { Link, useNavigate } from 'react-router-dom';
-import { CHAT, REGISTER } from 'renderer/shared/constants';
+import { useRecoilState, useResetRecoilState } from 'recoil';
+import { chatIdsState } from 'renderer/hooks/use-chat';
+import { currentUser } from 'renderer/hooks/use-user';
+import SocketClient from 'renderer/services/socket';
+import { APP, REGISTER } from 'renderer/shared/constants';
 import sapiens from '../../../../../../assets/sapiens.svg';
 
 function Login() {
   const navigate = useNavigate();
-  const handleSubmit = (e: BaseSyntheticEvent) => {
-    e.preventDefault();
-    const target = e.target as typeof e.target & {
-      email: { value: string };
-      password: { value: string };
-    };
-    const email = target.email.value;
-    const password = target.password.value;
+  const [user, setCurrentUser] = useRecoilState(currentUser);
+  // const resetList = useResetRecoilState(chatIdsState);
+
+  const handleSubmit = (values) => {
+    const { username, password } = values;
+    axios
+      .post('/user/login', { username, password })
+      .then((res) => {
+        setCurrentUser(res.data.data);
+        return null;
+      })
+      .catch((err) => console.error('cant login'));
   };
+
+  useEffect(() => {
+    if (user) {
+      navigate(`/${APP}`);
+    }
+  }, []);
 
   return (
     <div className=" flex items-center justify-center h-screen w-screen">
-      <div className="bg-amber-50 flex flex-col  md:flex-row items-center justify-center p-16 rounded">
+      <div className="mx-4 bg-amber-50 flex flex-col  md:flex-row items-center justify-center p-16 rounded">
         <img src={sapiens} alt="" className="sm:w-1/2 md:w-[40%]" />
         <div className="bg-white w-full rounded-3xl border sm:w-2/3 md:w-[480px] pt-[58px] pb-[48px] text-center">
           <h2 className="font-bold text-3xl rounded text-center mb-2 mt-8 tracking-wide text-orange-600">
@@ -35,7 +50,11 @@ function Login() {
           <Form
             size="large"
             wrapperCol={{ offset: 2, span: 20 }}
-            initialValues={{ remember: true }}
+            initialValues={{
+              remember: true,
+              username: 'Karl_Jones',
+              password: '44lwA5KFn15pNCk',
+            }}
             onFinish={handleSubmit}
             // onFinishFailed={onFinishFailed}
             autoComplete="off"
@@ -66,19 +85,52 @@ function Login() {
           </Form>
           <p className="font-bold text-xs tracking-wide mb-5 ">
             -- Or
-            <Link to={REGISTER} className="text-orange-600 m-1">
+            <Link to={`/${REGISTER}`} className="text-orange-600 m-1">
               register
             </Link>
             for an account --
           </p>
           <Button
+            className="mx-3"
             type="primary"
-            block
             onClick={() => {
-              navigate(`/${CHAT}`);
+              axios
+                .post('/user/login', {
+                  username: 'Glennie_Swaniawski63',
+                  password: 'bSj2x325DhkjQqb',
+                })
+                .then((res) => {
+                  setCurrentUser(res.data.data);
+
+                  SocketClient.setup();
+                  navigate(`/${APP}`);
+                  return null;
+                })
+                .catch((err) => console.error('cant login'));
             }}
           >
-            go chat
+            Rene
+          </Button>
+          <Button
+            type="primary"
+            onClick={() => {
+              axios
+                .post('/user/login', {
+                  username: 'Karl_Jones',
+                  password: '44lwA5KFn15pNCk',
+                })
+                .then((res) => {
+                  setCurrentUser(res.data.data);
+
+                  SocketClient.setup();
+                  navigate(`/${APP}`);
+
+                  return null;
+                })
+                .catch((err) => console.error('cant login'));
+            }}
+          >
+            Douglas
           </Button>
         </div>
       </div>

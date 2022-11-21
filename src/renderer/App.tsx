@@ -6,15 +6,19 @@ import {
   Route,
   Navigate,
 } from 'react-router-dom';
-import React from 'react';
-
-import icon from '../../assets/icon.svg';
 import './App.css';
 import 'antd/dist/antd.less';
 import 'tailwindcss/tailwind.css';
+import { Suspense, useEffect } from 'react';
+import {
+  RecoilValue,
+  useRecoilRefresher_UNSTABLE,
+  useRecoilSnapshot,
+  useRecoilState,
+} from 'recoil';
 import LoginCheckPoint from './shared/protected-route';
 import {
-  CHAT,
+  APP,
   C_CONVERSATION,
   C_FRIEND,
   C_PROFILE,
@@ -23,86 +27,79 @@ import {
 } from './shared/constants';
 import Login from './ui/pages/auth/login';
 import Register from './ui/pages/auth/register';
-import Chats from './ui/pages/home/chats';
+import AppContainer from './ui/pages/home/app-container';
 import Chat from './ui/pages/home/pages/chat';
 import Profile from './ui/pages/home/pages/profile';
 import Friends from './ui/pages/home/pages/friends';
 import ChatBoxProvider from './shared/context/chatbox.context';
 import Preload from './ui/pages/preload/preload';
 import './node-event';
+import HeaderFallback from './ui/pages/home/components/loaders/header.fallback';
+import NewChat from './ui/pages/home/components/new-chat';
+import RecentChat from './ui/pages/home/components/recent-chat';
 
-class ErrorBoundary extends React.Component<any, any> {
-  constructor(props: any) {
-    super(props);
-    this.state = { hasError: false };
-  }
+const RecoilCachResetEntry = ({ node }: { node: RecoilValue<unknown> }) => {
+  const resetNode = useRecoilRefresher_UNSTABLE(node);
+  useEffect(() => {
+    return () => resetNode();
+  }, [resetNode]);
+  return null;
+};
 
-  static getDerivedStateFromError(error: any) {
-    // Update state so the next render will show the fallback UI.
-    return { hasError: true };
-  }
-
-  componentDidCatch(error: any, errorInfo: any) {
-    // You can also log the error to an error reporting service
-    // logErrorToMyService(error, errorInfo);
-    console.error(error, errorInfo);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      // You can render any custom fallback UI
-      return (
-        <>
-          <h1>Something went wrong.</h1>;
-          {this.state.error && this.state.error.toString()}
-          <br />
-          {this.state.errorInfo.componentStack}
-        </>
-      );
-    }
-
-    return this.props.children;
-  }
-}
+const RecoilCacheReset = () => {
+  const snapshot = useRecoilSnapshot();
+  return (
+    <>
+      {Array.from(snapshot.getNodes_UNSTABLE()).map((node) => (
+        <RecoilCachResetEntry key={node.key} node={node} />
+      ))}
+    </>
+  );
+};
 
 export default function App() {
   return (
-    <ErrorBoundary className="scroll">
-      <Router>
-        <Routes>
-          <Route path={LOGIN} element={<Login />} />
-          <Route path={REGISTER} element={<Register />} />
+    <Router>
+      <Routes>
+        <Route path={LOGIN} element={<Login />} />
+        <Route path={REGISTER} element={<Register />} />
+        <Route
+          path={APP}
+          element={
+            <>
+              {/* <RecoilCacheReset /> */}
+
+              <AppContainer />
+            </>
+          }
+        >
           <Route
-            path={CHAT}
+            path={C_CONVERSATION}
             element={
-              <Preload userId="1">
-                <Chats />
-              </Preload>
+              <ChatBoxProvider>
+                <Chat />
+              </ChatBoxProvider>
             }
           >
-            <Route
-              path={C_CONVERSATION}
-              element={
-                <ChatBoxProvider>
-                  <Chat />
-                </ChatBoxProvider>
-              }
-            />
-            <Route path={C_FRIEND} element={<Friends />} />
-            <Route path={C_PROFILE} element={<Profile />} />
-            <Route
-              index
-              element={
-                <ChatBoxProvider>
-                  <Chat />
-                </ChatBoxProvider>
-              }
-            />
+            <Route index element={<RecentChat />} />
+            <Route path="new-chat" element={<NewChat />} />
           </Route>
+          <Route
+            path={C_FRIEND}
+            element={
+              <Suspense fallback={<HeaderFallback />}>
+                <ChatBoxProvider>
+                  <Friends />
+                </ChatBoxProvider>
+              </Suspense>
+            }
+          />
+          <Route path={C_PROFILE} element={<Profile />} />
+          <Route index element={<Navigate to={C_CONVERSATION} />} />
+        </Route>
 
-          <Route path="*" element={<Navigate to={CHAT} />} />
-        </Routes>
-      </Router>
-    </ErrorBoundary>
+        <Route path="*" element={<Navigate to={LOGIN} />} />
+      </Routes>
+    </Router>
   );
 }

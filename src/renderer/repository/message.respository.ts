@@ -1,11 +1,14 @@
-import { Message } from 'renderer/entity';
+import { CHAT_MESSAGE } from 'renderer/config/api.routes';
+import { Message, MessageWithTotalCount } from 'renderer/domain';
 import { genMockMsg, messages as data } from 'renderer/mock/message';
 import HttpClient from 'renderer/services/http';
 import { MSG_PAGE_SIZE } from 'renderer/shared/constants';
-import { IHttp, OMessage } from 'renderer/shared/lib/network/type';
+import { randomNumber } from 'renderer/utils/common';
+import { resolveAfter } from 'renderer/utils/debouce';
+import IDataSource from './type';
 
-export interface IMessageRespository {
-  getMessages(chatId: Id, count: number, skip: number): Promise<Message[]>;
+export interface IMessageRepository {
+  getMessages(chatId: Id, offset: number): Promise<MessageWithTotalCount>;
   saveMessages(messages: Message[]): Promise<void>;
   uploadFile(file: File, meta: any): Promise<any>;
   getUploadProgress(fileId: Id): any;
@@ -14,11 +17,24 @@ export interface IMessageRespository {
 
 const fileUploading: Map<Id, any> = new Map();
 
-export class MessageRespositoryImpl implements IMessageRespository {
-  private _dataSource: IHttp;
+export class MessageRepositoryImpl implements IMessageRepository {
+  private _dataSource: IDataSource;
 
-  constructor(dataSource: IHttp) {
+  constructor(dataSource: IDataSource) {
     this._dataSource = dataSource;
+  }
+
+  async getMessages(
+    chatId: string,
+    offset: number
+  ): Promise<MessageWithTotalCount> {
+    const res = await this._dataSource.get<MessageWithTotalCount>(
+      `${CHAT_MESSAGE}?channelId=${chatId}&offset=${offset}`
+    );
+    if (res.error) {
+      throw res.error;
+    }
+    return res.data as MessageWithTotalCount;
   }
 
   notifyFileReady(fileId: string): any {
@@ -73,28 +89,35 @@ export class MessageRespositoryImpl implements IMessageRespository {
     throw new Error('Method not implemented.');
   }
 
-  async getMessages(
-    chatId: string,
-    count: number = MSG_PAGE_SIZE,
-    skip = 0
-  ): Promise<Message[]> {
-    // const request = await this._dataSource.get('/messages', {
-    //   chatId,
-    //   count,
-    //   start,
-    // });
-    // const messages = request.data;
-    // parse data to Message
-    // save to local database
-    // return messages;
+  // async getMessages(
+  //   chatId: string,
+  //   count: number = MSG_PAGE_SIZE,
+  //   skip = 0
+  // ): Promise<Message[]> {
+  //   // const request = await this._dataSource.get('/messages', {
+  //   //   chatId,
+  //   //   count,
+  //   //   start,
+  //   // });
+  //   // const messages = request.data;
+  //   // parse data to Message
+  //   // save to local database
+  //   // return messages;
 
-    return Array.from(
-      {
-        length: count,
-      },
-      genMockMsg
-    ); // return fake data
-  }
+  //   // return fake data
+  //   console.log('====================================');
+  //   console.log('re call this', chatId);
+  //   console.log('====================================');
+  //   return resolveAfter<Message[]>(
+  //     Array.from(
+  //       {
+  //         length: count,
+  //       },
+  //       genMockMsg
+  //     ),
+  //     randomNumber(100, 600)
+  //   );
+  // }
 }
 
-export const messsageRespository = new MessageRespositoryImpl(HttpClient);
+export const messageRepository = new MessageRepositoryImpl(HttpClient);

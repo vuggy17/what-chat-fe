@@ -5,17 +5,17 @@ const SECONDARY = 'white';
 // ROUTES
 const REGISTER = 'register';
 const LOGIN = 'login';
-const CHAT = 'chat';
-const C_CONVERSATION = `${CHAT}/conversations`;
-const C_FRIEND = `${CHAT}/friend`;
-const C_PROFILE = `${CHAT}/profile`;
+const APP = 'app';
+const C_CONVERSATION = `conversations`;
+const C_FRIEND = `${APP}/friend`;
+const C_PROFILE = `${APP}/profile`;
 
 // DATA
 const MSG_PAGE_SIZE = 30;
 const CONV_PAGE_SIZE = 20;
 
 // NETWORK
-const BASEURL = 'http://localhost:3003/';
+const BASEURL = 'http://localhost:3005';
 const REQUEST_TIMEOUT = 5000;
 const HTTP_ERROR = {
   401: 'Wrong username or password',
@@ -24,18 +24,12 @@ const HTTP_ERROR = {
   500: 'Service unavailable',
 };
 
-// EVENT
-enum SocketEvent {
-  hasNewMessage = 'message_received',
-  sendMessage = 'private_message',
-} // SOCKET
-
 export {
   PRIMARY_COLOR,
   SECONDARY,
   REGISTER,
   LOGIN,
-  CHAT,
+  APP,
   C_CONVERSATION,
   C_FRIEND,
   C_PROFILE,
@@ -43,6 +37,5 @@ export {
   CONV_PAGE_SIZE,
   BASEURL,
   REQUEST_TIMEOUT,
-  SocketEvent,
   HTTP_ERROR,
 };

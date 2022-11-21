@@ -11,11 +11,16 @@ dayjs.extend(isToday);
 dayjs.locale('vi');
 dayjs.extend(LocalizedFormat);
 
-export default function formatDTime(dt: string) {
+/**
+ *
+ * @param {number} dt Unix timestamp
+ * @returns {string} formatted dayjs string
+ */
+export default function formatDTime(dt: number) {
   // if (dayjs(dt).isToday()) {
   //   return dayjs(dt).fromNow();
   // } else
-  return dayjs(dt).format('HH:mm');
+  return dayjs.unix(dt).format('HH:mm');
 }
 
 export function aisToday(time: string) {

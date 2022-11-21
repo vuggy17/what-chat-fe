@@ -1,39 +1,35 @@
-import { LoadingOutlined, MoreOutlined, UserOutlined } from '@ant-design/icons';
+import { MoreOutlined, UserOutlined } from '@ant-design/icons';
+import { Avatar, Badge, Button, Divider, Space, Typography } from 'antd';
+import { useCallback } from 'react';
+import { useRecoilValue } from 'recoil';
+
+// import ConversationController from 'renderer/controllers/chat.controller';
+import { Chat as ChatEntity, Message } from 'renderer/domain';
 import {
-  Avatar,
-  Badge,
-  Button,
-  Divider,
-  Input,
-  Skeleton,
-  Space,
-  Typography,
-} from 'antd';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+  ChatWithMessages,
+  useChat,
+  useChatMessage,
+} from 'renderer/hooks/new-store';
+import { currentUser as userState } from 'renderer/hooks/use-user';
+import SocketClient from 'renderer/services/socket';
 
-import ConversationController from 'renderer/controllers/conversation.controller';
-import messageController from 'renderer/controllers/message.controller';
-import { Conversation, Message } from 'renderer/entity';
-
-import { useOptionPanelContext } from 'renderer/shared/context/chatbox.context';
-import { createMsgPlaceholder } from 'renderer/usecase/message.usecase';
-import usePrevious from 'renderer/utils/use-previous';
+import { useChatBoxContext } from 'renderer/shared/context/chatbox.context';
+import {
+  addMessageToChat,
+  updateChat as updateChatUseCase,
+} from 'renderer/usecase/conversation.usecase';
+import {
+  convertToPreview,
+  createMsgPlaceholder,
+  seenMessage,
+  sendMessageOnline,
+} from 'renderer/usecase/message.usecase';
 
 import RichEditor from '../components/input';
-import MessageList from '../components/message-list';
 import SearchBox from '../components/search-box';
 
-function Header({ chatId }: { chatId: Id }) {
-  const { toggleOpenConvOption } = useOptionPanelContext();
-  const [data, setData] = useState<Conversation>({} as Conversation);
-
-  useEffect(() => {
-    const chatdata = ConversationController.getChatMeta(chatId);
-    if (chatdata) {
-      setData(chatdata);
-    }
-  }, [chatId]);
-
+export function Header({ data }: { data: ChatEntity }) {
+  const { toggleInfoOpen: toggleOpenConvOption } = useChatBoxContext();
   return (
     <>
       <div className="pt-4 flex justify-between items-center pl-4 pr-10 ">
@@ -73,89 +69,142 @@ function Header({ chatId }: { chatId: Id }) {
   );
 }
 
-const randomNumber = (min: number, max: number) =>
-  Math.floor(Math.random() * (max - min + 1)) + min;
-
-export default function Chat({ chatId, hasSearch }: any) {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const virtuoso = useRef(null);
-
-  const prevChatId = usePrevious(chatId);
-
-  useEffect(() => {
-    const subcription = messageController.messages.subscribe({
-      next: (v) => {
-        // console.log('ChatBox: messages changed', v);
-        setMessages([...v]);
-      },
-    });
-    return () => {
-      subcription.unsubscribe();
-    };
-  }, [chatId]);
-
-  const startReached = useCallback(() => {
-    // console.log('Chat: startReached');
-    // console.log('prependItems');
-
-    // simulate network request with random timeout
-    const timeout = randomNumber(500, 1000);
-    setTimeout(() => {
-      messageController.loadMoreMessages(chatId);
-    }, timeout);
-  }, [chatId]);
+export default function Chat({
+  chat,
+  hasSearch,
+  header,
+  hasEditor,
+  messagesContainer,
+}: {
+  chat: ChatWithMessages;
+  hasSearch?: boolean;
+  header: React.ReactNode;
+  messagesContainer: React.ReactNode;
+  hasEditor?: boolean;
+}) {
+  const { appendMessage, insertMessage } = useChatMessage();
+  // const updateChatItem = useUpdateChatItem();
+  const { updateChat } = useChat();
+  const currentUser = useRecoilValue(userState);
+  const { messages } = chat;
 
   const onSendMessage = (msg: File | string, type: MessageType) => {
-    // create placeholder
-    let newItem = {} as Message;
-    switch (type) {
-      case 'file':
-        newItem = createMsgPlaceholder(chatId, msg as File).file();
-        break;
-      case 'photo':
-        newItem = createMsgPlaceholder(chatId, msg as File).image();
-        break;
-      default:
-        newItem = createMsgPlaceholder(chatId, msg as string).text();
-        break;
-    }
-    console.log('onSendMessage', newItem);
+    // SETUP: construct message
+    let clientMessage = {} as Message;
+    if (currentUser) {
+      const receiver = chat.participants.find((p) => p.id !== currentUser.id);
 
-    messageController.addMessage(newItem); // add placeholder to list
-    // messageController.sendMessage(msg, { type, chatId }); // send message
-    ConversationController.updateConverstationMeta(chatId, {
-      lastUpdate: new Date(),
-      status: 'sending',
+      switch (type) {
+        case 'file':
+          clientMessage = createMsgPlaceholder(
+            currentUser,
+            receiver,
+            msg as File
+          ).file();
+          break;
+        case 'photo':
+          clientMessage = createMsgPlaceholder(
+            currentUser,
+            receiver,
+            msg as File
+          ).image();
+          break;
+        default:
+          clientMessage = createMsgPlaceholder(
+            currentUser,
+            receiver,
+            msg as string
+          ).text();
+          break;
+      }
+    }
+
+    // ACTION: update UI
+    addMessageToChat(chat.id, clientMessage, {
+      insertMessage: appendMessage,
     });
+    updateChatUseCase(
+      chat.id,
+      {
+        status: 'sending',
+        lastUpdate: clientMessage.createdAt,
+        lastMessage: convertToPreview(clientMessage),
+      },
+      {
+        updateChatItem: updateChat,
+      }
+    );
+
+    console.log('SENDING MESASGE: ', clientMessage);
+    // ACTION: send message
+    sendMessageOnline(clientMessage, SocketClient)
+      .then((res) => {
+        // FINAL: update chat
+        updateChatUseCase(
+          chat.id,
+          {
+            status: 'idle',
+            lastUpdate: res.data.message.createdAt,
+            lastMessage: convertToPreview(res.data.message),
+          },
+          {
+            updateChatItem: updateChat,
+          }
+        );
+
+        // FINAL: update message status
+        insertMessage(
+          chat.id,
+          {
+            id: res.data.message.id,
+            status: 'sent',
+            createdAt: res.data.message.createdAt,
+          },
+          clientMessage.id
+        );
+
+        return null;
+      })
+      .catch((err) => console.error(err));
   };
 
+  const onEditorGotFocused = useCallback(() => {
+    if (currentUser && messages.length > 0) {
+      seenMessage(
+        chat.id,
+        messages[messages.length - 1].id,
+        currentUser?.id,
+        chat.participants.find((p) => p.id !== currentUser.id)!.id,
+        Date.now()
+      );
+    }
+  }, [messages, currentUser, chat.id, chat.participants]);
+
   return (
-    <div className=" flex flex-col min-h-0 h-full pb-4 pr-2">
-      <Header chatId={chatId} />
-      <div className="flex-auto relative pl-4 pr-3 transition-all transform duration-700 overflow-hidden">
-        {/* if switching lists, unmount virtuoso so internal state gets reset */}
-        {prevChatId === chatId ? (
-          <MessageList
-            messages={messages}
-            chatId={chatId}
-            virtuoso={virtuoso}
-            onScrollOnTop={startReached}
-          />
-        ) : (
-          Array.from({ length: 8 }).map((_, i) => (
-            <Skeleton
-              avatar
-              paragraph={{ rows: Math.floor(Math.random() * 2) + 1 }}
-            />
-          ))
-        )}
+    <div className="flex flex-col min-h-0 h-full pb-2 ">
+      {header}
+      <div className="flex-1 relative px-2 mb-1 transition-all transform duration-700 overflow-hidden min-h-0">
+        {messages.length > 0
+          ? messagesContainer
+          : // <div className="flex w-full items-center justify-center pt-2 flex-col">
+            //   <Avatar src={chat.avatar} size={56} />
+            //   <Typography.Text>{chat.name}</Typography.Text>
+            // </div>
+            null}
         {hasSearch && (
           <div className="absolute top-0 inset-x-0 z-50 [&_*]:rounded-none ">
             <SearchBox />
           </div>
         )}
       </div>
-      <RichEditor onSubmit={onSendMessage} />
+      {hasEditor && (
+        <RichEditor onSubmit={onSendMessage} onFocus={onEditorGotFocused} />
+      )}
     </div>
   );
 }
+
+Chat.defaultProps = {
+  hasSearch: false,
+  hasEditor: true,
+};

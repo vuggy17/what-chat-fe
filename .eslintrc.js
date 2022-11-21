@@ -8,6 +8,13 @@ module.exports = {
     'react/react-in-jsx-scope': 'off',
     'no-underscore-dangle': ['error', { allowAfterThis: true }],
     'class-methods-use-this': 'off',
+    'react-hooks/rules-of-hooks': 'error',
+    'react-hooks/exhaustive-deps': [
+      'warn',
+      {
+        additionalHooks: '(useRecoilCallback|useRecoilTransaction_UNSTABLE)',
+      },
+    ],
   },
   parserOptions: {
     ecmaVersion: 2020,

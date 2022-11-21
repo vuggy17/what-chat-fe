@@ -1,4 +1,5 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useRef } from 'react';
+
 export default function useDebounce(func: any, delay = 400) {
   const debounce = useRef<any>();
   return useCallback(
@@ -10,6 +11,14 @@ export default function useDebounce(func: any, delay = 400) {
         func.apply(context, args);
       }, delay);
     },
-    [func],
+    [func]
   );
+}
+
+export function resolveAfter<T>(data: T, time: number) {
+  return new Promise<T>((resolve) => {
+    setTimeout(() => {
+      resolve(data);
+    }, time);
+  });
 }

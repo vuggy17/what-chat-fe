@@ -1,71 +1,85 @@
 import { DownOutlined } from '@ant-design/icons';
-import { Affix, Button, Skeleton, Tooltip } from 'antd';
-import { useCallback, useMemo, useState } from 'react';
-import { Virtuoso } from 'react-virtuoso';
-import { Message } from 'renderer/entity';
+import { Affix, Button, Spin, Tooltip } from 'antd';
+import { forwardRef, useCallback, useMemo, useRef, useState } from 'react';
+import { Virtuoso, Components } from 'react-virtuoso';
+import { useRecoilValue } from 'recoil';
+import { Chat, Message } from 'renderer/domain';
+import { currentChatQuery, useChatMessage } from 'renderer/hooks/new-store';
+
+import { currentUser as userState } from 'renderer/hooks/use-user';
+import { getMessageOfChat } from 'renderer/usecase/message.usecase';
+
 import MessageBubble from './chat-bubble';
 
 type MessageListProps = {
-  messages: Message[];
-  chatId: Id;
-  virtuoso: any;
-  onScrollOnTop: () => void;
+  messages: WithRequired<Message, 'sender'>[];
+  totalCount: number;
+  currentUserId: Id;
+  onStartReached: () => Promise<void>;
 };
 
-const START_INDEX = 5000;
-
-export default function MessagesList({
-  chatId,
+function MessagesList({
   messages,
-  onScrollOnTop,
-  virtuoso,
+  totalCount,
+  currentUserId,
+  onStartReached,
 }: MessageListProps) {
-  // START_INDEX starting value is the max value, makes figuring out the index in the messages array easier
+  // totalCount starting value is the max value, makes figuring out the index in the messages array easier
   const [firstItemIndex, setFirstItemIndex] = useState(
-    START_INDEX - messages.length
+    totalCount - messages.length
   );
   const [isAtBottom, setIsAtBottom] = useState(true);
+  const virtuosoRef = useRef<any>(null);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+  const loadMoreItem = useCallback(async () => {
+    if (totalCount > messages.length + 1) {
+      setIsLoadingMore(true);
+      await onStartReached();
+      setIsLoadingMore(false);
+    }
+  }, [totalCount, messages, onStartReached]);
 
   const toggleFloatingButton = (atBottom: boolean) => {
     setIsAtBottom(atBottom);
   };
 
   const internalMessages = useMemo(() => {
-    const nextFirstItemIndex = START_INDEX - messages.length;
+    const nextFirstItemIndex = totalCount - messages.length;
     setFirstItemIndex(nextFirstItemIndex);
     return messages;
-  }, [messages]);
+  }, [messages, totalCount]);
 
   const itemContent = useCallback(
     (index: number, rowData: Message) => {
-      const currentIndex = internalMessages.length - (START_INDEX - index); // map the index to the messages array index
+      const { sender, text, createdAt, id } = rowData;
+      const currentIndex = internalMessages.length - (totalCount - index); // map the index to the messages array index
 
-      // check if next messaage have the same sender
+      // check if next message have the same sender
       const nextMessage = internalMessages[currentIndex + 1];
-      let isSameSender = nextMessage?.senderId === rowData.senderId;
+      let isSameSender = nextMessage?.sender.id === sender.id;
 
       // if next element is a self message, so there is the last message
       // render avatar
-      if (nextMessage && nextMessage.fromMe) {
+      if (nextMessage && nextMessage.sender.id === currentUserId) {
         isSameSender = false;
       }
 
       return (
-        <div className="overflow-hidden" key={rowData.id}>
+        <div className="overflow-hidden" key={id}>
           <MessageBubble
-            content={rowData.content}
-            self={rowData.fromMe}
-            time={rowData.createdAt}
+            content={text}
+            self={sender.id === currentUserId}
+            time={createdAt}
             hasAvatar={!isSameSender} // if next message is from the same sender, don't render avatar
-            key={rowData.id}
-            sender={rowData.senderId}
+            key={id}
             // eslint-disable-next-line react/jsx-props-no-spreading
             {...rowData}
           />
         </div>
       );
     },
-    [internalMessages]
+    [internalMessages, totalCount, currentUserId]
   );
 
   const followOutput = useCallback((bottomState: boolean) => {
@@ -76,27 +90,25 @@ export default function MessagesList({
   return (
     <>
       <Virtuoso
-        ref={virtuoso}
+        ref={virtuosoRef}
         overscan={{ reverse: 100, main: 200 }}
         data={internalMessages}
         itemContent={itemContent}
         computeItemKey={(_, rowdata) => rowdata.id}
         initialTopMostItemIndex={internalMessages.length - 1}
         firstItemIndex={Math.max(0, firstItemIndex)}
-        startReached={onScrollOnTop}
+        startReached={loadMoreItem}
         followOutput={followOutput}
         atBottomStateChange={toggleFloatingButton}
-        style={{ overflow: 'auto' }}
+        style={{ position: 'relative', height: '100%' }}
         components={{
           Header: () => (
             <>
-              {Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton
-                  active
-                  avatar
-                  paragraph={{ rows: Math.floor(Math.random() * 2) }}
-                />
-              ))}
+              {isLoadingMore && (
+                <div className="flex justify-center pb-6 pt-2">
+                  <Spin spinning />
+                </div>
+              )}
             </>
           ),
         }}
@@ -110,7 +122,7 @@ export default function MessagesList({
         <Tooltip title="Scroll to bottom">
           <Button
             onClick={() =>
-              virtuoso.current.scrollToIndex({
+              virtuosoRef.current.scrollToIndex({
                 index: internalMessages.length - 1,
               })
             }
@@ -125,5 +137,28 @@ export default function MessagesList({
         </Tooltip>
       </Affix>
     </>
+  );
+}
+
+export default function StateFullMessageList({ chat }: { chat: Chat }) {
+  const { prependMessage } = useChatMessage();
+  const { messages, total } = useRecoilValue(currentChatQuery);
+  const currentUser = useRecoilValue(userState);
+
+  const loadMoreMessages = useCallback(async () => {
+    if (total > messages.length + 1) {
+      const { data } = await getMessageOfChat(chat.id, messages.length + 1);
+
+      prependMessage(chat.id, data);
+    }
+  }, [chat, prependMessage, total, messages]);
+
+  return (
+    <MessagesList
+      messages={messages}
+      currentUserId={currentUser?.id || 'this_cant_be_null'}
+      totalCount={total}
+      onStartReached={loadMoreMessages}
+    />
   );
 }

@@ -1,18 +1,18 @@
 /* eslint-disable max-classes-per-file */
-import { Conversation, Message } from 'renderer/entity';
-import { OConveration, OMessage } from 'renderer/shared/lib/network/type';
+import { Chat, Message } from 'renderer/domain';
+import { OConveration, OMessage } from 'renderer/services/type';
 
 interface IParser<E, R> {
   fromEntity(v: E): R;
   toEntity(v: R): E;
 }
 
-class ChatParser implements IParser<Conversation, OConveration> {
-  fromEntity(v: Conversation): OConveration {
+class ChatParser implements IParser<Chat, OConveration> {
+  fromEntity(v: Chat): OConveration {
     throw new Error('Method not implemented.');
   }
 
-  toEntity(v: OConveration): Conversation {
+  toEntity(v: OConveration): Chat {
     throw new Error('Method not implemented.');
   }
 }

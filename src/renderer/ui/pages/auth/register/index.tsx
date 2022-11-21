@@ -10,9 +10,9 @@ import RegisterForm from './registerform';
 export default function Register() {
   const navigate = useNavigate();
   return (
-    <div className="flex items-center justify-center grow py-7 ">
-      <div className=" w-[768px]  overflow-auto ">
-        <div className=" bg-white rounded border pt-[38px] pb-[48px] px-11 text-left ">
+    <div className=" py-7 h-screen flex w-full items-center justify-center">
+      <div className="mx-4 w-full max-w-4xl max-w-sce  overflow-auto ">
+        <div className="bg-white rounded border pt-[38px] pb-[48px] px-11 text-left ">
           <div className="mb-4">
             <ArrowLeftOutlined
               style={{ fontSize: 18 }}
