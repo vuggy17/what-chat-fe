@@ -22,15 +22,11 @@ export interface FileMessage extends BaseMessage {
   path: string;
 }
 
-export type Message = TextMessage;
+export type Message = TextMessage | FileMessage;
 
-export type PreviewMessage = {
-  createdAt: number;
-  id: string;
+export type PreviewMessage = Message & {
   receiverName: string; // receiver name
   senderName: string; // sender name
-  text: string;
-  updatedAt: number;
 };
 
 export type MessageWithTotalCount = { data: Message[]; total: number };

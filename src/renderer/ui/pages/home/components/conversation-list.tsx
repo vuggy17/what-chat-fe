@@ -3,7 +3,7 @@ import { QuestionOutlined } from '@ant-design/icons';
 import { Avatar, Badge, Col, Grid, Row, Space, Typography } from 'antd';
 import { useEffect, useRef } from 'react';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
-import { Chat } from 'renderer/domain';
+import { Chat as ChatEntity } from 'renderer/domain';
 import { parseDescription } from 'renderer/ui/helper/string-converter';
 import formatDTime from 'renderer/utils/time';
 import { currentUser } from 'renderer/hooks/use-user';
@@ -172,7 +172,7 @@ Item.defaultProps = {
 
 const MemorizedItem = Item;
 interface ListProps {
-  data: Chat[];
+  data: ChatEntity[];
 }
 
 function InternalItem({ id }: { id: Id }) {
@@ -187,7 +187,7 @@ function InternalItem({ id }: { id: Id }) {
 
   if (!listItem) return <></>;
 
-  const getProperties = (item: Chat) => {
+  const getProperties = (item: ChatEntity) => {
     const {
       id: internalId,
       avatar,
@@ -197,9 +197,21 @@ function InternalItem({ id }: { id: Id }) {
       status,
     } = item;
 
-    const getPreviewMessage = (text: string) => {
-      if (user?.name === lastMessage?.senderName) return `You: ${text}`;
-      return text;
+    const getPreviewMessage = (
+      originalMessage: Pick<ChatEntity, 'lastMessage'>['lastMessage']
+    ) => {
+      console.log(user, originalMessage);
+      if (user?.id === originalMessage?.sender.id) {
+        switch (originalMessage?.type) {
+          case 'text':
+            return `You: ${originalMessage?.text}`;
+          default:
+            return 'You sent a file';
+        }
+      }
+      return (
+        originalMessage?.text || `${originalMessage?.senderName} send a file`
+      );
     };
 
     return {
@@ -207,7 +219,10 @@ function InternalItem({ id }: { id: Id }) {
       avatar,
       name,
       description: parseDescription({
-        preview: lastMessage ? getPreviewMessage(lastMessage.text) : '',
+        preview:
+          lastMessage !== undefined
+            ? getPreviewMessage(lastMessage)
+            : 'unhandled',
         typing: false,
         status: status || 'idle',
       }), // TODO: not implement typing yet

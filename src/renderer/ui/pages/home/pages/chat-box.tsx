@@ -138,14 +138,15 @@ export default function Chat({
     console.log('SENDING MESASGE: ', clientMessage);
     // ACTION: send message
     sendMessageOnline(clientMessage, SocketClient)
-      .then((res) => {
+      .then(({ data: { message } }) => {
+        console.log('SEND COMPLETED: ', message);
         // FINAL: update chat
         updateChatUseCase(
           chat.id,
           {
             status: 'idle',
-            lastUpdate: res.data.message.createdAt,
-            lastMessage: convertToPreview(res.data.message),
+            lastUpdate: message.createdAt,
+            lastMessage: convertToPreview(message),
           },
           {
             updateChatItem: updateChat,
@@ -156,9 +157,9 @@ export default function Chat({
         insertMessage(
           chat.id,
           {
-            id: res.data.message.id,
+            id: message.id,
             status: 'sent',
-            createdAt: res.data.message.createdAt,
+            createdAt: message.createdAt,
           },
           clientMessage.id
         );

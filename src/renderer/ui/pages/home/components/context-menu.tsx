@@ -7,7 +7,7 @@ import {
   EditOutlined,
   ExclamationCircleOutlined,
 } from '@ant-design/icons';
-import { Dropdown, Menu, Space, Modal, message, MenuProps } from 'antd';
+import { Dropdown, Space, Modal, message, MenuProps } from 'antd';
 import { HtmlHTMLAttributes } from 'react';
 import User from 'renderer/domain/user.entity';
 
@@ -15,7 +15,8 @@ import User from 'renderer/domain/user.entity';
 export interface MessageBubbleProps {
   self: boolean;
   type: MessageType;
-  content: any;
+  text: string;
+  attachments?: any;
   path?: string;
   name?: string;
   size?: number;
@@ -23,11 +24,10 @@ export interface MessageBubbleProps {
   time: number;
   hasAvatar?: boolean;
   uploaded?: boolean;
-  chatId: Id;
+  chatId: Id | null;
   id: Id;
   status: MessageStatus;
 }
-
 const { confirm } = Modal;
 
 interface ActionMenuProps extends HtmlHTMLAttributes<HTMLDivElement> {
@@ -76,20 +76,24 @@ export default function BubbleActionMenu({
       duration: 3,
     });
 
-    restProperties.content?.arrayBuffer().then((buffer) => {
-      const buff = Buffer.from(buffer);
-      window.electron.ipcRenderer.sendMessage('save-file', [
-        restProperties.name,
-        buff,
-      ]);
-      console.log(
-        `Saving ${JSON.stringify({
-          name: restProperties.name,
-          size: restProperties.size,
-        })}`
-      );
-      return null;
-    });
+    if (restProperties.attachments instanceof File) {
+      restProperties.attachments?.arrayBuffer().then((buffer) => {
+        const buff = Buffer.from(buffer);
+        window.electron.ipcRenderer.sendMessage('save-file', [
+          restProperties.name,
+          buff,
+        ]);
+        console.log(
+          `Saving ${JSON.stringify({
+            name: restProperties.name,
+            size: restProperties.size,
+          })}`
+        );
+        return null;
+      });
+    } else {
+      console.error('Download attachments is a link is not supported yet');
+    }
   };
 
   const menuItems: MenuProps['items'] = actions.map((action) => {

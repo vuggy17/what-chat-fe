@@ -1,7 +1,8 @@
 /* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable promise/always-return */
-import React, { useEffect, useState } from 'react';
+import React, { ReactElement, ReactNode, useEffect, useState } from 'react';
+import { JsxElement } from 'typescript';
 // eslint-disable-next-line import/no-cycle
 import { MessageBubbleProps } from './chat-bubble';
 import { CircleChecked, CircleDashed } from './icons';
@@ -10,12 +11,13 @@ interface ImageBubbleProps
   extends MessageBubbleProps,
     React.HTMLAttributes<HTMLDivElement> {
   uploaded: boolean;
-  chatId: Id;
+  chatId: Id | null;
   id: Id;
   type: MessageType;
+  indicator?: () => JSX.Element | null;
 }
 
-export default function ImageBubble({ ...props }: ImageBubbleProps) {
+export default function ImageBubble({ indicator, ...props }: ImageBubbleProps) {
   const [uploadStatus, setUploadStatus] = useState(0);
 
   // upload file then notify controller that file is ready to send
@@ -54,15 +56,21 @@ export default function ImageBubble({ ...props }: ImageBubbleProps) {
   return (
     <div
       {...props}
-      className="w-auto h-[300px] overflow-hidden flex"
+      className="w-auto h-[300px] flex  "
       style={{ flexDirection: props.self ? 'row-reverse' : 'inherit' }}
     >
-      {props.self && (
-        <div className="h-full flex items-end">
-          {props.uploaded ? <CircleChecked /> : <CircleDashed />}
-        </div>
+      {props.self && indicator && (
+        <div className="h-full flex items-end">{indicator()}</div>
       )}
-      <img src={props.path} alt="img" className="w-auto h-[300px]" />
+      <img
+        src={props.path || props.attachments}
+        alt="img"
+        className="  overflow-hidden w-auto h-[300px]"
+      />
     </div>
   );
 }
+
+ImageBubble.defaultProps = {
+  indicator: undefined,
+};

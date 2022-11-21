@@ -14,7 +14,8 @@ import BubbleActionMenu from './context-menu';
 export interface MessageBubbleProps {
   self: boolean;
   type: MessageType;
-  content: any;
+  text: string;
+  attachments?: any;
   path?: string;
   name?: string;
   size?: number;
@@ -31,7 +32,7 @@ export default function MessageBubble({
   hasAvatar = false,
   ...props
 }: MessageBubbleProps) {
-  const { self, type, content, time, status, ...messageMeta } = props;
+  const { self, type, text, attachments, time, status, ...messageMeta } = props;
   if (self) {
     const indicator = () => {
       switch (status) {
@@ -77,7 +78,11 @@ export default function MessageBubble({
               actions={['download', 'edit', 'delete']}
               msg={props}
             >
-              <ImageBubble uploaded={messageMeta.uploaded!} {...props} />
+              <ImageBubble
+                uploaded={messageMeta.uploaded!}
+                indicator={indicator}
+                {...props}
+              />
             </BubbleActionMenu>
           );
         default:
@@ -86,7 +91,7 @@ export default function MessageBubble({
               <div className="bg-primary text-white break-words rounded-md rounded-br-none pt-3 pl-4 pr-3 pb-0  ">
                 <BubbleActionMenu actions={['delete']} msg={props}>
                   <Typography.Paragraph className="text-inherit">
-                    {content}
+                    {text}
                   </Typography.Paragraph>
                 </BubbleActionMenu>
               </div>
@@ -139,7 +144,7 @@ export default function MessageBubble({
         return (
           <div className="bg-[#EBEBEB] break-words  rounded-md rounded-bl-none p-3 pb-0">
             <BubbleActionMenu actions={['delete']} msg={props}>
-              <Typography.Paragraph>{content}</Typography.Paragraph>
+              <Typography.Paragraph>{text}</Typography.Paragraph>
             </BubbleActionMenu>
           </div>
         );

@@ -1,3 +1,4 @@
+import HttpClient from 'renderer/services/http';
 import { MSG_PAGE_SIZE } from 'renderer/shared/constants';
 /* eslint-disable promise/always-return */
 /* eslint-disable promise/catch-or-return */
@@ -18,6 +19,8 @@ import { ISocketClient } from 'renderer/services/type';
 import User from 'renderer/domain/user.entity';
 import { blob } from 'stream/consumers';
 import SocketClient from 'renderer/services/socket';
+import SendMessageSocket from './pipeline/socket.handler';
+import SendMessageHttp from './pipeline/http.handler';
 
 // export function createMessage(content: string | any, id?: any): Message {
 //   return {
@@ -59,7 +62,7 @@ export function createMsgPlaceholder(
         createdAt: Date.now(),
         sender,
         receiver,
-        status: 'unsent',
+        status: 'sending',
         chatId: receiver.id,
         text: '',
         ...fileInfo,
@@ -82,7 +85,7 @@ export function createMsgPlaceholder(
         text: '',
         sender,
         createdAt: Date.now(),
-        status: 'unsent',
+        status: 'sending',
         ...fileInfo,
       };
     },
@@ -116,25 +119,45 @@ export async function getMessageOfChat(
 
 export async function sendMessageOnline(
   message: Message,
-  sendService: ISocketClient
+  socket: ISocketClient,
+  http = HttpClient
 ) {
-  if (message.type !== 'text') {
-    console.error('Cannot send message of type', message.type);
+  // if (message.type !== 'text') {
+  //   console.error('Cannot send message of type', message.type);
+  // }
+  // const msg = message as TextMessage;
+  // return socket.sendPrivateMessage(msg);
+  console.log('BEGIN PIPELINE', message);
+  switch (message.type) {
+    case 'text': {
+      const handler = new SendMessageSocket();
+      return handler.handle(message);
+    }
+    case 'photo': {
+      const socketHandler = new SendMessageSocket();
+      const httpHandler = new SendMessageHttp();
+      httpHandler.setNext(socketHandler);
+      return httpHandler.handle(
+        message as WithRequired<FileMessage, 'attachments'>
+      );
+    }
+
+    default:
+      // eslint-disable-next-line prefer-promise-reject-errors
+      return new Promise((resolve, reject) => reject('Message type not found'));
   }
-  const msg = message as TextMessage;
-  return sendService.sendPrivateMessage(msg);
 }
 
 export function convertToPreview(message: Message): PreviewMessage {
-  const previewText = `${message.text}`; // TODO: get preview text from message
-
+  let previewText = `${message.text}`; // TODO: get preview text from message
+  if (message.type === 'photo') {
+    previewText = `${(message.receiver as User).name} send a photo`;
+  }
   const preview: PreviewMessage = {
-    createdAt: message.createdAt,
-    id: message.id,
+    ...message,
     receiverName: (message.receiver as User).name,
     senderName: (message.sender as User).name,
     text: previewText,
-    updatedAt: message.createdAt,
   };
 
   return preview;

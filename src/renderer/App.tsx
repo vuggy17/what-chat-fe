@@ -11,12 +11,11 @@ import 'antd/dist/antd.less';
 import 'tailwindcss/tailwind.css';
 import { Suspense, useEffect } from 'react';
 import {
+  RecoilRoot,
   RecoilValue,
   useRecoilRefresher_UNSTABLE,
   useRecoilSnapshot,
-  useRecoilState,
 } from 'recoil';
-import LoginCheckPoint from './shared/protected-route';
 import {
   APP,
   C_CONVERSATION,
@@ -32,7 +31,6 @@ import Chat from './ui/pages/home/pages/chat';
 import Profile from './ui/pages/home/pages/profile';
 import Friends from './ui/pages/home/pages/friends';
 import ChatBoxProvider from './shared/context/chatbox.context';
-import Preload from './ui/pages/preload/preload';
 import './node-event';
 import HeaderFallback from './ui/pages/home/components/loaders/header.fallback';
 import NewChat from './ui/pages/home/components/new-chat';
@@ -63,13 +61,15 @@ export default function App() {
       <Routes>
         <Route path={LOGIN} element={<Login />} />
         <Route path={REGISTER} element={<Register />} />
+
         <Route
           path={APP}
           element={
             <>
-              {/* <RecoilCacheReset /> */}
-
-              <AppContainer />
+              <RecoilRoot override={false}>
+                <AppContainer />
+              <RecoilCacheReset />
+              </RecoilRoot>
             </>
           }
         >

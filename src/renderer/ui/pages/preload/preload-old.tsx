@@ -2,6 +2,7 @@ import { ReactNode, useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { Message } from 'renderer/domain';
 import { useChat, useChatMessage } from 'renderer/hooks/new-store';
+
 import { currentUser } from 'renderer/hooks/use-user';
 import SocketClient from 'renderer/services/socket';
 import {
@@ -56,7 +57,6 @@ export default function Preload({ children }: { children: ReactNode }) {
     }, 100);
     // send ack signal
     if (user) {
-      // if (typeof ack === 'function') ack({ chatId, message });
       sendMessageReceivedAck(message.sender.id, {
         chatId,
         receiverId: user.id,

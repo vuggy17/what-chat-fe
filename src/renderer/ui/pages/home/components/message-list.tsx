@@ -68,7 +68,6 @@ function MessagesList({
       return (
         <div className="overflow-hidden" key={id}>
           <MessageBubble
-            content={text}
             self={sender.id === currentUserId}
             time={createdAt}
             hasAvatar={!isSameSender} // if next message is from the same sender, don't render avatar
