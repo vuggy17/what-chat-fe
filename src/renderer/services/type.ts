@@ -1,7 +1,19 @@
-import { Message, TextMessage } from 'renderer/domain';
+import { Chat, Message, TextMessage } from 'renderer/domain';
+import { ids } from 'webpack';
 
 interface ISocketClient {
-  sendReceivedMessageAck(chatId: Id, receiverId: Id, message: Id): void;
+  seenMessage(
+    chatId: Id,
+    messageId: Id,
+    userId: Id,
+    toId: Id,
+    time: number
+  ): void;
+
+  sendReceivedMessageAck(
+    address: Id,
+    meta: { chatId: Id; receiverId: Id; messageId: Id }
+  ): void;
   /**
    *
    * @param {Message} message
@@ -27,16 +39,32 @@ export enum ClientToServerEvent {
   PRIVATE_MESSAGE_ACK = 'private_message_ack',
   ADD_FRIEND = 'add_friend',
   UN_FRIEND = 'un_friend',
+  // TEST = 'TEST',
+  SEEN_MESSAGE = 'seen_message',
 }
 export enum ServerToClientEvent {
   HAS_NEW_MESSAGE = 'has_new_message',
-  ADD_FRIEND_RES = 'add_friend_res',
-  UN_FRIEND_RES = 'un_friend_res',
+  TEST = 'TEST_ACK',
+  SEEN_MESSAGE = 'seen_message',
+  MESSAGE_RECEIVED_BY = 'message_received_by',
+  // ADD_FRIEND_RES = 'add_friend_res',
+  // UN_FRIEND_RES = 'un_friend_res',
 }
 
-type EventListenerWithAck = (payload: any, ack: (res: any) => void) => void;
+export type EventListenerWithAck<T> = (
+  payload: T,
+  ack: (ackPayload: unknown) => void
+) => void;
+
+export type EventListener<T> = (payload: T) => void;
 export interface IServerToClientEvent {
-  [ServerToClientEvent.HAS_NEW_MESSAGE]: EventListenerWithAck;
+  [ServerToClientEvent.HAS_NEW_MESSAGE]: (
+    payload: any,
+    ackFn: (res: any) => void
+  ) => void;
+  [ServerToClientEvent.TEST]: (payload: any, ackFn: (res: any) => void) => void;
+  [ServerToClientEvent.MESSAGE_RECEIVED_BY]: EventListener<PrivateMessageReceivedByPayload>;
+  [ServerToClientEvent.SEEN_MESSAGE]: EventListener<SeenMessagePayload>;
 }
 
 export interface IClientToServerEvent {
@@ -53,9 +81,11 @@ export interface IClientToServerEvent {
     onSuccess: (val) => void
   ) => void;
   [ClientToServerEvent.PRIVATE_MESSAGE_ACK]: (
-    { chatId, receiverId, messageId }: PrivateMessageAcknowledgePayload,
+    { address, meta }: PrivateMessageAcknowledgePayload,
     onSuccess: (val) => void
   ) => void;
+  // [ClientToServerEvent.TEST]: (payload: any) => void;
+  [ClientToServerEvent.SEEN_MESSAGE]: (payload: SeenMessagePayload) => void;
 }
 
 export type HasNewMessagePayload = {
@@ -63,10 +93,14 @@ export type HasNewMessagePayload = {
   message: Message;
 };
 
+export type PrivateMessageReceivedByPayload = Pick<
+  PrivateMessageAcknowledgePayload,
+  'meta'
+>['meta'];
+
 export type PrivateMessageAcknowledgePayload = {
-  chatId: string;
-  receiverId: string;
-  messageId: string;
+  address: Id;
+  meta: { chatId: string; receiverId: string; messageId: string };
 };
 
 export type SendMessageResponse = {
@@ -109,9 +143,17 @@ type OMessage = {
 };
 
 interface SeenMessagePayload {
-  userId: number;
-  convId: number;
-  messageId?: number;
+  userId: Id;
+  chatId: Id;
+  messageId: Id;
+  toId: Id;
+  time: number; // seen unix timestamp
+}
+
+// chat interface that is used by indexdb
+export interface InternalChat extends Chat {
+  lastReadTime: number; // unix timestamp
+  lastReadMessageId: string; // message id
 }
 
 export { OContact, OConveration, OMessage, SeenMessagePayload, ISocketClient };

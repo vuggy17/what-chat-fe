@@ -20,7 +20,7 @@ export default function formatDTime(dt: number) {
   // if (dayjs(dt).isToday()) {
   //   return dayjs(dt).fromNow();
   // } else
-  return dayjs(dt).format('HH:mm');
+  return dayjs.unix(dt).format('HH:mm');
 }
 
 export function aisToday(time: string) {

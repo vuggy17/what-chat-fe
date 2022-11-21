@@ -8,13 +8,13 @@ import { useRecoilState, useResetRecoilState } from 'recoil';
 import { chatIdsState } from 'renderer/hooks/use-chat';
 import { currentUser } from 'renderer/hooks/use-user';
 import SocketClient from 'renderer/services/socket';
-import { CHAT, REGISTER } from 'renderer/shared/constants';
+import { APP, REGISTER } from 'renderer/shared/constants';
 import sapiens from '../../../../../../assets/sapiens.svg';
 
 function Login() {
   const navigate = useNavigate();
   const [user, setCurrentUser] = useRecoilState(currentUser);
-  const resetList = useResetRecoilState(chatIdsState);
+  // const resetList = useResetRecoilState(chatIdsState);
 
   const handleSubmit = (values) => {
     const { username, password } = values;
@@ -22,22 +22,20 @@ function Login() {
       .post('/user/login', { username, password })
       .then((res) => {
         setCurrentUser(res.data.data);
-
-        navigate(CHAT);
         return null;
       })
       .catch((err) => console.error('cant login'));
   };
 
   useEffect(() => {
-    return () => {
-      resetList();
-    };
+    if (user) {
+      navigate(`/${APP}`);
+    }
   }, []);
 
   return (
     <div className=" flex items-center justify-center h-screen w-screen">
-      <div className="bg-amber-50 flex flex-col  md:flex-row items-center justify-center p-16 rounded">
+      <div className="mx-4 bg-amber-50 flex flex-col  md:flex-row items-center justify-center p-16 rounded">
         <img src={sapiens} alt="" className="sm:w-1/2 md:w-[40%]" />
         <div className="bg-white w-full rounded-3xl border sm:w-2/3 md:w-[480px] pt-[58px] pb-[48px] text-center">
           <h2 className="font-bold text-3xl rounded text-center mb-2 mt-8 tracking-wide text-orange-600">
@@ -87,7 +85,7 @@ function Login() {
           </Form>
           <p className="font-bold text-xs tracking-wide mb-5 ">
             -- Or
-            <Link to={REGISTER} className="text-orange-600 m-1">
+            <Link to={`/${REGISTER}`} className="text-orange-600 m-1">
               register
             </Link>
             for an account --
@@ -105,7 +103,7 @@ function Login() {
                   setCurrentUser(res.data.data);
 
                   SocketClient.setup();
-                  navigate(`/${CHAT}`);
+                  navigate(`/${APP}`);
                   return null;
                 })
                 .catch((err) => console.error('cant login'));
@@ -125,7 +123,7 @@ function Login() {
                   setCurrentUser(res.data.data);
 
                   SocketClient.setup();
-                  navigate(`/${CHAT}`);
+                  navigate(`/${APP}`);
 
                   return null;
                 })

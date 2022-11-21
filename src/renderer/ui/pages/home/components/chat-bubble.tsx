@@ -6,7 +6,7 @@ import React from 'react';
 import formatDTime from 'renderer/utils/time';
 import User from 'renderer/domain/user.entity';
 import FileBubble from './file-bubble';
-import { CircleChecked, CircleDashed } from './icons';
+import { CircleChecked, CircleDashed, CircleSent } from './icons';
 import ImageBubble from './image-bubble';
 import BubbleActionMenu from './context-menu';
 
@@ -36,9 +36,23 @@ export default function MessageBubble({
     const indicator = () => {
       switch (status) {
         case 'sending':
-          return <CircleDashed />;
+          return <CircleDashed classname="scale-[0.9] ml-1 -mr-1" />;
         case 'sent':
-          return <CircleChecked />;
+          return (
+            <CircleSent
+              color="white"
+              background="#4b5563"
+              classname="scale-[0.9] ml-1 -mr-1"
+            />
+          );
+        case 'received':
+          return (
+            <CircleChecked
+              color="white"
+              background="#4b5563"
+              classname="scale-[0.9] ml-1 -mr-1"
+            />
+          );
         default:
           return null;
       }
@@ -83,7 +97,7 @@ export default function MessageBubble({
     };
     return (
       // self message
-      <div className=" mr-3 float-right flex max-w-[90%] mb-3">
+      <div className=" mr-[6px] float-right flex max-w-[90%] mb-3">
         <Tooltip
           title={formatDTime(time)}
           placement="left"

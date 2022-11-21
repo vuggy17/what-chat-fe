@@ -2,7 +2,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable promise/always-return */
 import React, { useEffect, useState } from 'react';
-import messageController from 'renderer/controllers/message.controller';
 // eslint-disable-next-line import/no-cycle
 import { MessageBubbleProps } from './chat-bubble';
 import { CircleChecked, CircleDashed } from './icons';
@@ -26,29 +25,29 @@ export default function ImageBubble({ ...props }: ImageBubbleProps) {
     if (!props.uploaded) {
       console.log('uploading image');
 
-      const uploadProgress = messageController.getUploadProgress(props.id);
-      if (uploadProgress) {
-        setUploadStatus(uploadProgress.percentage);
-        return;
-      }
+      // const uploadProgress = messageController.getUploadProgress(props.id);
+      // if (uploadProgress) {
+      //   setUploadStatus(uploadProgress.percentage);
+      //   return;
+      // }
 
-      messageController
-        .uploadFile(props.content, {
-          chatId: props.chatId,
-          id: props.id,
-          type: 'photo',
-        })
-        .then((res) => {
-          if (res) {
-            console.info(res);
-            messageController.notifyFileReady(res.id, res.path); // mark file as uploaded, and replace its path with the remote path
-            // messageController.sendMessage(res, {
-            //   type: 'photo',
-            //   chatId: props.chatId,
-            // });
-          }
-        })
-        .catch((err) => console.error('Error on loading bubble image', err));
+      // messageController
+      //   .uploadFile(props.content, {
+      //     chatId: props.chatId,
+      //     id: props.id,
+      //     type: 'photo',
+      //   })
+      //   .then((res) => {
+      //     if (res) {
+      //       console.info(res);
+      //       messageController.notifyFileReady(res.id, res.path); // mark file as uploaded, and replace its path with the remote path
+      //       // messageController.sendMessage(res, {
+      //       //   type: 'photo',
+      //       //   chatId: props.chatId,
+      //       // });
+      //     }
+      //   })
+      //   .catch((err) => console.error('Error on loading bubble image', err));
     }
   }, []);
 

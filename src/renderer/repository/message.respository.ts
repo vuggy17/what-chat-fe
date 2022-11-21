@@ -28,10 +28,13 @@ export class MessageRepositoryImpl implements IMessageRepository {
     chatId: string,
     offset: number
   ): Promise<MessageWithTotalCount> {
-    const res = await this._dataSource.get(
+    const res = await this._dataSource.get<MessageWithTotalCount>(
       `${CHAT_MESSAGE}?channelId=${chatId}&offset=${offset}`
     );
-    return res.data;
+    if (res.error) {
+      throw res.error;
+    }
+    return res.data as MessageWithTotalCount;
   }
 
   notifyFileReady(fileId: string): any {

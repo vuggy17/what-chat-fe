@@ -1,13 +1,18 @@
 /* eslint-disable react/jsx-props-no-spreading */
 import { QuestionOutlined } from '@ant-design/icons';
 import { Avatar, Badge, Col, Grid, Row, Space, Typography } from 'antd';
-import { memo, useEffect, useRef } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useEffect, useRef } from 'react';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { Chat } from 'renderer/domain';
 import { parseDescription } from 'renderer/ui/helper/string-converter';
 import formatDTime from 'renderer/utils/time';
-import { activeChatIdState, useChatItem } from 'renderer/hooks/use-chat';
 import { currentUser } from 'renderer/hooks/use-user';
+import { useLocation, useNavigate } from 'react-router-dom';
+import {
+  chatState,
+  currentChatIdState,
+  currentChatQuery,
+} from 'renderer/hooks/new-store';
 import { BellOff } from './icons';
 
 const { useBreakpoint } = Grid;
@@ -84,6 +89,7 @@ function Item({
           boxShadow: 'none',
           fontWeight: 700,
           fontSize: 10,
+          display: 'none',
         }}
       />
     </Space>
@@ -158,18 +164,26 @@ Item.defaultProps = {
   muted: false,
 };
 
-const MemorizedItem = memo(
-  Item,
-  (prev, next) => JSON.stringify(prev) === JSON.stringify(next)
-);
+// TODO: memoized item keep old location state
+// const MemorizedItem = memo(
+//   Item,
+//   (prev, next) => JSON.stringify(prev) === JSON.stringify(next)
+// );
+
+const MemorizedItem = Item;
 interface ListProps {
   data: Chat[];
 }
 
 function InternalItem({ id }: { id: Id }) {
-  const { listItem } = useChatItem(id);
-  const [activeChatId, setActiveChatId] = useRecoilState(activeChatIdState);
+  // const { listItem } = useChatItem(id);
+  const listItem = useRecoilValue(chatState(id));
+  // const [activeChatId, setActiveChatId] = useRecoilState(currentChatIdState);
+  const setActiveChatId = useSetRecoilState(currentChatIdState);
+  const activeChat = useRecoilValue(currentChatQuery);
   const user = useRecoilValue(currentUser);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   if (!listItem) return <></>;
 
@@ -201,13 +215,17 @@ function InternalItem({ id }: { id: Id }) {
       time: lastUpdate,
     };
   };
+
   return (
     <MemorizedItem
       {...getProperties(listItem)}
       onSelectItem={(key) => {
         setActiveChatId(key);
+        if (location.pathname.includes('new-chat')) {
+          navigate('/app/conversations');
+        }
       }}
-      active={id === activeChatId}
+      active={id === activeChat.id}
     />
   );
 }
@@ -227,6 +245,7 @@ export function EmptyChatItem({
 }) {
   const itemRef = useRef<HTMLLIElement>(null);
   const breakpoints = useBreakpoint();
+  console.log(active);
 
   useEffect(() => {
     if (active && itemRef.current) {
@@ -289,7 +308,7 @@ export function EmptyChatItem({
 }
 
 EmptyChatItem.defaultProps = {
-  active: true,
+  active: false,
   id: null,
   avatarUrl: null,
   onPress: null,

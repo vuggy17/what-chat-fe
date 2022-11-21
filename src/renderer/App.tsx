@@ -9,11 +9,16 @@ import {
 import './App.css';
 import 'antd/dist/antd.less';
 import 'tailwindcss/tailwind.css';
-import { Suspense } from 'react';
-import { useRecoilState } from 'recoil';
+import { Suspense, useEffect } from 'react';
+import {
+  RecoilValue,
+  useRecoilRefresher_UNSTABLE,
+  useRecoilSnapshot,
+  useRecoilState,
+} from 'recoil';
 import LoginCheckPoint from './shared/protected-route';
 import {
-  CHAT,
+  APP,
   C_CONVERSATION,
   C_FRIEND,
   C_PROFILE,
@@ -22,7 +27,7 @@ import {
 } from './shared/constants';
 import Login from './ui/pages/auth/login';
 import Register from './ui/pages/auth/register';
-import Chats from './ui/pages/home/chats';
+import AppContainer from './ui/pages/home/app-container';
 import Chat from './ui/pages/home/pages/chat';
 import Profile from './ui/pages/home/pages/profile';
 import Friends from './ui/pages/home/pages/friends';
@@ -30,6 +35,27 @@ import ChatBoxProvider from './shared/context/chatbox.context';
 import Preload from './ui/pages/preload/preload';
 import './node-event';
 import HeaderFallback from './ui/pages/home/components/loaders/header.fallback';
+import NewChat from './ui/pages/home/components/new-chat';
+import RecentChat from './ui/pages/home/components/recent-chat';
+
+const RecoilCachResetEntry = ({ node }: { node: RecoilValue<unknown> }) => {
+  const resetNode = useRecoilRefresher_UNSTABLE(node);
+  useEffect(() => {
+    return () => resetNode();
+  }, [resetNode]);
+  return null;
+};
+
+const RecoilCacheReset = () => {
+  const snapshot = useRecoilSnapshot();
+  return (
+    <>
+      {Array.from(snapshot.getNodes_UNSTABLE()).map((node) => (
+        <RecoilCachResetEntry key={node.key} node={node} />
+      ))}
+    </>
+  );
+};
 
 export default function App() {
   return (
@@ -38,11 +64,13 @@ export default function App() {
         <Route path={LOGIN} element={<Login />} />
         <Route path={REGISTER} element={<Register />} />
         <Route
-          path={CHAT}
+          path={APP}
           element={
-            <Preload>
-              <Chats />
-            </Preload>
+            <>
+              {/* <RecoilCacheReset /> */}
+
+              <AppContainer />
+            </>
           }
         >
           <Route
@@ -52,7 +80,10 @@ export default function App() {
                 <Chat />
               </ChatBoxProvider>
             }
-          />
+          >
+            <Route index element={<RecentChat />} />
+            <Route path="new-chat" element={<NewChat />} />
+          </Route>
           <Route
             path={C_FRIEND}
             element={
@@ -64,17 +95,10 @@ export default function App() {
             }
           />
           <Route path={C_PROFILE} element={<Profile />} />
-          <Route
-            index
-            element={
-              <ChatBoxProvider>
-                <Chat />
-              </ChatBoxProvider>
-            }
-          />
+          <Route index element={<Navigate to={C_CONVERSATION} />} />
         </Route>
 
-        <Route path="*" element={<Navigate to={CHAT} />} />
+        <Route path="*" element={<Navigate to={LOGIN} />} />
       </Routes>
     </Router>
   );
