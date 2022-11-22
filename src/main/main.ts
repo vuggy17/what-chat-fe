@@ -49,6 +49,12 @@ ipcMain.on('save-file', (event, args) => {
   });
 });
 
+ipcMain.on('open-file', (event, filePath: string) => {
+  console.info('Opening path: ', filePath);
+  shell.showItemInFolder(filePath);
+});
+
+// download file via url
 ipcMain.on('download-url', async (event, { url }) => {
   const win = BrowserWindow.getFocusedWindow();
   if (!win) {
@@ -60,7 +66,9 @@ ipcMain.on('download-url', async (event, { url }) => {
     onCompleted(file) {
       event.sender.send('url-downloaded', file);
     },
-    onProgress(progress) {},
+    onProgress(progress) {
+      console.log(progress);
+    },
   });
   // event.sender.send('url-downloaded', item.getSavePath());
 });

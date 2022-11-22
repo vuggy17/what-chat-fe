@@ -29,13 +29,6 @@ export interface MessageBubbleProps {
   status: MessageStatus;
 }
 const { confirm } = Modal;
-type DownloadFileCompletedPayload = {
-  filename: string;
-  path: string;
-  fileSize: number;
-  mimeType: string;
-  url: string;
-};
 interface ActionMenuProps extends HtmlHTMLAttributes<HTMLDivElement> {
   actions: Array<'delete' | 'edit' | 'download'>;
   msg: MessageBubbleProps;

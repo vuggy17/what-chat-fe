@@ -1,6 +1,12 @@
-import { FileImageOutlined, FileOutlined } from '@ant-design/icons';
+import {
+  AudioFilled,
+  FileImageOutlined,
+  FileOutlined,
+  PaperClipOutlined,
+} from '@ant-design/icons';
 import { Tooltip, Input as AntInput, InputRef, Divider, Button } from 'antd';
-import React, { ChangeEvent, useRef } from 'react';
+import React, { ChangeEvent, useRef, useState } from 'react';
+import ImagePreview from './image-preview';
 
 export default function Input({
   ...props
@@ -9,6 +15,7 @@ export default function Input({
   onFocus(): void;
 }) {
   const inputRef = useRef<InputRef>(null);
+  const [fileRef, setFileRef] = useState<File | null>(null);
   const [textContent, setContent] = React.useState('');
 
   const addNewLineToTextArea = () => {
@@ -39,9 +46,11 @@ export default function Input({
     if (files && files?.length > 0) {
       const file = files[0];
       if (isFileImage(file)) {
-        props.onSubmit(file, 'photo');
+        // props.onSubmit(file, 'photo');
+        setFileRef(file);
       } else {
-        props.onSubmit(file, 'file');
+        console.log('not a image file');
+        // props.onSubmit(file, 'file');
       }
     }
 
@@ -59,30 +68,30 @@ export default function Input({
     <div className="bg-white ">
       <Divider className="my-0 mb-2" />
       <div className="flex gap-1 pb-1 pl-1">
-        <Tooltip title="Open file">
+        <Tooltip title="Record a Voice Clip">
           <label
-            htmlFor="chat-input-file"
-            className="flex items-center justify-center font-semibold text-md pl-1 pr-2 hover:text-primary transform duration-300 cursor-pointer w-fit"
+            htmlFor="chat-input-voice"
+            className="flex items-center justify-center  font-semibold text-md pl-1 pr-2 hover:text-primary transform duration-300 cursor-pointer w-fit"
           >
             <span>
-              <FileOutlined className="scale-125 text-neutral-500" />
+              <AudioFilled className="scale-125 text-neutral-500" />
             </span>
             <input
-              id="chat-input-file"
+              id="chat-input-voice"
               type="file"
               hidden
-              // accept="image/*"
+              accept="image/*"
               onChange={handleSendFile}
             />
           </label>
-        </Tooltip>
-        <Tooltip title="Open file">
+        </Tooltip>{' '}
+        <Tooltip title="Add attachment(s)">
           <label
             htmlFor="chat-input-image"
             className="flex items-center justify-center  font-semibold text-md pl-1 pr-2 hover:text-primary transform duration-300 cursor-pointer w-fit"
           >
             <span>
-              <FileImageOutlined className="scale-125 text-neutral-500" />
+              <PaperClipOutlined className="scale-125 text-neutral-500" />
             </span>
             <input
               id="chat-input-image"
@@ -98,6 +107,18 @@ export default function Input({
       <div className="pt-2">
         <table className="w-full">
           <tbody>
+            {fileRef && (
+              <tr>
+                <td colSpan={2}>
+                  <ul className="flex p-0 m-0">
+                    <ImagePreview
+                      file={fileRef}
+                      onClose={() => setFileRef(null)}
+                    />
+                  </ul>
+                </td>
+              </tr>
+            )}
             <tr>
               <td colSpan={2}>
                 <AntInput.TextArea
@@ -112,12 +133,19 @@ export default function Input({
                   autoSize={{ minRows: 1, maxRows: 5 }}
                 />
               </td>
-              <td style={{ width: 40, whiteSpace: 'nowrap' }}>
+              <td
+                style={{
+                  width: 40,
+                  height: 42,
+                  whiteSpace: 'nowrap',
+                  verticalAlign: 'bottom',
+                }}
+              >
                 <div className="min-w-0 ">
                   <Tooltip title="Send message" placement="leftTop">
                     <Button
                       type="text"
-                      className="p-2 mr-5 mb-2"
+                      className=""
                       onClick={() => {
                         sendMessage(textContent);
                       }}

@@ -24,12 +24,11 @@ import {
 export default function Preload({ children }: { children: ReactNode }) {
   const [appReady, setAppReady] = useState(false);
   const { insertMessage } = useChatMessage();
-  // const updateChatItem = useUpdateChatItem();
   const { updateChat } = useChat();
 
   const user = useRecoilValue(currentUser);
 
-  // new api
+  // init chat items
   const { batchInitChats: setChatList } = useChat();
 
   const onHasNewMessage: EventListenerWithAck<HasNewMessagePayload> = (
