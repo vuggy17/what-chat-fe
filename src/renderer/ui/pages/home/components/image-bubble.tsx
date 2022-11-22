@@ -14,7 +14,7 @@ interface ImageBubbleProps
   chatId: Id | null;
   id: Id;
   type: MessageType;
-  indicator?: () => JSX.Element | null;
+  indicator?: JSX.Element | null;
 }
 
 export default function ImageBubble({ indicator, ...props }: ImageBubbleProps) {
@@ -23,34 +23,31 @@ export default function ImageBubble({ indicator, ...props }: ImageBubbleProps) {
   // upload file then notify controller that file is ready to send
   useEffect(() => {
     // check if file upload is in progress
-
-    if (!props.uploaded) {
-      console.log('uploading image');
-
-      // const uploadProgress = messageController.getUploadProgress(props.id);
-      // if (uploadProgress) {
-      //   setUploadStatus(uploadProgress.percentage);
-      //   return;
-      // }
-
-      // messageController
-      //   .uploadFile(props.content, {
-      //     chatId: props.chatId,
-      //     id: props.id,
-      //     type: 'photo',
-      //   })
-      //   .then((res) => {
-      //     if (res) {
-      //       console.info(res);
-      //       messageController.notifyFileReady(res.id, res.path); // mark file as uploaded, and replace its path with the remote path
-      //       // messageController.sendMessage(res, {
-      //       //   type: 'photo',
-      //       //   chatId: props.chatId,
-      //       // });
-      //     }
-      //   })
-      //   .catch((err) => console.error('Error on loading bubble image', err));
-    }
+    // if (!props.uploaded) {
+    //   console.log('uploading image');
+    // const uploadProgress = messageController.getUploadProgress(props.id);
+    // if (uploadProgress) {
+    //   setUploadStatus(uploadProgress.percentage);
+    //   return;
+    // }
+    // messageController
+    //   .uploadFile(props.content, {
+    //     chatId: props.chatId,
+    //     id: props.id,
+    //     type: 'photo',
+    //   })
+    //   .then((res) => {
+    //     if (res) {
+    //       console.info(res);
+    //       messageController.notifyFileReady(res.id, res.path); // mark file as uploaded, and replace its path with the remote path
+    //       // messageController.sendMessage(res, {
+    //       //   type: 'photo',
+    //       //   chatId: props.chatId,
+    //       // });
+    //     }
+    //   })
+    //   .catch((err) => console.error('Error on loading bubble image', err));
+    // }
   }, []);
 
   return (
@@ -60,7 +57,7 @@ export default function ImageBubble({ indicator, ...props }: ImageBubbleProps) {
       style={{ flexDirection: props.self ? 'row-reverse' : 'inherit' }}
     >
       {props.self && indicator && (
-        <div className="h-full flex items-end">{indicator()}</div>
+        <div className="h-full flex items-end">{indicator}</div>
       )}
       <img
         src={props.path || props.attachments}

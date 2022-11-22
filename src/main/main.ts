@@ -13,6 +13,7 @@ import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import fs from 'fs-extra';
+import { download } from 'electron-dl';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
@@ -46,6 +47,21 @@ ipcMain.on('save-file', (event, args) => {
       event.sender.send('saved-file', args[0]);
     }
   });
+});
+
+ipcMain.on('download-url', async (event, { url }) => {
+  const win = BrowserWindow.getFocusedWindow();
+  if (!win) {
+    console.log('No focused window');
+    return null;
+  }
+
+  const item = await download(win, url, {
+    onCompleted(file) {
+      console.log('file', file);
+    },
+  });
+  // event.sender.send('url-downloaded', item.getSavePath());
 });
 
 if (process.env.NODE_ENV === 'production') {

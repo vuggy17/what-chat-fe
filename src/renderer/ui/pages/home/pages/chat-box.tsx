@@ -185,7 +185,7 @@ export default function Chat({
     <div className="flex flex-col min-h-0 h-full pb-2 ">
       {header}
       <div className="flex-1 relative px-2 mb-1 transition-all transform duration-700 overflow-hidden min-h-0">
-        {messages.length > 0
+        {messages?.length > 0
           ? messagesContainer
           : // <div className="flex w-full items-center justify-center pt-2 flex-col">
             //   <Avatar src={chat.avatar} size={56} />

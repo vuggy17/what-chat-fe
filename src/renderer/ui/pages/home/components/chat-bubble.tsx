@@ -10,6 +10,30 @@ import { CircleChecked, CircleDashed, CircleSent } from './icons';
 import ImageBubble from './image-bubble';
 import BubbleActionMenu from './context-menu';
 
+function Indicator({ status }: { status: MessageStatus }) {
+  switch (status) {
+    case 'sending':
+      return <CircleDashed classname="scale-[0.9] ml-1 -mr-1" />;
+    case 'sent':
+      return (
+        <CircleSent
+          color="white"
+          background="#4b5563"
+          classname="scale-[0.9] ml-1 -mr-1"
+        />
+      );
+    case 'received':
+      return (
+        <CircleChecked
+          color="white"
+          background="#4b5563"
+          classname="scale-[0.9] ml-1 -mr-1"
+        />
+      );
+    default:
+      return null;
+  }
+}
 /* eslint-disable react/require-default-props */
 export interface MessageBubbleProps {
   self: boolean;
@@ -34,31 +58,6 @@ export default function MessageBubble({
 }: MessageBubbleProps) {
   const { self, type, text, attachments, time, status, ...messageMeta } = props;
   if (self) {
-    const indicator = () => {
-      switch (status) {
-        case 'sending':
-          return <CircleDashed classname="scale-[0.9] ml-1 -mr-1" />;
-        case 'sent':
-          return (
-            <CircleSent
-              color="white"
-              background="#4b5563"
-              classname="scale-[0.9] ml-1 -mr-1"
-            />
-          );
-        case 'received':
-          return (
-            <CircleChecked
-              color="white"
-              background="#4b5563"
-              classname="scale-[0.9] ml-1 -mr-1"
-            />
-          );
-        default:
-          return null;
-      }
-    };
-
     const selfMessage = () => {
       switch (type) {
         case 'file':
@@ -80,7 +79,7 @@ export default function MessageBubble({
             >
               <ImageBubble
                 uploaded={messageMeta.uploaded!}
-                indicator={indicator}
+                indicator={<Indicator status={status} />}
                 {...props}
               />
             </BubbleActionMenu>
@@ -95,7 +94,9 @@ export default function MessageBubble({
                   </Typography.Paragraph>
                 </BubbleActionMenu>
               </div>
-              <div className="flex items-end">{indicator()}</div>
+              <div className="flex items-end">
+                <Indicator status={status} />
+              </div>
             </div>
           );
       }
@@ -136,7 +137,10 @@ export default function MessageBubble({
         );
       case 'photo':
         return (
-          <BubbleActionMenu actions={['edit', 'delete']} msg={props}>
+          <BubbleActionMenu
+            actions={['download', 'edit', 'delete']}
+            msg={props}
+          >
             <ImageBubble uploaded={messageMeta.uploaded!} {...props} />
           </BubbleActionMenu>
         );
@@ -150,7 +154,6 @@ export default function MessageBubble({
         );
     }
   };
-  // TODO: get user avar from userManager with props.sender
   return (
     <div className="max-w-[90%] flex clear-right mb-3">
       <div

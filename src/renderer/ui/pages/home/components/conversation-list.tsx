@@ -200,18 +200,21 @@ function InternalItem({ id }: { id: Id }) {
     const getPreviewMessage = (
       originalMessage: Pick<ChatEntity, 'lastMessage'>['lastMessage']
     ) => {
-      console.log(user, originalMessage);
       if (user?.id === originalMessage?.sender.id) {
         switch (originalMessage?.type) {
-          case 'text':
-            return `You: ${originalMessage?.text}`;
+          case 'photo':
+            return `You send a file`;
           default:
-            return 'You sent a file';
+            return `You: ${originalMessage?.text}`;
         }
       }
-      return (
-        originalMessage?.text || `${originalMessage?.senderName} send a file`
-      );
+
+      switch (originalMessage?.type) {
+        case 'photo':
+          return `${originalMessage?.sender.name} send a file`;
+        default:
+          return originalMessage?.text;
+      }
     };
 
     return {
