@@ -11,9 +11,12 @@ export default function Chat() {
   const navigate = useNavigate();
 
   return (
-    <Layout className="h-full " style={{ background: 'white' }}>
-      <Header className="bg-white px-4 ">
-        <div className="flex w-full justify-between items-center">
+    <Layout className="h-full" style={{ background: 'white' }}>
+      <Header
+        className="bg-white px-4 "
+        style={{ background: 'white', paddingLeft: 8 }}
+      >
+        <div className="flex w-full justify-between items-center h-full">
           <Typography.Title level={2}> Messages</Typography.Title>
           <Tooltip title="Compose message" placement="topLeft">
             <Button
@@ -24,11 +27,11 @@ export default function Chat() {
           </Tooltip>
         </div>
       </Header>
-      <Layout className="h-full rounded-xl bg-[#f3f3f3]">
+      <Layout className="h-full rounded-xl bg-[#f3f3f3]" hasSider>
         <Sider
           theme="light"
           style={{ background: 'transparent' }}
-          width={360}
+          width={272}
           collapsedWidth={110}
           breakpoint="lg"
         >
@@ -37,7 +40,7 @@ export default function Chat() {
           </Suspense>
         </Sider>
 
-        <Divider type="vertical" className="h-full mr-0" />
+        <Divider type="vertical" className="h-full mx-0" />
         <Outlet />
       </Layout>
     </Layout>

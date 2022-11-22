@@ -73,16 +73,16 @@ const AppContainer: React.FC = () => {
   // });
 
   return (
-    <Layout style={{ height: '100vh', overflow: 'auto' }}>
+    <Layout style={{ height: '100vh', overflow: 'auto' }} hasSider>
       <Sider
+        theme="light"
         trigger={null}
         // breakpoint="xl"
         collapsible
         // onBreakpoint={setCollapsed}
         collapsed={collapsed}
         defaultCollapsed
-        theme="light"
-        className="px-4"
+        // className="px-4"
         // width={!collapsed ? 220 : ''}
       >
         <div className="flex flex-col flex-1 h-full justify-between ">
@@ -154,11 +154,8 @@ const AppContainer: React.FC = () => {
       </Sider>
 
       <Layout className="site-layout h-full">
-        <Header
-          className="bg-white"
-          style={{ paddingRight: 28, paddingLeft: 0 }}
-        >
-          <div className="flex justify-between items-center ">
+        <Header style={{ background: 'white', paddingLeft: 8 }}>
+          <div className="flex justify-between items-center h-full">
             {React.createElement(
               collapsed ? MenuUnfoldOutlined : MenuFoldOutlined,
               {
@@ -181,7 +178,7 @@ const AppContainer: React.FC = () => {
         <Content
           style={{
             minHeight: 280,
-            height: ' 100%',
+            height: '100%',
             background: 'transparent     ',
           }}
         >

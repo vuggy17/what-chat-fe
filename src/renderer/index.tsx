@@ -1,3 +1,4 @@
+import { ConfigProvider } from 'antd';
 import { useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
@@ -29,7 +30,16 @@ root.render(
   <ErrorBoundary>
     <RecoilRoot>
       <DebugObserver />
-      <App />
+      <ConfigProvider
+        theme={{
+          token: {
+            colorPrimary: '#128C7E',
+            colorPrimaryBg: '#ecf7f4',
+          },
+        }}
+      >
+        <App />
+      </ConfigProvider>
     </RecoilRoot>
   </ErrorBoundary>
 );

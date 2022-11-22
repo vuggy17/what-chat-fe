@@ -74,6 +74,7 @@ export default function ChatDiscover<
   return (
     <Select
       labelInValue
+      dropdownMatchSelectWidth={300}
       filterOption={false}
       onSearch={debounceFetcher}
       notFoundContent={fetching ? <Spin size="small" /> : null}

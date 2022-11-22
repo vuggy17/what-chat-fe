@@ -1,6 +1,5 @@
-import { Divider } from 'antd';
-import { Content } from 'antd/lib/layout/layout';
-import Sider from 'antd/lib/layout/Sider';
+import { Divider, Layout } from 'antd';
+
 import { Suspense, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { currentChatQuery } from 'renderer/hooks/new-store';
@@ -9,6 +8,8 @@ import ChatBox, { Header } from '../pages/chat-box';
 import ChatOptionToggle from './chat-side-menu';
 import ChatBoxFallback from './loaders/chatbox.fallback';
 import MessageList from './message-list';
+
+const { Sider, Content } = Layout;
 
 export default function RecentChat() {
   const [seachOpen, setSearchOpen] = useState(false);

@@ -7,7 +7,6 @@ import {
   Navigate,
 } from 'react-router-dom';
 import './App.css';
-import 'antd/dist/antd.less';
 import 'tailwindcss/tailwind.css';
 import { Suspense, useEffect } from 'react';
 import {
@@ -68,7 +67,7 @@ export default function App() {
             <>
               <RecoilRoot override={false}>
                 <AppContainer />
-              <RecoilCacheReset />
+                <RecoilCacheReset />
               </RecoilRoot>
             </>
           }

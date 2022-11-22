@@ -56,10 +56,11 @@ ipcMain.on('download-url', async (event, { url }) => {
     return null;
   }
 
-  const item = await download(win, url, {
+  download(win, url, {
     onCompleted(file) {
-      console.log('file', file);
+      event.sender.send('url-downloaded', file);
     },
+    onProgress(progress) {},
   });
   // event.sender.send('url-downloaded', item.getSavePath());
 });

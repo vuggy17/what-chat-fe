@@ -32,7 +32,7 @@ export function Header({ data }: { data: ChatEntity }) {
   const { toggleInfoOpen: toggleOpenConvOption } = useChatBoxContext();
   return (
     <>
-      <div className="pt-4 flex justify-between items-center pl-4 pr-10 ">
+      <div className="flex justify-between items-center pl-4 pr-10 pb-3 pt-2">
         <Space size="middle" align="center">
           <Avatar
             shape="circle"
@@ -42,7 +42,10 @@ export function Header({ data }: { data: ChatEntity }) {
           />
           <div className="flex flex-col">
             <Space style={{ paddingTop: 6 }}>
-              <Typography.Title level={5} style={{ marginBottom: 0 }}>
+              <Typography.Title
+                level={5}
+                style={{ marginBottom: 0, marginTop: 0 }}
+              >
                 {data.name}
               </Typography.Title>
               <Badge color="green" />
@@ -64,7 +67,7 @@ export function Header({ data }: { data: ChatEntity }) {
           onClick={toggleOpenConvOption}
         />
       </div>
-      <Divider style={{ marginTop: 18, marginBottom: 0 }} />
+      <Divider style={{ marginTop: 0, marginBottom: 0 }} />
     </>
   );
 }

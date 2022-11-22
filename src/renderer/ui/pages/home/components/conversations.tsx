@@ -53,7 +53,7 @@ export default function Conversations() {
 
   return (
     <div className="h-full flex flex-col  ">
-      <div className="ml-7 mr-6 pt-6 pb-8">
+      <div className="mx-2  pt-6 ">
         <Input
           onClick={() => {
             console.log(location.pathname);
@@ -62,17 +62,21 @@ export default function Conversations() {
             }
           }}
           onChange={(e) => debounceSearch(e.target.value)}
-          size="large"
-          style={{ padding: '8px 11px', color: '#171717' }}
+          style={{
+            color: '#171717',
+            paddingInline: 8,
+            height: 38,
+          }}
           placeholder="Search a chat"
-          prefix={<SearchOutlined className="text-gray-1" />}
+          suffix={<SearchOutlined className="text-gray-1" />}
         />
       </div>
       <>
         <ul
           className="list-none p-0 overflow-hidden"
           style={{
-            visibility: chatResult.length !== 0 ? 'visible' : 'hidden',
+            // visibility: chatResult.length !== 0 ? 'visible' : 'hidden',
+            display: 'none',
           }}
         >
           {chatResult.map((item) => (

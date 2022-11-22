@@ -113,24 +113,26 @@ function Item({
     <li
       key={id}
       ref={itemRef}
-      className=" relative py-2 pl-7 pr-2 before:opacity-0 cursor-pointer   "
+      className=" relative py-2 pl-3 pr-2 before:opacity-0 cursor-pointer   "
       onClick={() => onSelectItem(id)}
     >
       {breakpoints.lg ? (
-        <Space direction="horizontal" size="middle" style={{ width: '100%' }}>
+        <Space direction="horizontal" size="small" style={{ width: '100%' }}>
           {avatar}
 
           <Row
-            gutter={[16, 8]}
+            gutter={[8, 8]}
             style={{ minWidth: 0, flex: 1, marginRight: 0 }}
             align="middle"
           >
             <Col flex="1" style={{ minWidth: 0 }}>
               <Space
                 direction="vertical"
+                size="small"
                 style={{
                   width: '100%',
                   columnGap: 0,
+                  rowGap: 0,
                   justifyContent: 'center',
                   minWidth: 0,
                 }}
