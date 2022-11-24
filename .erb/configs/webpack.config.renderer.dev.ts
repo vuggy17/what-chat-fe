@@ -118,6 +118,7 @@ const configuration: webpack.Configuration = {
               svgoConfig: {
                 plugins: [{ removeViewBox: false }],
               },
+              icon: true,
               titleProp: true,
               ref: true,
             },

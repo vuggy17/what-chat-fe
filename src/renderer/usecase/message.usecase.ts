@@ -38,25 +38,22 @@ import SendMessageHttp from './pipeline/http.handler';
  * @param content can be a file or a string
  * @returns new message object to display in the UI
  */
-export function createMsgPlaceholder(
-  sender: User,
-  receiver: User | any,
-  content: string | any
-) {
+export function createMsgPlaceholder(sender: User, receiver: User | any) {
   if (!sender) throw new Error('User not logged in');
 
   const uuid = genId(); // temp id used for UI mutation/updates
   return {
-    image: (): FileMessage => {
-      const file = content as File;
+    image: (attachments: File, text?: string): FileMessage => {
+      const file = attachments;
       const fileInfo = {
-        path: URL.createObjectURL(file),
-        name: file.name,
-        size: file.size,
+        path: URL.createObjectURL(file!),
+        name: file!.name,
+        size: file!.size,
       };
+
       return {
         id: uuid,
-        attachments: content,
+        attachments,
         type: 'photo',
         uploaded: false,
         createdAt: Date.now(),
@@ -64,34 +61,34 @@ export function createMsgPlaceholder(
         receiver,
         status: 'sending',
         chatId: receiver.id,
-        text: '',
+        text: text || '',
         ...fileInfo,
       };
     },
-    file: (): FileMessage => {
-      const file = content as File;
+    file: (attachments: File, text?: string): FileMessage => {
+      const file = attachments;
       const fileInfo = {
-        path: URL.createObjectURL(file),
-        name: file.name,
-        size: file.size,
+        path: URL.createObjectURL(file!),
+        name: file!.name,
+        size: file!.size,
       };
       return {
         id: uuid,
         uploaded: false,
         chatId: receiver.id,
-        attachments: content,
+        attachments,
         type: 'file',
         receiver,
-        text: '',
+        text: text || '',
         sender,
         createdAt: Date.now(),
         status: 'sending',
         ...fileInfo,
       };
     },
-    text: (): TextMessage => ({
+    text: (text: string): TextMessage => ({
       id: uuid,
-      text: content,
+      text,
       type: 'text',
       createdAt: Date.now(),
       sender,

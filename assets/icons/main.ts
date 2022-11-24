@@ -27,12 +27,6 @@ class AppUpdater {
 
 let mainWindow: BrowserWindow | null = null;
 
-ipcMain.on('ipc-example', async (event, arg) => {
-  const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
-  console.log(msgTemplate(arg));
-  event.reply('ipc-example', msgTemplate('pong'));
-});
-
 // save file to ./tmp folder
 // args[0] is the file name
 // args[1] is the file buffer
@@ -59,7 +53,7 @@ ipcMain.on('download-url', async (event, { url }) => {
   const win = BrowserWindow.getFocusedWindow();
   if (!win) {
     console.log('No focused window');
-    return 0;
+    return null;
   }
 
   download(win, url, {
@@ -70,8 +64,6 @@ ipcMain.on('download-url', async (event, { url }) => {
       console.log(progress);
     },
   });
-
-  return 1;
   // event.sender.send('url-downloaded', item.getSavePath());
 });
 

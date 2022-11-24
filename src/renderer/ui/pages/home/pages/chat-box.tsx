@@ -91,33 +91,32 @@ export default function Chat({
   const currentUser = useRecoilValue(userState);
   const { messages } = chat;
 
-  const onSendMessage = (msg: File | string, type: MessageType) => {
+  const onSendMessage = (
+    type: MessageType,
+    text?: string,
+    attachments?: File
+  ) => {
     // SETUP: construct message
     let clientMessage = {} as Message;
     if (currentUser) {
       const receiver = chat.participants.find((p) => p.id !== currentUser.id);
-
       switch (type) {
         case 'file':
-          clientMessage = createMsgPlaceholder(
-            currentUser,
-            receiver,
-            msg as File
-          ).file();
+          clientMessage = createMsgPlaceholder(currentUser, receiver).file(
+            attachments!,
+            text
+          );
           break;
         case 'photo':
-          clientMessage = createMsgPlaceholder(
-            currentUser,
-            receiver,
-            msg as File
-          ).image();
+          clientMessage = createMsgPlaceholder(currentUser, receiver).image(
+            attachments!,
+            text
+          );
           break;
         default:
-          clientMessage = createMsgPlaceholder(
-            currentUser,
-            receiver,
-            msg as string
-          ).text();
+          clientMessage = createMsgPlaceholder(currentUser, receiver).text(
+            text!
+          );
           break;
       }
     }
@@ -140,36 +139,36 @@ export default function Chat({
 
     console.log('SENDING MESASGE: ', clientMessage);
     // ACTION: send message
-    sendMessageOnline(clientMessage, SocketClient)
-      .then(({ data: { message } }) => {
-        console.log('SEND COMPLETED: ', message);
-        // FINAL: update chat
-        updateChatUseCase(
-          chat.id,
-          {
-            status: 'idle',
-            lastUpdate: message.createdAt,
-            lastMessage: convertToPreview(message),
-          },
-          {
-            updateChatItem: updateChat,
-          }
-        );
+    // sendMessageOnline(clientMessage, SocketClient)
+    //   .then(({ data: { message } }) => {
+    //     console.log('SEND COMPLETED: ', message);
+    //     // FINAL: update chat
+    //     updateChatUseCase(
+    //       chat.id,
+    //       {
+    //         status: 'idle',
+    //         lastUpdate: message.createdAt,
+    //         lastMessage: convertToPreview(message),
+    //       },
+    //       {
+    //         updateChatItem: updateChat,
+    //       }
+    //     );
 
-        // FINAL: update message status
-        insertMessage(
-          chat.id,
-          {
-            id: message.id,
-            status: 'sent',
-            createdAt: message.createdAt,
-          },
-          clientMessage.id
-        );
+    //     // FINAL: update message status
+    //     insertMessage(
+    //       chat.id,
+    //       {
+    //         id: message.id,
+    //         status: 'sent',
+    //         createdAt: message.createdAt,
+    //       },
+    //       clientMessage.id
+    //     );
 
-        return null;
-      })
-      .catch((err) => console.error(err));
+    //     return null;
+    //   })
+    //   .catch((err) => console.error(err));
   };
 
   const onEditorGotFocused = useCallback(() => {

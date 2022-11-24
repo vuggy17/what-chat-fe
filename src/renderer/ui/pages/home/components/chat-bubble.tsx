@@ -1,7 +1,15 @@
 /* eslint-disable import/no-cycle */
 /* eslint-disable react/jsx-props-no-spreading */
 import { UserOutlined } from '@ant-design/icons';
-import { Avatar, message, Tooltip, Typography } from 'antd';
+import {
+  Avatar,
+  Col,
+  ConfigProvider,
+  message,
+  Row,
+  Tooltip,
+  Typography,
+} from 'antd';
 import React from 'react';
 import formatDTime from 'renderer/utils/time';
 import User from 'renderer/domain/user.entity';
@@ -13,13 +21,13 @@ import BubbleActionMenu from './context-menu';
 function Indicator({ status }: { status: MessageStatus }) {
   switch (status) {
     case 'sending':
-      return <CircleDashed classname="scale-[0.9] ml-1 -mr-1" />;
+      return <CircleDashed classname="scale-[0.9] ml-1 " />;
     case 'sent':
       return (
         <CircleSent
           color="white"
           background="#4b5563"
-          classname="scale-[0.9] ml-1 -mr-1"
+          classname="scale-[0.9] ml-1 "
         />
       );
     case 'received':
@@ -27,7 +35,7 @@ function Indicator({ status }: { status: MessageStatus }) {
         <CircleChecked
           color="white"
           background="#4b5563"
-          classname="scale-[0.9] ml-1 -mr-1"
+          classname="scale-[0.9] ml-1 "
         />
       );
     default:
@@ -52,10 +60,7 @@ export interface MessageBubbleProps {
   status: MessageStatus;
 }
 
-export default function MessageBubble({
-  hasAvatar = false,
-  ...props
-}: MessageBubbleProps) {
+function MessageBubble1({ hasAvatar = false, ...props }: MessageBubbleProps) {
   const { self, type, text, attachments, time, status, ...messageMeta } = props;
   if (self) {
     const selfMessage = () => {
@@ -77,11 +82,7 @@ export default function MessageBubble({
               actions={['download', 'edit', 'delete']}
               msg={props}
             >
-              <ImageBubble
-                uploaded={messageMeta.uploaded!}
-                indicator={<Indicator status={status} />}
-                {...props}
-              />
+              <ImageBubble uploaded={messageMeta.uploaded!} {...props} />
             </BubbleActionMenu>
           );
         default:
@@ -169,6 +170,150 @@ export default function MessageBubble({
       <Tooltip title={formatDTime(time)} placement="left">
         {othersMessage()}
       </Tooltip>
+    </div>
+  );
+}
+
+export default function MessageBubble({
+  hasAvatar = false,
+  ...props
+}: MessageBubbleProps) {
+  const { self, type, text, attachments, time, status, ...messageMeta } = props;
+
+  const messageContent = () => {
+    if (self) {
+      switch (type) {
+        case 'file':
+          return (
+            <BubbleActionMenu actions={['download', 'delete']} msg={props}>
+              <FileBubble
+                uploaded={messageMeta.uploaded!}
+                name={messageMeta.name!}
+                size={messageMeta.size!}
+                {...props}
+              />
+            </BubbleActionMenu>
+          );
+        case 'photo':
+          return (
+            <BubbleActionMenu
+              actions={['download', 'edit', 'delete']}
+              msg={props}
+            >
+              <ImageBubble
+                className="bg-primary rounded  w-fit  rounded-br-none overflow-hidden text-white max-w-[60%] float-right"
+                description={
+                  text && (
+                    <div className="break-words py-1 pl-2 pr-3">
+                      <Typography.Paragraph className="text-inherit mb-0 remove-text-margin">
+                        {text}
+                      </Typography.Paragraph>
+                    </div>
+                  )
+                }
+                {...props}
+              />
+            </BubbleActionMenu>
+          );
+        default:
+          return (
+            <div className="bg-primary w-fit float-right text-white break-words rounded-md rounded-br-none py-2 pl-4 pr-3  ">
+              <BubbleActionMenu actions={['delete']} msg={props}>
+                <Typography.Paragraph className="text-inherit remove-text-margin">
+                  {text}
+                </Typography.Paragraph>
+              </BubbleActionMenu>
+            </div>
+          );
+      }
+    }
+
+    // others message
+    switch (type) {
+      case 'file':
+        return (
+          <BubbleActionMenu actions={['delete']} msg={props}>
+            <FileBubble
+              uploaded={messageMeta.uploaded!}
+              name={messageMeta.name!}
+              size={messageMeta.size!}
+              {...props}
+            />
+          </BubbleActionMenu>
+        );
+      // case 'photo':
+      //   return (
+      //     <BubbleActionMenu
+      //       actions={['download', 'edit', 'delete']}
+      //       msg={props}
+      //     >
+      //       <ImageBubble
+      //         {...props}
+      //         description={
+      //           text && (
+      //             <BubbleActionMenu actions={['delete']} msg={props}>
+      //               <div className="break-words py-1 pl-2 pr-3 bg-[#EBEBEB]  ">
+      //                 <Typography.Paragraph className="text-inherit mb-0 remove-text-margin">
+      //                   {text}
+      //                 </Typography.Paragraph>
+      //               </div>
+      //             </BubbleActionMenu>
+      //           )
+      //         }
+      //       />
+      //     </BubbleActionMenu>
+      //   );
+      case 'photo':
+        return (
+          <BubbleActionMenu
+            actions={['download', 'edit', 'delete']}
+            msg={props}
+          >
+            <ImageBubble
+              className="bg-[#EBEBEB] rounded rounded-bl-none w-fit overflow-hidden max-w-[60%] "
+              description={
+                text && (
+                  <div className="break-words py-1 pl-2 pr-3   ">
+                    <Typography.Paragraph className="text-inherit mb-0 remove-text-margin">
+                      {text}
+                    </Typography.Paragraph>
+                  </div>
+                )
+              }
+              {...props}
+            />
+          </BubbleActionMenu>
+        );
+      default:
+        return (
+          <BubbleActionMenu actions={['delete']} msg={props}>
+            <div className="bg-[#EBEBEB] w-fit break-words rounded-md rounded-bl-none pl-3 py-2 pr-4">
+              <Typography.Paragraph className="remove-text-margin">
+                {text}
+              </Typography.Paragraph>
+            </div>
+          </BubbleActionMenu>
+        );
+    }
+  };
+
+  return (
+    <div
+      className="flex mb-1 min-w-0 "
+      style={{ flexDirection: self ? 'row-reverse' : 'row' }}
+    >
+      {status && (
+        <div className="flex flex-col ">
+          <div className="grow flex flex-col justify-end">
+            <Indicator status={status} />
+          </div>
+        </div>
+      )}
+      {/* message content */}
+      <div className="text-left flex-1 min-w-0 ">{messageContent()}</div>
+      {/* message status */}
+
+      <div className="w-[10%] shrink-0" />
     </div>
   );
 }

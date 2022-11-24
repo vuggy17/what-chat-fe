@@ -1,17 +1,31 @@
-import {
+import Icon, {
   AudioFilled,
   FileImageOutlined,
   FileOutlined,
   PaperClipOutlined,
 } from '@ant-design/icons';
-import { Tooltip, Input as AntInput, InputRef, Divider, Button } from 'antd';
+import {
+  Tooltip,
+  Input as AntInput,
+  InputRef,
+  Divider,
+  Button,
+  Grid,
+  Col,
+  Row,
+} from 'antd';
 import React, { ChangeEvent, useRef, useState } from 'react';
 import ImagePreview from './image-preview';
+import { ReactComponent as SendIcon } from '../../../../../../assets/icons/send.svg';
 
 export default function Input({
   ...props
 }: {
-  onSubmit(content: string | File, type: 'file' | 'photo' | 'text'): void;
+  onSubmit(
+    type: 'file' | 'photo' | 'text',
+    text?: string,
+    attachments?: File
+  ): void;
   onFocus(): void;
 }) {
   const inputRef = useRef<InputRef>(null);
@@ -24,10 +38,24 @@ export default function Input({
   };
 
   const sendMessage = (e: any) => {
-    if (textContent.trim().length > 0 && !e.shiftKey) {
-      props.onSubmit(textContent, 'text');
-      setContent('');
+    const hasFile = fileRef !== null;
+    const hasText = textContent.trim().length > 0;
+    // if we have a file with description
+    if (hasFile && hasText) {
+      props.onSubmit('photo', textContent, fileRef);
     }
+    // or file only
+    if (hasFile && !hasText) {
+      props.onSubmit('photo', '', fileRef);
+    }
+
+    // or text only
+    if (hasText && !hasFile) {
+      props.onSubmit('text', textContent);
+    }
+
+    setContent('');
+    setFileRef(null);
   };
 
   const handleKeyPress = (e: any) => {
@@ -65,7 +93,7 @@ export default function Input({
   }
 
   return (
-    <div className="bg-white ">
+    <div className="bg-white">
       <Divider className="my-0 mb-2" />
       <div className="flex gap-1 pb-1 pl-1">
         <Tooltip title="Record a Voice Clip">
@@ -105,75 +133,54 @@ export default function Input({
       </div>
       <Divider className="my-0" />
       <div className="pt-2">
-        <table className="w-full">
-          <tbody>
+        <Row>
+          <Col span={22}>
             {fileRef && (
-              <tr>
-                <td colSpan={2}>
-                  <ul className="flex p-0 m-0">
-                    <ImagePreview
-                      file={fileRef}
-                      onClose={() => setFileRef(null)}
-                    />
-                  </ul>
-                </td>
-              </tr>
+              <ul className="flex p-0 m-0 px-2 space-x-1 list-none  preview-scroll">
+                <li className="w-20 h-20 overflow-hidden shrink-0 rounded-md">
+                  <ImagePreview
+                    file={fileRef}
+                    onClose={() => setFileRef(null)}
+                  />
+                </li>
+              </ul>
             )}
-            <tr>
-              <td colSpan={2}>
-                <AntInput.TextArea
-                  onPressEnter={sendMessage}
-                  onKeyDown={handleKeyPress}
-                  ref={inputRef}
-                  className="w-full"
-                  bordered={false}
-                  value={textContent}
-                  onChange={(e) => setContent(e.target.value)}
-                  placeholder="Type your message "
-                  autoSize={{ minRows: 1, maxRows: 5 }}
-                />
-              </td>
-              <td
-                style={{
-                  width: 40,
-                  height: 42,
-                  whiteSpace: 'nowrap',
-                  verticalAlign: 'bottom',
+          </Col>
+        </Row>
+        <Row className="py-2" align="middle" justify="end">
+          <Col flex={1}>
+            <AntInput.TextArea
+              size="large"
+              onPressEnter={sendMessage}
+              onKeyDown={handleKeyPress}
+              ref={inputRef}
+              className="w-full"
+              bordered={false}
+              value={textContent}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder="Type your message "
+              autoSize={{ minRows: 1, maxRows: 5 }}
+            />
+          </Col>
+          <Col span={2}>
+            <Tooltip title="Send message" placement="leftTop">
+              <Button
+                className="group mx-auto table"
+                type="text"
+                onClick={() => {
+                  sendMessage(textContent);
                 }}
-              >
-                <div className="min-w-0 ">
-                  <Tooltip title="Send message" placement="leftTop">
-                    <Button
-                      type="text"
-                      className=""
-                      onClick={() => {
-                        sendMessage(textContent);
-                      }}
-                    >
-                      <span>
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="group-hover:text-primary transition-colors duration-300"
-                          width="24"
-                          height="24"
-                          viewBox="0 0 24 24"
-                          strokeWidth="1.5"
-                          stroke="#597e8d"
-                          fill="none"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                          <path d="M15 10l-4 4l6 6l4 -16l-18 7l4 2l2 6l3 -4" />
-                        </svg>
-                      </span>
-                    </Button>
-                  </Tooltip>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                icon={
+                  <Icon
+                    component={SendIcon}
+                    size={48}
+                    className="group-hover:text-primary transition-colors duration-150 text-xl"
+                  />
+                }
+              />
+            </Tooltip>
+          </Col>
+        </Row>
       </div>
     </div>
   );
