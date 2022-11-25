@@ -110,7 +110,6 @@ export const useChatMessage = () => {
           const msgIdx = prevState.messages.findIndex(
             (msg) => msg.id === oldId
           );
-          console.log('msgIdx', msgIdx);
           if (msgIdx === -1) {
             return {
               ...prevState,

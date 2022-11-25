@@ -5,7 +5,7 @@ import AbstractHandler from './definition';
 
 export default class SendMessageHttp extends AbstractHandler {
   public async handle(
-    request: WithRequired<FileMessage, 'attachments'>
+    request: WithRequired<FileMessage, 'fileList'>
   ): Promise<any> {
     // request.
 
@@ -14,8 +14,9 @@ export default class SendMessageHttp extends AbstractHandler {
 
     const url = `https://api.cloudinary.com/v1_1/${credential.cloudName}/auto/upload`;
 
-    const files = request.attachments;
+    const files = request.fileList;
     const formData = new FormData();
+    // throw new Error('DSda');
 
     // upload multiple files example
     // Append parameters to the form data. The parameters that are signed using
@@ -43,7 +44,7 @@ export default class SendMessageHttp extends AbstractHandler {
     //     });
     // }
 
-    formData.append('file', files);
+    formData.append('file', request.fileList);
     formData.append('api_key', credential.apiKey);
     formData.append('timestamp', credential.timestamp);
     formData.append('signature', credential.signature);

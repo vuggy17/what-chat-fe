@@ -1,4 +1,4 @@
-import { MoreOutlined, UserOutlined } from '@ant-design/icons';
+import Icon, { MoreOutlined, UserOutlined } from '@ant-design/icons';
 import { Avatar, Badge, Button, Divider, Space, Typography } from 'antd';
 import { useCallback } from 'react';
 import { useRecoilValue } from 'recoil';
@@ -24,6 +24,8 @@ import {
   seenMessage,
   sendMessageOnline,
 } from 'renderer/usecase/message.usecase';
+import { ReactComponent as SideBarRight } from '../../../../../../assets/icons/layout-sidebar-right.svg';
+import { ReactComponent as DotsVertical } from '../../../../../../assets/icons/dots-vertical.svg';
 
 import RichEditor from '../components/input';
 import SearchBox from '../components/search-box';
@@ -59,13 +61,23 @@ export function Header({ data }: { data: ChatEntity }) {
             </Typography.Text>
           </div>
         </Space>
-        <Button
-          icon={<MoreOutlined />}
-          type="text"
-          className="text-2xl text-gray-1"
-          size="large"
-          onClick={toggleOpenConvOption}
-        />
+        <div className="flex items-center">
+          <Button
+            type="text"
+            icon={
+              <Icon
+                component={SideBarRight}
+                style={{ color: 'white', fontSize: 22 }}
+              />
+            }
+            onClick={toggleOpenConvOption}
+          />
+          <Button
+            // icon={}
+            icon={<Icon component={DotsVertical} />}
+            type="text"
+          />
+        </div>
       </div>
       <Divider style={{ marginTop: 0, marginBottom: 0 }} />
     </>
@@ -91,11 +103,7 @@ export default function Chat({
   const currentUser = useRecoilValue(userState);
   const { messages } = chat;
 
-  const onSendMessage = (
-    type: MessageType,
-    text?: string,
-    attachments?: File
-  ) => {
+  const onSendMessage = (type: MessageType, text?: string, fileList?: File) => {
     // SETUP: construct message
     let clientMessage = {} as Message;
     if (currentUser) {
@@ -103,13 +111,13 @@ export default function Chat({
       switch (type) {
         case 'file':
           clientMessage = createMsgPlaceholder(currentUser, receiver).file(
-            attachments!,
+            fileList!,
             text
           );
           break;
         case 'photo':
           clientMessage = createMsgPlaceholder(currentUser, receiver).image(
-            attachments!,
+            fileList!,
             text
           );
           break;
@@ -120,6 +128,8 @@ export default function Chat({
           break;
       }
     }
+
+    console.log('client meesage', clientMessage);
 
     // ACTION: update UI
     addMessageToChat(chat.id, clientMessage, {
@@ -139,36 +149,37 @@ export default function Chat({
 
     console.log('SENDING MESASGE: ', clientMessage);
     // ACTION: send message
-    // sendMessageOnline(clientMessage, SocketClient)
-    //   .then(({ data: { message } }) => {
-    //     console.log('SEND COMPLETED: ', message);
-    //     // FINAL: update chat
-    //     updateChatUseCase(
-    //       chat.id,
-    //       {
-    //         status: 'idle',
-    //         lastUpdate: message.createdAt,
-    //         lastMessage: convertToPreview(message),
-    //       },
-    //       {
-    //         updateChatItem: updateChat,
-    //       }
-    //     );
+    sendMessageOnline(clientMessage, SocketClient)
+      .then(({ data: { message } }) => {
+        console.log('SEND COMPLETED: ', message);
+        // FINAL: update chat
+        updateChatUseCase(
+          chat.id,
+          {
+            status: 'idle',
+            lastUpdate: message.createdAt,
+            lastMessage: convertToPreview(message),
+          },
+          {
+            updateChatItem: updateChat,
+          }
+        );
 
-    //     // FINAL: update message status
-    //     insertMessage(
-    //       chat.id,
-    //       {
-    //         id: message.id,
-    //         status: 'sent',
-    //         createdAt: message.createdAt,
-    //       },
-    //       clientMessage.id
-    //     );
+        // FINAL: update message status
+        insertMessage(
+          chat.id,
+          {
+            id: message.id,
+            status: 'sent',
+            createdAt: message.createdAt,
+            attachments: message.attachments,
+          },
+          clientMessage.id
+        );
 
-    //     return null;
-    //   })
-    //   .catch((err) => console.error(err));
+        return null;
+      })
+      .catch((err) => console.error(err));
   };
 
   const onEditorGotFocused = useCallback(() => {

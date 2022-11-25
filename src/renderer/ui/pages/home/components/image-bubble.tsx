@@ -5,20 +5,19 @@ import React, { ReactNode } from 'react';
 interface ImageBubbleProps extends React.HTMLAttributes<HTMLDivElement> {
   // indicator?: JSX.Element | null;
   // self?: boolean;
-  path?: string; // local file path
+  localPath?: string; // local file path
   attachments?: string; // remote file url
   description?: ReactNode;
 }
 
 export default function ImageBubble({
-  path,
+  localPath,
   attachments,
   description,
   ...props
 }: ImageBubbleProps) {
   if (description) {
-    console.log('description', path, attachments, description);
-
+    console.log('render with', attachments, localPath);
     // return image with description component
     return (
       // eslint-disable-next-line react/jsx-props-no-spreading
@@ -26,10 +25,10 @@ export default function ImageBubble({
         <div className="overflow-hidden">
           <img
             className="object-cover h-auto max-h-[300px]"
-            src={path || attachments}
+            src={attachments || localPath}
             onLoad={() => {
-              if (path) {
-                URL.revokeObjectURL(path);
+              if (attachments && localPath) {
+                URL.revokeObjectURL(localPath);
               }
             }}
             alt="img"
@@ -46,11 +45,11 @@ export default function ImageBubble({
       <div className="overflow-hidden">
         <img
           className="object-cover h-auto max-h-[300px]"
-          src={path || attachments}
+          src={attachments || localPath}
           alt="img"
           onLoad={() => {
-            if (path) {
-              URL.revokeObjectURL(path);
+            if (attachments && localPath) {
+              URL.revokeObjectURL(localPath);
             }
           }}
         />
@@ -62,7 +61,7 @@ export default function ImageBubble({
 ImageBubble.defaultProps = {
   // indicator: undefined,
   // self: false,
-  path: undefined,
+  localPath: undefined,
   attachments: undefined,
   description: undefined,
 };

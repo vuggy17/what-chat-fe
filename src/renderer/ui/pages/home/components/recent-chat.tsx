@@ -39,10 +39,10 @@ export default function RecentChat() {
             background: 'white',
             marginLeft: -8,
           }}
-          width={360}
+          width={272}
         >
           <ChatOptionToggle
-            id={activeChat.id}
+            activeChat={activeChat}
             toggleSearch={() => setSearchOpen((opened) => !opened)}
           />
         </Sider>

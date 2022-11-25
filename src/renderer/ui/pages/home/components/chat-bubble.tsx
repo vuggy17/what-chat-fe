@@ -48,7 +48,7 @@ export interface MessageBubbleProps {
   type: MessageType;
   text: string;
   attachments?: any;
-  path?: string;
+  localPath?: string;
   name?: string;
   size?: number;
   sender: User | any;
@@ -201,7 +201,7 @@ export default function MessageBubble({
               msg={props}
             >
               <ImageBubble
-                className="bg-primary rounded  w-fit  rounded-br-none overflow-hidden text-white max-w-[60%] float-right"
+                className="bg-primary rounded h-[300px]  w-fit  rounded-br-none overflow-hidden text-white max-w-[60%] float-right"
                 description={
                   text && (
                     <div className="break-words py-1 pl-2 pr-3">
@@ -270,7 +270,7 @@ export default function MessageBubble({
             msg={props}
           >
             <ImageBubble
-              className="bg-[#EBEBEB] rounded rounded-bl-none w-fit overflow-hidden max-w-[60%] "
+              className="bg-[#EBEBEB] h-[300px] rounded rounded-bl-none w-fit overflow-hidden max-w-[60%] "
               description={
                 text && (
                   <div className="break-words py-1 pl-2 pr-3   ">

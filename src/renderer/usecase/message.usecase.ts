@@ -43,8 +43,8 @@ export function createMsgPlaceholder(sender: User, receiver: User | any) {
 
   const uuid = genId(); // temp id used for UI mutation/updates
   return {
-    image: (attachments: File, text?: string): FileMessage => {
-      const file = attachments;
+    image: (fileList: File, text?: string): FileMessage => {
+      const file = fileList;
       const fileInfo = {
         path: URL.createObjectURL(file!),
         name: file!.name,
@@ -53,7 +53,7 @@ export function createMsgPlaceholder(sender: User, receiver: User | any) {
 
       return {
         id: uuid,
-        attachments,
+        localPath: fileInfo.path,
         type: 'photo',
         uploaded: false,
         createdAt: Date.now(),
@@ -62,11 +62,13 @@ export function createMsgPlaceholder(sender: User, receiver: User | any) {
         status: 'sending',
         chatId: receiver.id,
         text: text || '',
-        ...fileInfo,
+        name: fileInfo.name,
+        size: fileInfo.size,
+        fileList: file, // local file to upload to server
       };
     },
-    file: (attachments: File, text?: string): FileMessage => {
-      const file = attachments;
+    file: (fileList: File, text?: string): FileMessage => {
+      const file = fileList;
       const fileInfo = {
         path: URL.createObjectURL(file!),
         name: file!.name,
@@ -76,14 +78,16 @@ export function createMsgPlaceholder(sender: User, receiver: User | any) {
         id: uuid,
         uploaded: false,
         chatId: receiver.id,
-        attachments,
+        localPath: fileInfo.path,
         type: 'file',
         receiver,
         text: text || '',
         sender,
         createdAt: Date.now(),
         status: 'sending',
-        ...fileInfo,
+        name: fileInfo.name,
+        size: fileInfo.size,
+        fileList: file, // local file to upload to server
       };
     },
     text: (text: string): TextMessage => ({
@@ -135,7 +139,7 @@ export async function sendMessageOnline(
       const httpHandler = new SendMessageHttp();
       httpHandler.setNext(socketHandler);
       return httpHandler.handle(
-        message as WithRequired<FileMessage, 'attachments'>
+        message as WithRequired<FileMessage, 'fileList'>
       );
     }
 
