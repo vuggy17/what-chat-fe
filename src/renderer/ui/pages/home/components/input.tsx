@@ -141,6 +141,7 @@ export default function Input({
                 {fileRef.map((file) => (
                   <li className="w-20 h-20 overflow-hidden shrink-0 rounded-md">
                     <ImagePreview
+                      key={file.path}
                       file={file}
                       onClose={() =>
                         setFileRef((prev) =>

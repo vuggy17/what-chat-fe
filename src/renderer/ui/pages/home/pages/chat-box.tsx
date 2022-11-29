@@ -124,7 +124,7 @@ export default function ChatBox({
     // SETUP: construct message
     let clientMessage = {} as Message;
     if (currentUser) {
-      const receiver = chat.participants.find((p) => p.id !== currentUser.id);
+      const receiver = chat.participants?.find((p) => p.id !== currentUser.id);
       switch (type) {
         case 'file':
           clientMessage = createMsgPlaceholder(currentUser, receiver).file(
@@ -205,7 +205,7 @@ export default function ChatBox({
         chat.id,
         messages[messages.length - 1].id,
         currentUser?.id,
-        chat.participants.find((p) => p.id !== currentUser.id)!.id,
+        chat.participants?.find((p) => p.id !== currentUser.id)!.id,
         Date.now()
       );
     }
