@@ -34,9 +34,34 @@ body {
 body {
   --scrollbar-color: #00000040 !important;
 }
-
-.remove-text-margin {
+h4 {
   margin: 0 !important;
+}
+
+.ant-list-item:hover {
+  box-shadow: 0 0 4px #eee;
+}
+
+.ant-menu-item{
+  display: flex !important;
+  align-items: center !important;
+}
+
+.ant-collapse-header {
+  padding: 0 !important;
+}
+
+.ant-collapse-content-box {
+  padding: 0 !important;
+  padding-top: 4px !important;
+}
+
+.no-margin {
+  margin: 0 !important;
+}
+
+.input-transparent > input {
+  background-color: transparent;
 }
 
 .ant-menu-inline .ant-menu-selected::after,

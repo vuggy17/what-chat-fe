@@ -32,16 +32,17 @@ const { confirm } = Modal;
 interface ActionMenuProps extends HtmlHTMLAttributes<HTMLDivElement> {
   actions: Array<'delete' | 'edit' | 'download'>;
   msg: MessageBubbleProps;
-  onDownload?: (
-    percentage: number,
-    transferredBytes?: number,
-    totalBytes?: number
-  ) => void;
-  onCompleted?: (payload: DownloadFileCompletedPayload) => void;
+  // onDownload?: (
+  //   percentage: number,
+  //   transferredBytes?: number,
+  //   totalBytes?: number
+  // ) => void;
+  // onCompleted?: (payload: DownloadFileCompletedPayload) => void;
 }
 
 export default function BubbleActionMenu({
   actions,
+  // onDownload,
   msg,
   ...props
 }: ActionMenuProps) {
@@ -155,8 +156,3 @@ export default function BubbleActionMenu({
     </Dropdown>
   );
 }
-
-BubbleActionMenu.defaultProps = {
-  onDownload: undefined,
-  onCompleted: undefined,
-};

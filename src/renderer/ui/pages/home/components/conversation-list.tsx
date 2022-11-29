@@ -189,7 +189,7 @@ function InternalItem({ id }: { id: Id }) {
 
   if (!listItem) return <></>;
 
-  const getProperties = (item: ChatEntity) => {
+  const extractProperty = (item: ChatEntity) => {
     const {
       id: internalId,
       avatar,
@@ -198,6 +198,8 @@ function InternalItem({ id }: { id: Id }) {
       lastUpdate,
       status,
     } = item;
+
+    console.log('item', item);
 
     const getPreviewMessage = (
       originalMessage: Pick<ChatEntity, 'lastMessage'>['lastMessage']
@@ -232,18 +234,15 @@ function InternalItem({ id }: { id: Id }) {
         status: status || 'idle',
       }), // TODO: not implement typing yet
       muted: false, // TODO: not implement muted yet
-      time: lastUpdate,
+      time: lastUpdate || Date.now(),
     };
   };
 
   return (
     <MemorizedItem
-      {...getProperties(listItem)}
+      {...extractProperty(listItem)}
       onSelectItem={(key) => {
         setActiveChatId(key);
-        if (location.pathname.includes('new-chat')) {
-          navigate('/app/conversations');
-        }
       }}
       active={id === activeChat.id}
     />
@@ -336,7 +335,7 @@ EmptyChatItem.defaultProps = {
 
 function List({ data }: ListProps) {
   return (
-    <ul className="list-none p-0 overflow-hidden">
+    <ul className="list-none p-0 m-0 overflow-hidden">
       {data.map((item, index) => (
         <InternalItem key={item.id} id={item.id} />
       ))}

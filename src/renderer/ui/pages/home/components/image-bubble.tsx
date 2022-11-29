@@ -5,54 +5,57 @@ import React, { ReactNode } from 'react';
 interface ImageBubbleProps extends React.HTMLAttributes<HTMLDivElement> {
   // indicator?: JSX.Element | null;
   // self?: boolean;
-  localPath?: string; // local file path
-  attachments?: string; // remote file url
+  attachmentsMeta?: { name: string; size: number; path: string }[]; // local file path
+  attachments?: string[]; // remote file url
   description?: ReactNode;
 }
 
 export default function ImageBubble({
-  localPath,
+  attachmentsMeta,
   attachments,
   description,
   ...props
 }: ImageBubbleProps) {
-  if (description) {
-    console.log('render with', attachments, localPath);
-    // return image with description component
-    return (
-      // eslint-disable-next-line react/jsx-props-no-spreading
-      <div {...props}>
-        <div className="overflow-hidden">
-          <img
-            className="object-cover h-auto max-h-[300px]"
-            src={attachments || localPath}
-            onLoad={() => {
-              if (attachments && localPath) {
-                URL.revokeObjectURL(localPath);
-              }
-            }}
-            alt="img"
-          />
-        </div>
-        {description}
-      </div>
-    );
-  }
+  // if (description) {
+  //   // return image with description component
+  //   return (
+  //     // eslint-disable-next-line react/jsx-props-no-spreading
+  //     <div {...props}>
+  //       <div className="overflow-hidden">
+  //         <img
+  //           className="object-cover h-auto max-h-[300px]"
+  //           src={attachments || localPath}
+  //           onLoad={() => {
+  //             if (attachments && localPath) {
+  //               URL.revokeObjectURL(localPath);
+  //             }
+  //           }}
+  //           alt="img"
+  //         />
+  //       </div>
+  //       {description}
+  //     </div>
+  //   );
+  // }
 
+  const selectProperty =
+    attachments || attachmentsMeta?.map((meta) => meta.path);
   return (
     // eslint-disable-next-line react/jsx-props-no-spreading
     <div {...props}>
       <div className="overflow-hidden">
-        <img
-          className="object-cover h-auto max-h-[300px]"
-          src={attachments || localPath}
-          alt="img"
-          onLoad={() => {
-            if (attachments && localPath) {
-              URL.revokeObjectURL(localPath);
-            }
-          }}
-        />
+        {selectProperty?.map((path) => (
+          <img
+            className="object-cover h-auto max-h-[300px]"
+            src={path}
+            alt="img"
+            onLoad={() => {
+              if (attachments && attachmentsMeta) {
+                URL.revokeObjectURL(path);
+              }
+            }}
+          />
+        ))}
       </div>
     </div>
   );
@@ -61,7 +64,7 @@ export default function ImageBubble({
 ImageBubble.defaultProps = {
   // indicator: undefined,
   // self: false,
-  localPath: undefined,
+  attachmentsMeta: undefined,
   attachments: undefined,
   description: undefined,
 };

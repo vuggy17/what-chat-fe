@@ -24,6 +24,8 @@ import {
   seenMessage,
   sendMessageOnline,
 } from 'renderer/usecase/message.usecase';
+import { useNavigate } from 'react-router-dom';
+import { ReactComponent as IconSearch } from '../../../../../../assets/icons/search.svg';
 import { ReactComponent as SideBarRight } from '../../../../../../assets/icons/layout-sidebar-right.svg';
 import { ReactComponent as DotsVertical } from '../../../../../../assets/icons/dots-vertical.svg';
 
@@ -32,9 +34,11 @@ import SearchBox from '../components/search-box';
 
 export function Header({ data }: { data: ChatEntity }) {
   const { toggleInfoOpen: toggleOpenConvOption } = useChatBoxContext();
+  const navigate = useNavigate();
+
   return (
     <>
-      <div className="flex justify-between items-center pl-4 pr-10 pb-3 pt-2">
+      <div className="flex justify-between items-center pl-2   ">
         <Space size="middle" align="center">
           <Avatar
             shape="circle"
@@ -61,7 +65,17 @@ export function Header({ data }: { data: ChatEntity }) {
             </Typography.Text>
           </div>
         </Space>
-        <div className="flex items-center">
+        <div className="flex items-center space-x-2">
+          <Button
+            type="text"
+            onClick={() => navigate('search')}
+            icon={
+              <Icon
+                component={IconSearch}
+                style={{ color: 'white', fontSize: 19 }}
+              />
+            }
+          />
           <Button
             type="text"
             icon={
@@ -79,12 +93,11 @@ export function Header({ data }: { data: ChatEntity }) {
           />
         </div>
       </div>
-      <Divider style={{ marginTop: 0, marginBottom: 0 }} />
     </>
   );
 }
 
-export default function Chat({
+export default function ChatBox({
   chat,
   hasSearch,
   header,
@@ -103,7 +116,11 @@ export default function Chat({
   const currentUser = useRecoilValue(userState);
   const { messages } = chat;
 
-  const onSendMessage = (type: MessageType, text?: string, fileList?: File) => {
+  const onSendMessage = (
+    type: MessageType,
+    text?: string,
+    fileList?: File[]
+  ) => {
     // SETUP: construct message
     let clientMessage = {} as Message;
     if (currentUser) {
@@ -195,9 +212,11 @@ export default function Chat({
   }, [messages, currentUser, chat.id, chat.participants]);
 
   return (
-    <div className="flex flex-col min-h-0 h-full pb-2 ">
-      {header}
-      <div className="flex-1 relative px-2 mb-1 transition-all transform duration-700 overflow-hidden min-h-0">
+    <div className="flex flex-col min-h-0 h-full ">
+      <div className="py-1 pr-2">{header}</div>
+      <Divider style={{ marginTop: 0, marginBottom: 0 }} />
+
+      <div className="flex-1 relative px-2 transition-all transform duration-700 overflow-hidden min-h-0">
         {messages?.length > 0
           ? messagesContainer
           : // <div className="flex w-full items-center justify-center pt-2 flex-col">
@@ -218,7 +237,7 @@ export default function Chat({
   );
 }
 
-Chat.defaultProps = {
+ChatBox.defaultProps = {
   hasSearch: false,
   hasEditor: true,
 };

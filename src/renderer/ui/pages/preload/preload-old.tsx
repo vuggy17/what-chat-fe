@@ -1,6 +1,7 @@
 import { ReactNode, useEffect, useState } from 'react';
-import { useRecoilValue } from 'recoil';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { Message } from 'renderer/domain';
+import { useContact, userContacts } from 'renderer/hooks/contact-store';
 import { useChat, useChatMessage } from 'renderer/hooks/new-store';
 
 import { currentUser } from 'renderer/hooks/use-user';
@@ -25,7 +26,7 @@ export default function Preload({ children }: { children: ReactNode }) {
   const [appReady, setAppReady] = useState(false);
   const { insertMessage } = useChatMessage();
   const { updateChat } = useChat();
-
+  const setUserContact = useSetRecoilState(userContacts);
   const user = useRecoilValue(currentUser);
 
   // init chat items
@@ -92,6 +93,7 @@ export default function Preload({ children }: { children: ReactNode }) {
       onMessageRead
     );
     (async () => {
+      setUserContact(user!.friends || []);
       const response = await getInitialChat_v1();
       setChatList(response.data, response.extra);
       setAppReady(true);

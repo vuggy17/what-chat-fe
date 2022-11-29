@@ -1,6 +1,5 @@
-import { SearchOutlined } from '@ant-design/icons';
-import { Input, Skeleton } from 'antd';
-import { useState } from 'react';
+import { Button, Input, Skeleton } from 'antd';
+import { Suspense, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
@@ -14,7 +13,7 @@ import { chatRepository } from 'renderer/repository/chat/chat.repository';
 import useDebounce from 'renderer/utils/debouce';
 import ConversationList, { EmptyChatItem } from './conversation-list';
 
-export default function Conversations() {
+function List() {
   // const { listIds, extra: listExtra, setList } = useChatList();
   const listExtra = useRecoilValue(chatExtraState);
   const conversationItems = useRecoilValue(sortedChatsQuery);
@@ -52,27 +51,8 @@ export default function Conversations() {
   const navigate = useNavigate();
 
   return (
-    <div className="h-full flex flex-col  ">
-      <div className="mx-2  pt-6 ">
-        <Input
-          onClick={() => {
-            console.log(location.pathname);
-            if (location.pathname.includes('new-chat')) {
-              navigate('/app/conversations');
-            }
-          }}
-          onChange={(e) => debounceSearch(e.target.value)}
-          style={{
-            color: '#171717',
-            paddingInline: 8,
-            height: 38,
-          }}
-          placeholder="Search a chat"
-          suffix={<SearchOutlined className="text-gray-1" />}
-        />
-      </div>
-      <>
-        <ul
+    <div className="h-full">
+      {/* <ul
           className="list-none p-0 overflow-hidden"
           style={{
             // visibility: chatResult.length !== 0 ? 'visible' : 'hidden',
@@ -92,37 +72,44 @@ export default function Conversations() {
               active={false}
             />
           ))}
-        </ul>
-        <div
-          id="scrollableDiv"
-          className="flex-1"
-          style={{
-            overflowY: 'auto',
-            visibility: chatResult.length === 0 ? 'visible' : 'hidden',
-          }}
+        </ul> */}
+      <div
+        id="scrollableDiv"
+        className="flex-1"
+        style={{
+          overflowY: 'auto',
+          visibility: chatResult.length === 0 ? 'visible' : 'hidden',
+        }}
+      >
+        <InfiniteScroll
+          style={{ minWidth: 0 }}
+          dataLength={conversationItems.length}
+          next={loadMoreData}
+          hasMore={listExtra.totalPage !== listExtra.pageNum}
+          loader={
+            <Skeleton
+              className="pl-7 pr-2"
+              avatar
+              paragraph={{
+                rows: 1,
+              }}
+              active
+            />
+          }
+          // endMessage={<Divider plain>It is all, nothing more 🤐</Divider>}
+          scrollableTarget="scrollableDiv"
         >
-          <InfiniteScroll
-            style={{ minWidth: 0 }}
-            dataLength={conversationItems.length}
-            next={loadMoreData}
-            hasMore={listExtra.totalPage !== listExtra.pageNum}
-            loader={
-              <Skeleton
-                className="pl-7 pr-2"
-                avatar
-                paragraph={{
-                  rows: 1,
-                }}
-                active
-              />
-            }
-            // endMessage={<Divider plain>It is all, nothing more 🤐</Divider>}
-            scrollableTarget="scrollableDiv"
-          >
-            <ConversationList data={conversationItems} />
-          </InfiniteScroll>
-        </div>
-      </>
+          <ConversationList data={conversationItems} />
+        </InfiniteScroll>
+      </div>
     </div>
+  );
+}
+
+export default function Conversations() {
+  return (
+    <Suspense fallback="loading..">
+      <List />
+    </Suspense>
   );
 }

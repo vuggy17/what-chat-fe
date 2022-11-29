@@ -73,16 +73,15 @@ export default function App() {
           }
         >
           <Route
-            path={C_CONVERSATION}
+            path={`${C_CONVERSATION}/*`}
             element={
               <ChatBoxProvider>
                 <Chat />
               </ChatBoxProvider>
             }
-          >
-            <Route index element={<RecentChat />} />
-            <Route path="new-chat" element={<NewChat />} />
-          </Route>
+          />
+          {/* <Route index element={<RecentChat />} />
+            <Route path="new-chat" element={<NewChat />} /> */}
           <Route
             path={C_FRIEND}
             element={

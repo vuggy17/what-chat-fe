@@ -7,8 +7,9 @@ export type Chat = {
   avatar?: string;
   status?: 'sending' | 'sent_error' | 'idle';
   lastMessage?: PreviewMessage;
-  participants: User[];
-  lastUpdate: number;
+  participants?: User[];
+  lastUpdate?: number;
+  contactId?: Id;
   // unreadCount: number;
   // pinned: boolean;
 };

@@ -82,7 +82,7 @@ function MessageBubble1({ hasAvatar = false, ...props }: MessageBubbleProps) {
               actions={['download', 'edit', 'delete']}
               msg={props}
             >
-              <ImageBubble uploaded={messageMeta.uploaded!} {...props} />
+              <ImageBubble {...props} />
             </BubbleActionMenu>
           );
         default:
@@ -205,7 +205,7 @@ export default function MessageBubble({
                 description={
                   text && (
                     <div className="break-words py-1 pl-2 pr-3">
-                      <Typography.Paragraph className="text-inherit mb-0 remove-text-margin">
+                      <Typography.Paragraph className="text-inherit mb-0 no-margin">
                         {text}
                       </Typography.Paragraph>
                     </div>
@@ -219,7 +219,7 @@ export default function MessageBubble({
           return (
             <div className="bg-primary w-fit float-right text-white break-words rounded-md rounded-br-none py-2 pl-4 pr-3  ">
               <BubbleActionMenu actions={['delete']} msg={props}>
-                <Typography.Paragraph className="text-inherit remove-text-margin">
+                <Typography.Paragraph className="text-inherit no-margin">
                   {text}
                 </Typography.Paragraph>
               </BubbleActionMenu>
@@ -253,7 +253,7 @@ export default function MessageBubble({
       //           text && (
       //             <BubbleActionMenu actions={['delete']} msg={props}>
       //               <div className="break-words py-1 pl-2 pr-3 bg-[#EBEBEB]  ">
-      //                 <Typography.Paragraph className="text-inherit mb-0 remove-text-margin">
+      //                 <Typography.Paragraph className="text-inherit mb-0 no-margin">
       //                   {text}
       //                 </Typography.Paragraph>
       //               </div>
@@ -274,7 +274,7 @@ export default function MessageBubble({
               description={
                 text && (
                   <div className="break-words py-1 pl-2 pr-3   ">
-                    <Typography.Paragraph className="text-inherit mb-0 remove-text-margin">
+                    <Typography.Paragraph className="text-inherit mb-0 no-margin">
                       {text}
                     </Typography.Paragraph>
                   </div>
@@ -288,7 +288,7 @@ export default function MessageBubble({
         return (
           <BubbleActionMenu actions={['delete']} msg={props}>
             <div className="bg-[#EBEBEB] w-fit break-words rounded-md rounded-bl-none pl-3 py-2 pr-4">
-              <Typography.Paragraph className="remove-text-margin">
+              <Typography.Paragraph className="no-margin">
                 {text}
               </Typography.Paragraph>
             </div>

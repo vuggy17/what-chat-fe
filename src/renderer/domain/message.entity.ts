@@ -15,12 +15,13 @@ export interface TextMessage extends BaseMessage {
 
 export interface FileMessage extends BaseMessage {
   text: string;
-  attachments?: string; // remote file path
+  attachments?: string[]; // remote file path
   uploaded: boolean;
-  name: string;
-  size: number;
-  fileList?: File; // local file => use to upload to server
-  localPath?: string; // local file path
+  // name: string;
+  // size: number;
+  attachmentsMeta?: { name: string; size: number; path: string }[];
+  fileList?: File[]; // local file => use to upload to server
+  localPath?: string[]; // local file path
 }
 
 export type Message = TextMessage | FileMessage;

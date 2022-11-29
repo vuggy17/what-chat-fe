@@ -24,12 +24,12 @@ export default function Input({
   onSubmit(
     type: 'file' | 'photo' | 'text',
     text?: string,
-    attachments?: File
+    attachments?: File[]
   ): void;
   onFocus(): void;
 }) {
   const inputRef = useRef<InputRef>(null);
-  const [fileRef, setFileRef] = useState<File | null>(null);
+  const [fileRef, setFileRef] = useState<File[] | undefined>(null);
   const [textContent, setContent] = React.useState('');
 
   const addNewLineToTextArea = () => {
@@ -72,10 +72,10 @@ export default function Input({
   const handleSendFile = (e: ChangeEvent<HTMLInputElement>) => {
     const { files } = e.target;
     if (files && files?.length > 0) {
-      const file = files[0];
-      if (isFileImage(file)) {
+      const fileArray = Array.from(files);
+      if (isFileImage(files[0])) {
         // props.onSubmit(file, 'photo');
-        setFileRef(file);
+        setFileRef(fileArray);
       } else {
         console.log('not a image file');
         // props.onSubmit(file, 'file');
@@ -108,8 +108,8 @@ export default function Input({
               id="chat-input-voice"
               type="file"
               hidden
-              accept="image/*"
-              onChange={handleSendFile}
+              // accept="image/*"
+              // onChange={handleSendFile}
             />
           </label>
         </Tooltip>{' '}
@@ -125,6 +125,7 @@ export default function Input({
               id="chat-input-image"
               type="file"
               hidden
+              multiple
               accept="image/*"
               onChange={handleSendFile}
             />
@@ -132,25 +133,33 @@ export default function Input({
         </Tooltip>
       </div>
       <Divider className="my-0" />
-      <div className="pt-2">
+      <div>
         <Row>
           <Col span={22}>
             {fileRef && (
               <ul className="flex p-0 m-0 px-2 space-x-1 list-none  preview-scroll">
-                <li className="w-20 h-20 overflow-hidden shrink-0 rounded-md">
-                  <ImagePreview
-                    file={fileRef}
-                    onClose={() => setFileRef(null)}
-                  />
-                </li>
+                {fileRef.map((file) => (
+                  <li className="w-20 h-20 overflow-hidden shrink-0 rounded-md">
+                    <ImagePreview
+                      file={file}
+                      onClose={() =>
+                        setFileRef((prev) =>
+                          prev?.filter((f) => {
+                            return file.name !== f.name;
+                          })
+                        )
+                      }
+                    />
+                  </li>
+                ))}
               </ul>
             )}
           </Col>
         </Row>
-        <Row className="py-2" align="middle" justify="end">
+        <Row className="py-3" align="middle" justify="end">
           <Col flex={1}>
             <AntInput.TextArea
-              size="large"
+              // size="large"
               onPressEnter={sendMessage}
               onKeyDown={handleKeyPress}
               ref={inputRef}
@@ -158,14 +167,14 @@ export default function Input({
               bordered={false}
               value={textContent}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="Type your message "
+              placeholder="Write a message "
               autoSize={{ minRows: 1, maxRows: 5 }}
             />
           </Col>
           <Col span={2}>
             <Tooltip title="Send message" placement="leftTop">
               <Button
-                className="group mx-auto table"
+                className="mx-auto table group"
                 type="text"
                 onClick={() => {
                   sendMessage(textContent);
@@ -173,8 +182,12 @@ export default function Input({
                 icon={
                   <Icon
                     component={SendIcon}
+                    style={{
+                      color: textContent ? '#D1E4E8' : '',
+                      rotate: textContent ? '0deg' : '45deg',
+                    }}
                     size={48}
-                    className="group-hover:text-primary transition-colors duration-150 text-xl"
+                    className="transition-all group-hover:text-[#D1E4E8] duration-150 text-white text-xl transform "
                   />
                 }
               />

@@ -43,17 +43,22 @@ export function createMsgPlaceholder(sender: User, receiver: User | any) {
 
   const uuid = genId(); // temp id used for UI mutation/updates
   return {
-    image: (fileList: File, text?: string): FileMessage => {
-      const file = fileList;
-      const fileInfo = {
-        path: URL.createObjectURL(file!),
-        name: file!.name,
-        size: file!.size,
-      };
+    image: (fileList: File[], text?: string): FileMessage => {
+      const attachmentsMeta = fileList.map((file) => ({
+        name: file.name,
+        size: file.size,
+        path: URL.createObjectURL(file),
+      }));
+
+      // const fileInfo = {
+      //   path: URL.createObjectURL(file!),
+      //   name: file!.name,
+      //   size: file!.size,
+      // };
 
       return {
         id: uuid,
-        localPath: fileInfo.path,
+        // localPath: files.map((file) => file.path),
         type: 'photo',
         uploaded: false,
         createdAt: Date.now(),
@@ -62,32 +67,33 @@ export function createMsgPlaceholder(sender: User, receiver: User | any) {
         status: 'sending',
         chatId: receiver.id,
         text: text || '',
-        name: fileInfo.name,
-        size: fileInfo.size,
-        fileList: file, // local file to upload to server
+        // name: files.map((file) => file.name),
+        // size: files.map((file) => file.size),
+        attachmentsMeta, // file data contains name, size, path
+        fileList, // local file to upload to server
       };
     },
-    file: (fileList: File, text?: string): FileMessage => {
-      const file = fileList;
-      const fileInfo = {
-        path: URL.createObjectURL(file!),
-        name: file!.name,
-        size: file!.size,
-      };
+    file: (fileList: File[], text?: string): FileMessage => {
+      const attachmentsMeta = fileList.map((file) => ({
+        name: file.name,
+        size: file.size,
+        path: URL.createObjectURL(file),
+      }));
       return {
         id: uuid,
         uploaded: false,
         chatId: receiver.id,
-        localPath: fileInfo.path,
+        // localPath: fileInfo.path,
         type: 'file',
         receiver,
         text: text || '',
         sender,
         createdAt: Date.now(),
         status: 'sending',
-        name: fileInfo.name,
-        size: fileInfo.size,
-        fileList: file, // local file to upload to server
+        attachmentsMeta,
+        // name: fileInfo.name,
+        // size: fileInfo.size,
+        fileList, // local file to upload to server
       };
     },
     text: (text: string): TextMessage => ({
