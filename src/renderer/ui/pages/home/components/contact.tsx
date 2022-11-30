@@ -21,6 +21,7 @@ import {
   currentChatIdState,
   useChat,
 } from 'renderer/hooks/new-store';
+import { currentUser } from 'renderer/hooks/use-user';
 import useDebounce from 'renderer/utils/debouce';
 import formatDTime from 'renderer/utils/time';
 
@@ -38,7 +39,7 @@ export default function Contacts({
   open: boolean;
   toggleOpen: () => void;
 }) {
-  const { updateChat } = useChat();
+  const user = useRecoilValue(currentUser);
   const contactList = useRecoilValue(userContacts);
   const setChat = useRecoilCallback(({ set }) => (data: any) => {
     set(chatState(data.id), data);
@@ -69,6 +70,7 @@ export default function Contacts({
         avatar: contact.avatar,
         messages: [],
         total: 0,
+        participants: [contact, user],
       };
       setChat(newItem);
       setCurrentChatId(newItem.id);

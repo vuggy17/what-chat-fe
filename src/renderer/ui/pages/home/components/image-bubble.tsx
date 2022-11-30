@@ -1,5 +1,5 @@
 import { Col, Image, Row, Typography } from 'antd';
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect, useRef, useState } from 'react';
 import { ImageBubbleProps, MessageBubbleProps } from './type';
 // eslint-disable-next-line import/no-cycle
 
@@ -30,24 +30,37 @@ export default function ImageBubble({
   //     </div>
   //   );
   // }
-
+  // const [height, setHeight] = useState(0);
+  // const [loaded, setLoaded] = useState(false);
+  // const div = useRef<HTMLDivElement>(null);
   const selectProperty =
-    attachments || attachmentsMeta?.map((meta) => meta.path);
+    attachmentsMeta?.map((meta) => meta.path) || attachments;
+
+  // useEffect(() => {
+  //   if (loaded) setHeight(div.current?.clientHeight || 0);
+  // }, [loaded]);
+
   return (
     // eslint-disable-next-line react/jsx-props-no-spreading
-    <div className={className}>
+    <div
+      className={className}
+      // style={{ height: height !== 0 ? height : 'auto' }}
+      // ref={div}
+    >
       <div className="flex flex-wrap">
-        {selectProperty?.map((path) => (
-          <div key={path} className="img-reactive--wrap">
+        {selectProperty?.map((path, index) => (
+          // eslint-disable-next-line react/no-array-index-key
+          <div className="img-reactive--wrap">
             <img
-              className="object-cover h-full w-full"
+              className="object-cover h-full w-full "
               src={path}
               alt="img"
-              onLoad={() => {
-                if (attachments && attachmentsMeta) {
-                  URL.revokeObjectURL(path);
-                }
-              }}
+              // onLoad={() => setLoaded(true)}
+              // onLoad={() => {
+              //   if (attachments && attachmentsMeta) {
+              //     URL.revokeObjectURL(path);
+              //   }
+              // }}
             />
           </div>
         ))}
