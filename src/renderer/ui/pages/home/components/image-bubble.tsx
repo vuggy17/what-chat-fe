@@ -50,7 +50,7 @@ export default function ImageBubble({
       <div className="flex flex-wrap">
         {selectProperty?.map((path, index) => (
           // eslint-disable-next-line react/no-array-index-key
-          <div className="img-reactive--wrap">
+          <div className="img-reactive--wrap" key={index}>
             <img
               className="object-cover h-full w-full "
               src={path}

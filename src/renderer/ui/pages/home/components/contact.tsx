@@ -22,6 +22,7 @@ import {
   useChat,
 } from 'renderer/hooks/new-store';
 import { currentUser } from 'renderer/hooks/use-user';
+import { chatRepository } from 'renderer/repository/chat/chat.repository';
 import useDebounce from 'renderer/utils/debouce';
 import formatDTime from 'renderer/utils/time';
 
@@ -45,6 +46,7 @@ export default function Contacts({
     set(chatState(data.id), data);
   });
   const setCurrentChatId = useSetRecoilState(currentChatIdState);
+  // TODO: need to review
   const getChat = useRecoilCallback(({ snapshot }) => (contactId: Id) => {
     const chat = snapshot.getLoadable(chatState(contactId)).valueMaybe();
     return chat && Object.keys(getChat).length > 0 ? chat : null;
@@ -60,9 +62,10 @@ export default function Contacts({
   };
   const debounceSearch = useDebounce(findContact, 500);
 
-  const handleContactClick = (contact: any) => {
+  const handleContactClick = async (contact: any) => {
     // load contact
-    const chat = getChat(contact.id);
+
+    const chat = await chatRepository.getChatOfContact(contact.id);
     if (!chat) {
       const newItem: ChatWithMessages = {
         id: contact.id,
@@ -74,6 +77,8 @@ export default function Contacts({
       };
       setChat(newItem);
       setCurrentChatId(newItem.id);
+    } else {
+      setCurrentChatId(chat.id);
     }
     // close modal
     toggleOpen();

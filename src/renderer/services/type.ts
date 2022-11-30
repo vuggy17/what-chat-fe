@@ -1,5 +1,4 @@
-import { Chat, Message, TextMessage } from 'renderer/domain';
-import { ids } from 'webpack';
+import { Message } from 'renderer/domain';
 
 interface ISocketClient {
   seenMessage(
@@ -108,40 +107,6 @@ export type SendMessageResponse = {
   message: string;
   data: HasNewMessagePayload;
 };
-/** Type returned from remote server */
-type OContact = {
-  id: Id;
-  email: string;
-  name: string;
-  avatar: string;
-};
-
-type OConveration = {
-  id: Id;
-  chatUsers: OContact[];
-  lastMessageId: number;
-  previewMessage:
-    | {
-        message: string;
-        type: MessageType;
-      }
-    | string;
-  lastUpdate: string;
-  unreadCount: number;
-};
-
-type OMessage = {
-  id: LocalId;
-  globalId: Id | null;
-  senderId: Id;
-  chatId: Id;
-  content: string;
-  createdAt: string;
-  updatedAt: string;
-  type: MessageType;
-  status: MessageStatus;
-};
-
 interface SeenMessagePayload {
   userId: Id;
   chatId: Id;
@@ -150,10 +115,4 @@ interface SeenMessagePayload {
   time: number; // seen unix timestamp
 }
 
-// chat interface that is used by indexdb
-export interface InternalChat extends Chat {
-  lastReadTime: number; // unix timestamp
-  lastReadMessageId: string; // message id
-}
-
-export { OContact, OConveration, OMessage, SeenMessagePayload, ISocketClient };
+export { SeenMessagePayload, ISocketClient };
