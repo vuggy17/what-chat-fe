@@ -3,4 +3,5 @@ export default interface User {
   name: string;
   userName: string;
   avatar: string;
+  friends?: User[];
 }

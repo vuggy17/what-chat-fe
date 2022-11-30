@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { DownOutlined } from '@ant-design/icons';
 import { Affix, Button, Spin, Tooltip } from 'antd';
 import { forwardRef, useCallback, useMemo, useRef, useState } from 'react';
@@ -17,6 +18,16 @@ type MessageListProps = {
   currentUserId: Id;
   onStartReached: () => Promise<void>;
 };
+
+const CustomList: Components['List'] = forwardRef(
+  ({ style, children }, ref) => {
+    return (
+      <div style={{ ...style }} className="space-y-1" ref={ref}>
+        {children}
+      </div>
+    );
+  }
+);
 
 function MessagesList({
   messages,
@@ -68,11 +79,10 @@ function MessagesList({
       return (
         <div className="overflow-hidden" key={id}>
           <MessageBubble
-            content={text}
+            key={id}
             self={sender.id === currentUserId}
             time={createdAt}
             hasAvatar={!isSameSender} // if next message is from the same sender, don't render avatar
-            key={id}
             // eslint-disable-next-line react/jsx-props-no-spreading
             {...rowData}
           />
@@ -111,6 +121,7 @@ function MessagesList({
               )}
             </>
           ),
+          // List: CustomList,
         }}
       />
       {/* jump to bottom button */}

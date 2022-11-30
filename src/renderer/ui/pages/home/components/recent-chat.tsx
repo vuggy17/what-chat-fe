@@ -1,6 +1,5 @@
-import { Divider } from 'antd';
-import { Content } from 'antd/lib/layout/layout';
-import Sider from 'antd/lib/layout/Sider';
+import { Divider, Layout } from 'antd';
+
 import { Suspense, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { currentChatQuery } from 'renderer/hooks/new-store';
@@ -10,6 +9,8 @@ import ChatOptionToggle from './chat-side-menu';
 import ChatBoxFallback from './loaders/chatbox.fallback';
 import MessageList from './message-list';
 
+const { Sider, Content } = Layout;
+
 export default function RecentChat() {
   const [seachOpen, setSearchOpen] = useState(false);
   const activeChat = useRecoilValue(currentChatQuery);
@@ -17,7 +18,7 @@ export default function RecentChat() {
 
   return (
     <>
-      <Content className="h-full w-full">
+      <Content className="h-full w-full shrink-0">
         <Suspense fallback={<ChatBoxFallback />}>
           <ChatBox
             chat={activeChat}
@@ -29,19 +30,22 @@ export default function RecentChat() {
           />
         </Suspense>
       </Content>
-      <Divider type="vertical" className="h-full ml-0 mr-0" />
       {infoOpen && activeChat && (
         <Sider
-          className="max-h-full overflow-auto h-full "
+          className="max-h-full overflow-auto h-full relative "
           theme="light"
           style={{
             background: 'white',
             marginLeft: -8,
           }}
-          width={360}
+          width={272}
         >
+          <Divider
+            type="vertical"
+            className="h-full ml-0 mr-0 absolute top-0 left-0"
+          />
           <ChatOptionToggle
-            id={activeChat.id}
+            activeChat={activeChat}
             toggleSearch={() => setSearchOpen((opened) => !opened)}
           />
         </Sider>

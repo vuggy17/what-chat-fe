@@ -7,36 +7,25 @@ import {
   EditOutlined,
   ExclamationCircleOutlined,
 } from '@ant-design/icons';
-import { Dropdown, Menu, Space, Modal, message, MenuProps } from 'antd';
-import { HtmlHTMLAttributes } from 'react';
-import User from 'renderer/domain/user.entity';
-
-// REMEMBER TO COPY THIS FROM chat-bubble.tsx DUE TO ESLINT NO CYCLE IMPORT RULE
-export interface MessageBubbleProps {
-  self: boolean;
-  type: MessageType;
-  content: any;
-  path?: string;
-  name?: string;
-  size?: number;
-  sender: User | any;
-  time: number;
-  hasAvatar?: boolean;
-  uploaded?: boolean;
-  chatId: Id;
-  id: Id;
-  status: MessageStatus;
-}
+import { Dropdown, Space, Modal, message, MenuProps } from 'antd';
+import { HtmlHTMLAttributes, useRef } from 'react';
+import { MessageBubbleProps } from './type';
 
 const { confirm } = Modal;
-
 interface ActionMenuProps extends HtmlHTMLAttributes<HTMLDivElement> {
   actions: Array<'delete' | 'edit' | 'download'>;
   msg: MessageBubbleProps;
+  // onDownload?: (
+  //   percentage: number,
+  //   transferredBytes?: number,
+  //   totalBytes?: number
+  // ) => void;
+  // onCompleted?: (payload: DownloadFileCompletedPayload) => void;
 }
 
 export default function BubbleActionMenu({
   actions,
+  // onDownload,
   msg,
   ...props
 }: ActionMenuProps) {
@@ -60,6 +49,7 @@ export default function BubbleActionMenu({
       },
     });
   };
+  const notiRef = useRef<string>('');
 
   const handleEdit = () => {
     // open edit image lib
@@ -68,28 +58,40 @@ export default function BubbleActionMenu({
   };
 
   const download = () => {
-    console.log('downloading');
-
+    notiRef.current = `download_${restProperties.name}`;
     message.loading({
-      key: `download_${restProperties.name}`,
+      key: notiRef.current,
       content: 'Downloading..',
       duration: 3,
     });
 
-    restProperties.content?.arrayBuffer().then((buffer) => {
-      const buff = Buffer.from(buffer);
-      window.electron.ipcRenderer.sendMessage('save-file', [
-        restProperties.name,
-        buff,
-      ]);
-      console.log(
-        `Saving ${JSON.stringify({
-          name: restProperties.name,
-          size: restProperties.size,
-        })}`
-      );
-      return null;
-    });
+    if (restProperties.attachments instanceof File) {
+      restProperties.attachments?.arrayBuffer().then((buffer) => {
+        const buff = Buffer.from(buffer);
+        window.electron.ipcRenderer.sendMessage(
+          'save-file',
+          restProperties.name,
+          buff
+        );
+        message.destroy(notiRef.current);
+
+        console.log(
+          `Saving ${JSON.stringify({
+            name: restProperties.name,
+            size: restProperties.size,
+          })}`
+        );
+        return null;
+      });
+    } else {
+      console.log(notiRef.current);
+      message.destroy(notiRef.current);
+      window.electron.ipcRenderer.sendMessage('download-url', {
+        url: restProperties.attachments,
+      });
+      // console.error('Download attachments is a link is not supported yet');
+      // message.info('Download attachments is a link is not supported yet');
+    }
   };
 
   const menuItems: MenuProps['items'] = actions.map((action) => {

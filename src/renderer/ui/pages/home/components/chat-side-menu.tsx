@@ -17,9 +17,7 @@ import {
   Typography,
 } from 'antd';
 import React, { useState } from 'react';
-import ConversationController from 'renderer/controllers/chat.controller';
 import { Chat } from 'renderer/domain';
-import { useChatItem } from 'renderer/hooks/use-chat';
 import FileList from './file-list';
 import { Bell, BellOff, FileText, Photo } from './icons';
 import MediaGalery from './media-galery';
@@ -27,7 +25,7 @@ import AppSwitch from './switch';
 
 const { confirm } = Modal;
 interface ChatOptionToggleProps {
-  id: Id;
+  activeChat: Chat;
   toggleSearch: () => void;
 }
 
@@ -82,7 +80,7 @@ function Main({
   handleTabClick: (key: string) => void;
   onSearchClick: () => void;
 }) {
-  const { upsertListItem } = useChatItem(data.id);
+  // const { upsertListItem } = useChatItem(data.id);
   return (
     <>
       {data && (
@@ -109,10 +107,10 @@ function Main({
           >
             <Col flex="1" className="flex justify-center text-center">
               <AppSwitch
-                defaultChecked={data.muted}
-                onChange={(muted) =>
-                  upsertListItem({ id: data.id, updates: { muted } })
-                }
+                defaultChecked
+                // onChange={(muted) =>
+                //   upsertListItem({ id: data.id, updates: { muted } })
+                // }
                 CheckedComponent={({ toggleState }) => (
                   <span>
                     <Tooltip title="Click to unmute">
@@ -205,12 +203,9 @@ function Main({
 }
 
 export default function ChatOptionToggle({
-  id,
+  activeChat,
   toggleSearch,
 }: ChatOptionToggleProps) {
-  const { listItem: data } = useChatItem(id);
-  console.log(Boolean(data));
-
   const [activeTab, setActiveTab] = useState('main');
 
   const onTabClick = (key: string) => {
@@ -239,7 +234,7 @@ export default function ChatOptionToggle({
   };
   return (
     <>
-      {data && (
+      {activeChat && (
         <Tabs
           defaultValue="main"
           style={{ height: '100%', overflow: 'hidden' }}
@@ -252,7 +247,7 @@ export default function ChatOptionToggle({
               label: undefined,
               children: (
                 <Main
-                  data={data}
+                  data={activeChat}
                   handleTabClick={onTabClick}
                   onSearchClick={toggleSearch}
                 />
@@ -284,7 +279,7 @@ export default function ChatOptionToggle({
                   </Space>
 
                   <div className="h-6" />
-                  <MediaGalery id={id} />
+                  <MediaGalery id={activeChat.id} />
                 </div>
               ),
             },
@@ -313,7 +308,7 @@ export default function ChatOptionToggle({
                   </Space>
 
                   <div className="h-2" />
-                  <FileList id={id} />
+                  <FileList id={activeChat.id} />
                 </div>
               ),
             },

@@ -1,3 +1,4 @@
+import HttpClient from 'renderer/services/http';
 import { MSG_PAGE_SIZE } from 'renderer/shared/constants';
 /* eslint-disable promise/always-return */
 /* eslint-disable promise/catch-or-return */
@@ -18,6 +19,8 @@ import { ISocketClient } from 'renderer/services/type';
 import User from 'renderer/domain/user.entity';
 import { blob } from 'stream/consumers';
 import SocketClient from 'renderer/services/socket';
+import SendMessageSocket from './pipeline/socket.handler';
+import SendMessageHttp from './pipeline/http.handler';
 
 // export function createMessage(content: string | any, id?: any): Message {
 //   return {
@@ -35,60 +38,67 @@ import SocketClient from 'renderer/services/socket';
  * @param content can be a file or a string
  * @returns new message object to display in the UI
  */
-export function createMsgPlaceholder(
-  sender: User,
-  receiver: User | any,
-  content: string | any
-) {
+export function createMsgPlaceholder(sender: User, receiver: User | any) {
   if (!sender) throw new Error('User not logged in');
 
   const uuid = genId(); // temp id used for UI mutation/updates
   return {
-    image: (): FileMessage => {
-      const file = content as File;
-      const fileInfo = {
-        path: URL.createObjectURL(file),
+    image: (fileList: File[], text?: string): FileMessage => {
+      const attachmentsMeta = fileList.map((file) => ({
         name: file.name,
         size: file.size,
-      };
+        path: URL.createObjectURL(file),
+      }));
+
+      // const fileInfo = {
+      //   path: URL.createObjectURL(file!),
+      //   name: file!.name,
+      //   size: file!.size,
+      // };
+
       return {
         id: uuid,
-        attachments: content,
+        // localPath: files.map((file) => file.path),
         type: 'photo',
         uploaded: false,
         createdAt: Date.now(),
         sender,
         receiver,
-        status: 'unsent',
+        status: 'sending',
         chatId: receiver.id,
-        text: '',
-        ...fileInfo,
+        text: text || '',
+        // name: files.map((file) => file.name),
+        // size: files.map((file) => file.size),
+        attachmentsMeta, // file data contains name, size, path
+        fileList, // local file to upload to server
       };
     },
-    file: (): FileMessage => {
-      const file = content as File;
-      const fileInfo = {
-        path: URL.createObjectURL(file),
+    file: (fileList: File[], text?: string): FileMessage => {
+      const attachmentsMeta = fileList.map((file) => ({
         name: file.name,
         size: file.size,
-      };
+        path: URL.createObjectURL(file),
+      }));
       return {
         id: uuid,
         uploaded: false,
         chatId: receiver.id,
-        attachments: content,
+        // localPath: fileInfo.path,
         type: 'file',
         receiver,
-        text: '',
+        text: text || '',
         sender,
         createdAt: Date.now(),
-        status: 'unsent',
-        ...fileInfo,
+        status: 'sending',
+        attachmentsMeta,
+        // name: fileInfo.name,
+        // size: fileInfo.size,
+        fileList, // local file to upload to server
       };
     },
-    text: (): TextMessage => ({
+    text: (text: string): TextMessage => ({
       id: uuid,
-      text: content,
+      text,
       type: 'text',
       createdAt: Date.now(),
       sender,
@@ -116,25 +126,45 @@ export async function getMessageOfChat(
 
 export async function sendMessageOnline(
   message: Message,
-  sendService: ISocketClient
+  socket: ISocketClient,
+  http = HttpClient
 ) {
-  if (message.type !== 'text') {
-    console.error('Cannot send message of type', message.type);
+  // if (message.type !== 'text') {
+  //   console.error('Cannot send message of type', message.type);
+  // }
+  // const msg = message as TextMessage;
+  // return socket.sendPrivateMessage(msg);
+  console.log('BEGIN PIPELINE', message);
+  switch (message.type) {
+    case 'text': {
+      const handler = new SendMessageSocket();
+      return handler.handle(message);
+    }
+    case 'photo': {
+      const socketHandler = new SendMessageSocket();
+      const httpHandler = new SendMessageHttp();
+      httpHandler.setNext(socketHandler);
+      return httpHandler.handle(
+        message as WithRequired<FileMessage, 'fileList'>
+      );
+    }
+
+    default:
+      // eslint-disable-next-line prefer-promise-reject-errors
+      return new Promise((resolve, reject) => reject('Message type not found'));
   }
-  const msg = message as TextMessage;
-  return sendService.sendPrivateMessage(msg);
 }
 
 export function convertToPreview(message: Message): PreviewMessage {
-  const previewText = `${message.text}`; // TODO: get preview text from message
-
+  let previewText = `${message.text}`; // TODO: get preview text from message
+  if (message.type === 'photo') {
+    previewText = `${(message.receiver as User).name} send a photo`;
+  }
   const preview: PreviewMessage = {
-    createdAt: message.createdAt,
-    id: message.id,
+    ...message,
     receiverName: (message.receiver as User).name,
     senderName: (message.sender as User).name,
     text: previewText,
-    updatedAt: message.createdAt,
   };
 
   return preview;

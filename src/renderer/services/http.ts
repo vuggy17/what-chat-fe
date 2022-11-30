@@ -19,6 +19,12 @@ class AppHttp implements IDataSource {
       .catch((error: AxiosError) => this.handleError(error));
   }
 
+  /**
+   * Wrapper for axios.post
+   * @param endpoint
+   * @param data
+   * @returns
+   */
   async save<T>(endpoint: string, data: any): Promise<any> {
     return axios
       .post<T>(`${BASEURL}${endpoint}`, data)

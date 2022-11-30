@@ -51,3 +51,15 @@ const user: UserWithName = {
 }
  */
 type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };
+
+/**
+ * interface of download completed payload from
+ * @link https://github.com/sindresorhus/electron-dl#oncompleted
+ * */
+type DownloadFileCompletedPayload = {
+  filename: string;
+  path: string;
+  fileSize: number;
+  mimeType: string;
+  url: string;
+};

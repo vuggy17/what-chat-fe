@@ -3,7 +3,7 @@ import { QuestionOutlined } from '@ant-design/icons';
 import { Avatar, Badge, Col, Grid, Row, Space, Typography } from 'antd';
 import { useEffect, useRef } from 'react';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
-import { Chat } from 'renderer/domain';
+import { Chat as ChatEntity } from 'renderer/domain';
 import { parseDescription } from 'renderer/ui/helper/string-converter';
 import formatDTime from 'renderer/utils/time';
 import { currentUser } from 'renderer/hooks/use-user';
@@ -113,24 +113,26 @@ function Item({
     <li
       key={id}
       ref={itemRef}
-      className=" relative py-2 pl-7 pr-2 before:opacity-0 cursor-pointer   "
+      className=" relative py-2 pl-3 pr-2 before:opacity-0 cursor-pointer   "
       onClick={() => onSelectItem(id)}
     >
       {breakpoints.lg ? (
-        <Space direction="horizontal" size="middle" style={{ width: '100%' }}>
+        <Space direction="horizontal" size="small" style={{ width: '100%' }}>
           {avatar}
 
           <Row
-            gutter={[16, 8]}
+            gutter={[8, 8]}
             style={{ minWidth: 0, flex: 1, marginRight: 0 }}
             align="middle"
           >
             <Col flex="1" style={{ minWidth: 0 }}>
               <Space
                 direction="vertical"
+                size="small"
                 style={{
                   width: '100%',
                   columnGap: 0,
+                  rowGap: 0,
                   justifyContent: 'center',
                   minWidth: 0,
                 }}
@@ -172,7 +174,7 @@ Item.defaultProps = {
 
 const MemorizedItem = Item;
 interface ListProps {
-  data: Chat[];
+  data: ChatEntity[];
 }
 
 function InternalItem({ id }: { id: Id }) {
@@ -187,7 +189,7 @@ function InternalItem({ id }: { id: Id }) {
 
   if (!listItem) return <></>;
 
-  const getProperties = (item: Chat) => {
+  const extractProperty = (item: ChatEntity) => {
     const {
       id: internalId,
       avatar,
@@ -197,9 +199,26 @@ function InternalItem({ id }: { id: Id }) {
       status,
     } = item;
 
-    const getPreviewMessage = (text: string) => {
-      if (user?.name === lastMessage?.senderName) return `You: ${text}`;
-      return text;
+    console.log('item', item);
+
+    const getPreviewMessage = (
+      originalMessage: Pick<ChatEntity, 'lastMessage'>['lastMessage']
+    ) => {
+      if (user?.id === originalMessage?.sender.id) {
+        switch (originalMessage?.type) {
+          case 'photo':
+            return `You send a file`;
+          default:
+            return `You: ${originalMessage?.text}`;
+        }
+      }
+
+      switch (originalMessage?.type) {
+        case 'photo':
+          return `${originalMessage?.sender.name} send a file`;
+        default:
+          return originalMessage?.text;
+      }
     };
 
     return {
@@ -207,23 +226,23 @@ function InternalItem({ id }: { id: Id }) {
       avatar,
       name,
       description: parseDescription({
-        preview: lastMessage ? getPreviewMessage(lastMessage.text) : '',
+        preview:
+          lastMessage !== undefined
+            ? getPreviewMessage(lastMessage)
+            : 'unhandled',
         typing: false,
         status: status || 'idle',
       }), // TODO: not implement typing yet
       muted: false, // TODO: not implement muted yet
-      time: lastUpdate,
+      time: lastUpdate || Date.now(),
     };
   };
 
   return (
     <MemorizedItem
-      {...getProperties(listItem)}
+      {...extractProperty(listItem)}
       onSelectItem={(key) => {
         setActiveChatId(key);
-        if (location.pathname.includes('new-chat')) {
-          navigate('/app/conversations');
-        }
       }}
       active={id === activeChat.id}
     />
@@ -316,7 +335,7 @@ EmptyChatItem.defaultProps = {
 
 function List({ data }: ListProps) {
   return (
-    <ul className="list-none p-0 overflow-hidden">
+    <ul className="list-none p-0 m-0 overflow-hidden">
       {data.map((item, index) => (
         <InternalItem key={item.id} id={item.id} />
       ))}

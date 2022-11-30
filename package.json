@@ -111,7 +111,8 @@
   },
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
-    "antd": "^4.24.2",
+    "@tabler/icons": "^1.113.0",
+    "antd": "5.x",
     "axios": "^0.27.2",
     "buffer": "^6.0.3",
     "dayjs": "^1.11.5",

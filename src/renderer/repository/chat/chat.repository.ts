@@ -1,3 +1,4 @@
+import { LocalDb } from 'renderer/services/localdb';
 import { Chat } from 'renderer/domain';
 import { CONV_PAGE_SIZE } from 'renderer/shared/constants';
 import { genMockChat } from 'renderer/mock/chats';
@@ -54,6 +55,24 @@ class ChatRepositoryImpl implements IChatRepository {
     return new Promise((resolve, reject) => {
       resolve(chat);
     });
+  }
+
+  async getChatOfContact(contactId: Id) {
+    try {
+      const db = LocalDb.instance_force();
+      if (db instanceof Error) {
+        throw db;
+      } else {
+        const result = await db.privateChat.get(contactId);
+        if (result) {
+          const chat = await db.chats.get(result.chatId);
+          return chat;
+        }
+        return undefined;
+      }
+    } catch (error) {
+      throw new Error('Cannot get chat of contact');
+    }
   }
 }
 

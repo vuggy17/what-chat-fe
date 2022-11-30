@@ -1,4 +1,4 @@
-import { MoreOutlined, UserOutlined } from '@ant-design/icons';
+import Icon, { MoreOutlined, UserOutlined } from '@ant-design/icons';
 import { Avatar, Badge, Button, Divider, Space, Typography } from 'antd';
 import { useCallback } from 'react';
 import { useRecoilValue } from 'recoil';
@@ -24,15 +24,21 @@ import {
   seenMessage,
   sendMessageOnline,
 } from 'renderer/usecase/message.usecase';
+import { useNavigate } from 'react-router-dom';
+import { ReactComponent as IconSearch } from '../../../../../../assets/icons/search.svg';
+import { ReactComponent as SideBarRight } from '../../../../../../assets/icons/layout-sidebar-right.svg';
+import { ReactComponent as DotsVertical } from '../../../../../../assets/icons/dots-vertical.svg';
 
 import RichEditor from '../components/input';
 import SearchBox from '../components/search-box';
 
 export function Header({ data }: { data: ChatEntity }) {
   const { toggleInfoOpen: toggleOpenConvOption } = useChatBoxContext();
+  const navigate = useNavigate();
+
   return (
     <>
-      <div className="pt-4 flex justify-between items-center pl-4 pr-10 ">
+      <div className="flex justify-between items-center pl-2   ">
         <Space size="middle" align="center">
           <Avatar
             shape="circle"
@@ -42,7 +48,10 @@ export function Header({ data }: { data: ChatEntity }) {
           />
           <div className="flex flex-col">
             <Space style={{ paddingTop: 6 }}>
-              <Typography.Title level={5} style={{ marginBottom: 0 }}>
+              <Typography.Title
+                level={5}
+                style={{ marginBottom: 0, marginTop: 0 }}
+              >
                 {data.name}
               </Typography.Title>
               <Badge color="green" />
@@ -56,20 +65,39 @@ export function Header({ data }: { data: ChatEntity }) {
             </Typography.Text>
           </div>
         </Space>
-        <Button
-          icon={<MoreOutlined />}
-          type="text"
-          className="text-2xl text-gray-1"
-          size="large"
-          onClick={toggleOpenConvOption}
-        />
+        <div className="flex items-center space-x-2">
+          <Button
+            type="text"
+            onClick={() => navigate('search')}
+            icon={
+              <Icon
+                component={IconSearch}
+                style={{ color: 'white', fontSize: 19 }}
+              />
+            }
+          />
+          <Button
+            type="text"
+            icon={
+              <Icon
+                component={SideBarRight}
+                style={{ color: 'white', fontSize: 22 }}
+              />
+            }
+            onClick={toggleOpenConvOption}
+          />
+          <Button
+            // icon={}
+            icon={<Icon component={DotsVertical} />}
+            type="text"
+          />
+        </div>
       </div>
-      <Divider style={{ marginTop: 18, marginBottom: 0 }} />
     </>
   );
 }
 
-export default function Chat({
+export default function ChatBox({
   chat,
   hasSearch,
   header,
@@ -88,36 +116,37 @@ export default function Chat({
   const currentUser = useRecoilValue(userState);
   const { messages } = chat;
 
-  const onSendMessage = (msg: File | string, type: MessageType) => {
+  const onSendMessage = (
+    type: MessageType,
+    text?: string,
+    fileList?: File[]
+  ) => {
     // SETUP: construct message
     let clientMessage = {} as Message;
     if (currentUser) {
-      const receiver = chat.participants.find((p) => p.id !== currentUser.id);
-
+      const receiver = chat.participants?.find((p) => p.id !== currentUser.id);
       switch (type) {
         case 'file':
-          clientMessage = createMsgPlaceholder(
-            currentUser,
-            receiver,
-            msg as File
-          ).file();
+          clientMessage = createMsgPlaceholder(currentUser, receiver).file(
+            fileList!,
+            text
+          );
           break;
         case 'photo':
-          clientMessage = createMsgPlaceholder(
-            currentUser,
-            receiver,
-            msg as File
-          ).image();
+          clientMessage = createMsgPlaceholder(currentUser, receiver).image(
+            fileList!,
+            text
+          );
           break;
         default:
-          clientMessage = createMsgPlaceholder(
-            currentUser,
-            receiver,
-            msg as string
-          ).text();
+          clientMessage = createMsgPlaceholder(currentUser, receiver).text(
+            text!
+          );
           break;
       }
     }
+
+    console.log('client meesage', clientMessage);
 
     // ACTION: update UI
     addMessageToChat(chat.id, clientMessage, {
@@ -138,14 +167,15 @@ export default function Chat({
     console.log('SENDING MESASGE: ', clientMessage);
     // ACTION: send message
     sendMessageOnline(clientMessage, SocketClient)
-      .then((res) => {
+      .then(({ data: { message } }) => {
+        console.log('SEND COMPLETED: ', message);
         // FINAL: update chat
         updateChatUseCase(
           chat.id,
           {
             status: 'idle',
-            lastUpdate: res.data.message.createdAt,
-            lastMessage: convertToPreview(res.data.message),
+            lastUpdate: message.createdAt,
+            lastMessage: convertToPreview(message),
           },
           {
             updateChatItem: updateChat,
@@ -156,9 +186,10 @@ export default function Chat({
         insertMessage(
           chat.id,
           {
-            id: res.data.message.id,
+            id: message.id,
             status: 'sent',
-            createdAt: res.data.message.createdAt,
+            createdAt: message.createdAt,
+            attachments: message.attachments,
           },
           clientMessage.id
         );
@@ -174,17 +205,19 @@ export default function Chat({
         chat.id,
         messages[messages.length - 1].id,
         currentUser?.id,
-        chat.participants.find((p) => p.id !== currentUser.id)!.id,
+        chat.participants?.find((p) => p.id !== currentUser.id)!.id,
         Date.now()
       );
     }
   }, [messages, currentUser, chat.id, chat.participants]);
 
   return (
-    <div className="flex flex-col min-h-0 h-full pb-2 ">
-      {header}
-      <div className="flex-1 relative px-2 mb-1 transition-all transform duration-700 overflow-hidden min-h-0">
-        {messages.length > 0
+    <div className="flex flex-col min-h-0 h-full ">
+      <div className="py-1 pr-2">{header}</div>
+      <Divider style={{ marginTop: 0, marginBottom: 0 }} />
+
+      <div className="flex-1 relative px-2 transition-all transform duration-700 overflow-hidden min-h-0 pb-1">
+        {messages?.length > 0
           ? messagesContainer
           : // <div className="flex w-full items-center justify-center pt-2 flex-col">
             //   <Avatar src={chat.avatar} size={56} />
@@ -204,7 +237,7 @@ export default function Chat({
   );
 }
 
-Chat.defaultProps = {
+ChatBox.defaultProps = {
   hasSearch: false,
   hasEditor: true,
 };

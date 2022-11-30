@@ -110,7 +110,6 @@ export const useChatMessage = () => {
           const msgIdx = prevState.messages.findIndex(
             (msg) => msg.id === oldId
           );
-          console.log('msgIdx', msgIdx);
           if (msgIdx === -1) {
             return {
               ...prevState,
@@ -136,6 +135,7 @@ export const useChat = () => {
         extra: { pageNum: 1; totalCount: 0; totalPage: 0 }
       ) => {
         const ids = data.map((chat) => chat.id);
+        console.log('batchInitChats', data);
         data.forEach((chat) => {
           set(chatState(chat.id), chat);
         });

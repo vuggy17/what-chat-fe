@@ -31,6 +31,58 @@ body {
   overflow-y: hidden;
 }
 
+body {
+  --scrollbar-color: #00000040 !important;
+}
+h4 {
+  margin: 0 !important;
+}
+
+.img-reactive--wrap {
+  flex: 1 1 33%;
+  max-height: 300;
+}
+/* only match element if there is 4 items and it is the last one */
+.img-reactive--wrap:nth-child(4):last-child{
+  flex-basis: 50%;
+}
+/* only match element if there is 4 items and it is the nearest with last one (3th item) */
+.img-reactive--wrap:nth-child(3):nth-last-child(2){
+  flex-basis: 50%;
+}
+/* match items if there is more than 4 item and it is not the only child */
+.img-reactive--wrap:nth-child(3n + 1):last-child:not(:only-child) {
+  flex-grow: 0;
+}
+
+
+
+.ant-list-item:hover {
+  box-shadow: 0 0 4px #eee;
+}
+
+.ant-menu-item {
+  display: flex !important;
+  align-items: center !important;
+}
+
+.ant-collapse-header {
+  padding: 0 !important;
+}
+
+.ant-collapse-content-box {
+  padding: 0 !important;
+  padding-top: 4px !important;
+}
+
+.no-margin {
+  margin: 0 !important;
+}
+
+.input-transparent > input {
+  background-color: transparent;
+}
+
 .ant-menu-inline .ant-menu-selected::after,
 .ant-menu-inline .ant-menu-item-selected::after {
   display: none !important;
@@ -72,9 +124,13 @@ body {
 
 *::-webkit-scrollbar {
   -webkit-appearance: none;
+  scrollbar-gutter: stable;
 }
 *::-webkit-scrollbar:vertical {
-  width: 8px;
+  width: 4px;
+}
+*::-webkit-scrollbar:horizontal {
+  width: 4px;
 }
 
 *::-webkit-scrollbar-thumb {
@@ -82,12 +138,15 @@ body {
   background-color: #c0c0c0;
 }
 *::-webkit-scrollbar-track {
-  border-radius: 8px;
   background-color: #eee;
 }
 
 * {
   overflow-anchor: none;
+}
+
+.preview-scroll {
+  overflow: auto;
 }
 
 /* typing animation */

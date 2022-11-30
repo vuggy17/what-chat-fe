@@ -1,5 +1,5 @@
 /* eslint-disable react/button-has-type */
-import {
+import Icon, {
   ApiOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -7,10 +7,19 @@ import {
   SmileOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import { Avatar, Button, Layout, Menu, Tooltip, Typography } from 'antd';
+import {
+  Avatar,
+  Button,
+  Divider,
+  Layout,
+  Menu,
+  Modal,
+  Tooltip,
+  Typography,
+} from 'antd';
 import axios from 'axios';
 import React, { useState } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate, useOutletContext } from 'react-router-dom';
 import { useRecoilCallback, useRecoilState } from 'recoil';
 import { currentUser } from 'renderer/hooks/use-user';
 import SocketClient from 'renderer/services/socket';
@@ -20,8 +29,9 @@ import {
   C_PROFILE,
   LOGIN,
 } from 'renderer/shared/constants';
-import logo from '../../../../../assets/logo.png';
+import { ReactComponent as IconMenu } from '../../../../../assets/icons/menu.svg';
 import Preload from '../preload/preload-old';
+import Contacts from './components/contact';
 
 const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
@@ -60,7 +70,7 @@ function DebugButton() {
 }
 
 const AppContainer: React.FC = () => {
-  const [collapsed, setCollapsed] = useState(true);
+  const [contactOpen, setContactOpen] = useState(false);
   const navigate = useNavigate();
   const [user, setUser] = useRecoilState(currentUser);
 
@@ -74,15 +84,15 @@ const AppContainer: React.FC = () => {
 
   return (
     <Layout style={{ height: '100vh', overflow: 'auto' }}>
-      <Sider
+      {/* <Sider
+        theme="light"
         trigger={null}
         // breakpoint="xl"
         collapsible
         // onBreakpoint={setCollapsed}
         collapsed={collapsed}
         defaultCollapsed
-        theme="light"
-        className="px-4"
+        // className="px-4"
         // width={!collapsed ? 220 : ''}
       >
         <div className="flex flex-col flex-1 h-full justify-between ">
@@ -151,43 +161,53 @@ const AppContainer: React.FC = () => {
             </Tooltip>
           </div>
         </div>
-      </Sider>
+      </Sider> */}
 
       <Layout className="site-layout h-full">
         <Header
-          className="bg-white"
-          style={{ paddingRight: 28, paddingLeft: 0 }}
+          style={{
+            background: 'white',
+            height: 'auto',
+            padding: 8,
+            paddingRight: 0,
+          }}
         >
-          <div className="flex justify-between items-center ">
-            {React.createElement(
+          <div className="flex justify-center items-center h-full">
+            {/* {React.createElement(
               collapsed ? MenuUnfoldOutlined : MenuFoldOutlined,
               {
                 className: 'trigger',
                 onClick: () => setCollapsed(!collapsed),
               }
-            )}
-            <div className="flex gap-2 items-center">
+            )} */}
+
+            <div className="flex gap-2 items-center bg-slate-400 rounded-full pr-2 ">
               {/* <Text>Vu Dang Khuong Duy</Text> */}
-              <Text>{user?.name}</Text>
 
               <Avatar
                 src={user?.avatar}
-                style={{ backgroundColor: '#87d068' }}
+                // style={{ backgroundColor: '#87d068' }}
                 icon={<UserOutlined />}
               />
+              <Text>{user?.name}</Text>
             </div>
           </div>
         </Header>
+        <Divider style={{ margin: 0 }} />
         <Content
           style={{
             minHeight: 280,
-            height: ' 100%',
+            height: '100%',
             background: 'transparent     ',
           }}
         >
-          <Outlet />
+          <Outlet context={{ setContactOpen }} />
         </Content>
       </Layout>
+      <Contacts
+        open={contactOpen}
+        toggleOpen={() => setContactOpen((status) => !status)}
+      />
     </Layout>
   );
 };

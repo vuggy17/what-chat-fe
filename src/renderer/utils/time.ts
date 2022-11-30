@@ -13,7 +13,7 @@ dayjs.extend(LocalizedFormat);
 
 /**
  *
- * @param {number} dt Unix timestamp
+ * @param {number} dt Unix timestamp in seconds
  * @returns {string} formatted dayjs string
  */
 export default function formatDTime(dt: number) {

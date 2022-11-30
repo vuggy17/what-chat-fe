@@ -1,3 +1,4 @@
+import { ConfigProvider } from 'antd';
 import { useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
@@ -29,19 +30,28 @@ root.render(
   <ErrorBoundary>
     <RecoilRoot>
       <DebugObserver />
-      <App />
+      <ConfigProvider
+        theme={{
+          token: {
+            colorPrimary: '#128C7E',
+            colorPrimaryBg: '#ecf7f4',
+          },
+        }}
+      >
+        <App />
+      </ConfigProvider>
     </RecoilRoot>
   </ErrorBoundary>
 );
 
 // calling IPC exposed from preload script
-window.electron.ipcRenderer.once('ipc-example', (arg) => {
-  // eslint-disable-next-line no-console
-  console.log(arg);
-});
+// window.electron.ipcRenderer.once('ipc-example', (arg) => {
+//   // eslint-disable-next-line no-console
+//   console.log(arg);
+// });
 window.electron.ipcRenderer.once('error', (arg) => {
   // eslint-disable-next-line no-console
   console.error('Main process thrown an error', arg);
 });
 
-window.electron.ipcRenderer.sendMessage('ipc-example', ['ping']);
+// window.electron.ipcRenderer.sendMessage('ipc-example', ['ping']);
