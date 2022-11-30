@@ -38,11 +38,30 @@ h4 {
   margin: 0 !important;
 }
 
+.img-reactive--wrap {
+  flex: 1 1 33%;
+  max-height: 300;
+}
+/* only match element if there is 4 items and it is the last one */
+.img-reactive--wrap:nth-child(4):last-child{
+  flex-basis: 50%;
+}
+/* only match element if there is 4 items and it is the nearest with last one (3th item) */
+.img-reactive--wrap:nth-child(3):nth-last-child(2){
+  flex-basis: 50%;
+}
+/* match items if there is more than 4 item and it is not the only child */
+.img-reactive--wrap:nth-child(3n + 1):last-child:not(:only-child) {
+  flex-grow: 0;
+}
+
+
+
 .ant-list-item:hover {
   box-shadow: 0 0 4px #eee;
 }
 
-.ant-menu-item{
+.ant-menu-item {
   display: flex !important;
   align-items: center !important;
 }

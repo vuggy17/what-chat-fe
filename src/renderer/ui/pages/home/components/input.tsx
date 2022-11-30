@@ -139,7 +139,10 @@ export default function Input({
             {fileRef && (
               <ul className="flex p-0 m-0 px-2 space-x-1 list-none  preview-scroll">
                 {fileRef.map((file) => (
-                  <li className="w-20 h-20 overflow-hidden shrink-0 rounded-md">
+                  <li
+                    className="w-20 h-20 overflow-hidden shrink-0 rounded-md"
+                    key={file.path}
+                  >
                     <ImagePreview
                       key={file.path}
                       file={file}

@@ -9,25 +9,8 @@ import {
 } from '@ant-design/icons';
 import { Dropdown, Space, Modal, message, MenuProps } from 'antd';
 import { HtmlHTMLAttributes, useRef } from 'react';
-import User from 'renderer/domain/user.entity';
+import { MessageBubbleProps } from './type';
 
-// REMEMBER TO COPY THIS FROM chat-bubble.tsx DUE TO ESLINT NO CYCLE IMPORT RULE
-export interface MessageBubbleProps {
-  self: boolean;
-  type: MessageType;
-  text: string;
-  attachments?: any;
-  path?: string;
-  name?: string;
-  size?: number;
-  sender: User | any;
-  time: number;
-  hasAvatar?: boolean;
-  uploaded?: boolean;
-  chatId: Id | null;
-  id: Id;
-  status: MessageStatus;
-}
 const { confirm } = Modal;
 interface ActionMenuProps extends HtmlHTMLAttributes<HTMLDivElement> {
   actions: Array<'delete' | 'edit' | 'download'>;

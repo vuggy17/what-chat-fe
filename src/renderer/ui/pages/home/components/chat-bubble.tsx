@@ -17,6 +17,7 @@ import FileBubble from './file-bubble';
 import { CircleChecked, CircleDashed, CircleSent } from './icons';
 import ImageBubble from './image-bubble';
 import BubbleActionMenu from './context-menu';
+import { MessageBubbleProps } from './type';
 
 function Indicator({ status }: { status: MessageStatus }) {
   switch (status) {
@@ -43,136 +44,6 @@ function Indicator({ status }: { status: MessageStatus }) {
   }
 }
 /* eslint-disable react/require-default-props */
-export interface MessageBubbleProps {
-  self: boolean;
-  type: MessageType;
-  text: string;
-  attachments?: any;
-  localPath?: string;
-  name?: string;
-  size?: number;
-  sender: User | any;
-  time: number;
-  hasAvatar?: boolean;
-  uploaded?: boolean;
-  chatId: Id | null;
-  id: Id;
-  status: MessageStatus;
-}
-
-function MessageBubble1({ hasAvatar = false, ...props }: MessageBubbleProps) {
-  const { self, type, text, attachments, time, status, ...messageMeta } = props;
-  if (self) {
-    const selfMessage = () => {
-      switch (type) {
-        case 'file':
-          return (
-            <BubbleActionMenu actions={['download', 'delete']} msg={props}>
-              <FileBubble
-                uploaded={messageMeta.uploaded!}
-                name={messageMeta.name!}
-                size={messageMeta.size!}
-                {...props}
-              />
-            </BubbleActionMenu>
-          );
-        case 'photo':
-          return (
-            <BubbleActionMenu
-              actions={['download', 'edit', 'delete']}
-              msg={props}
-            >
-              <ImageBubble {...props} />
-            </BubbleActionMenu>
-          );
-        default:
-          return (
-            <div className="flex">
-              <div className="bg-primary text-white break-words rounded-md rounded-br-none pt-3 pl-4 pr-3 pb-0  ">
-                <BubbleActionMenu actions={['delete']} msg={props}>
-                  <Typography.Paragraph className="text-inherit">
-                    {text}
-                  </Typography.Paragraph>
-                </BubbleActionMenu>
-              </div>
-              <div className="flex items-end">
-                <Indicator status={status} />
-              </div>
-            </div>
-          );
-      }
-    };
-    return (
-      // self message
-      <div className=" mr-[6px] float-right flex max-w-[90%] mb-3">
-        <Tooltip
-          title={formatDTime(time)}
-          placement="left"
-          mouseEnterDelay={0.5}
-        >
-          {selfMessage()}
-          <div
-            className="flex-shrink-0 px-2 self-end hidden" // message from self should not have avatar
-            // style={{ visibility: hasAvatar ? 'visible' : 'hidden' }}
-          >
-            <Avatar shape="circle" />
-          </div>
-        </Tooltip>
-      </div>
-    );
-  }
-
-  // others message
-  const othersMessage = () => {
-    switch (type) {
-      case 'file':
-        return (
-          <BubbleActionMenu actions={['delete']} msg={props}>
-            <FileBubble
-              uploaded={messageMeta.uploaded!}
-              name={messageMeta.name!}
-              size={messageMeta.size!}
-              {...props}
-            />
-          </BubbleActionMenu>
-        );
-      case 'photo':
-        return (
-          <BubbleActionMenu
-            actions={['download', 'edit', 'delete']}
-            msg={props}
-          >
-            <ImageBubble uploaded={messageMeta.uploaded!} {...props} />
-          </BubbleActionMenu>
-        );
-      default:
-        return (
-          <div className="bg-[#EBEBEB] break-words  rounded-md rounded-bl-none p-3 pb-0">
-            <BubbleActionMenu actions={['delete']} msg={props}>
-              <Typography.Paragraph>{text}</Typography.Paragraph>
-            </BubbleActionMenu>
-          </div>
-        );
-    }
-  };
-  return (
-    <div className="max-w-[90%] flex clear-right mb-3">
-      <div
-        className="flex-shrink-0 pr-2 pb-1 self-end"
-        style={{ visibility: hasAvatar ? 'visible' : 'hidden' }}
-      >
-        <Avatar
-          shape="circle"
-          icon={<UserOutlined />}
-          src={props.sender?.avatar}
-        />
-      </div>
-      <Tooltip title={formatDTime(time)} placement="left">
-        {othersMessage()}
-      </Tooltip>
-    </div>
-  );
-}
 
 export default function MessageBubble({
   hasAvatar = false,
@@ -201,7 +72,7 @@ export default function MessageBubble({
               msg={props}
             >
               <ImageBubble
-                className="bg-primary rounded h-[300px]  w-fit  rounded-br-none overflow-hidden text-white max-w-[60%] float-right"
+                className="bg-primary rounded w-fit  rounded-br-none text-white max-w-[60%] float-right"
                 description={
                   text && (
                     <div className="break-words py-1 pl-2 pr-3">
@@ -211,7 +82,8 @@ export default function MessageBubble({
                     </div>
                   )
                 }
-                {...props}
+                attachments={attachments}
+                attachmentsMeta={messageMeta.attachmentsMeta}
               />
             </BubbleActionMenu>
           );
@@ -270,7 +142,7 @@ export default function MessageBubble({
             msg={props}
           >
             <ImageBubble
-              className="bg-[#EBEBEB] h-[300px] rounded rounded-bl-none w-fit overflow-hidden max-w-[60%] "
+              className="bg-[#EBEBEB] rounded rounded-bl-none w-fit max-w-[60%] "
               description={
                 text && (
                   <div className="break-words py-1 pl-2 pr-3   ">

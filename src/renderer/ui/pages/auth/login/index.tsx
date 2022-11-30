@@ -22,6 +22,8 @@ function Login() {
       .post('/user/login', { username, password })
       .then((res) => {
         setCurrentUser(res.data.data);
+        SocketClient.setup();
+        navigate(`/${APP}`);
         return null;
       })
       .catch((err) => console.error('cant login'));

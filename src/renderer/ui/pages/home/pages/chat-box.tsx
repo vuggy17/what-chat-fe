@@ -216,7 +216,7 @@ export default function ChatBox({
       <div className="py-1 pr-2">{header}</div>
       <Divider style={{ marginTop: 0, marginBottom: 0 }} />
 
-      <div className="flex-1 relative px-2 transition-all transform duration-700 overflow-hidden min-h-0">
+      <div className="flex-1 relative px-2 transition-all transform duration-700 overflow-hidden min-h-0 pb-1">
         {messages?.length > 0
           ? messagesContainer
           : // <div className="flex w-full items-center justify-center pt-2 flex-col">

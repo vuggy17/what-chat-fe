@@ -1,20 +1,13 @@
 import { Col, Image, Row, Typography } from 'antd';
 import React, { ReactNode } from 'react';
+import { ImageBubbleProps, MessageBubbleProps } from './type';
 // eslint-disable-next-line import/no-cycle
-
-interface ImageBubbleProps extends React.HTMLAttributes<HTMLDivElement> {
-  // indicator?: JSX.Element | null;
-  // self?: boolean;
-  attachmentsMeta?: { name: string; size: number; path: string }[]; // local file path
-  attachments?: string[]; // remote file url
-  description?: ReactNode;
-}
 
 export default function ImageBubble({
   attachmentsMeta,
   attachments,
   description,
-  ...props
+  className,
 }: ImageBubbleProps) {
   // if (description) {
   //   // return image with description component
@@ -42,29 +35,31 @@ export default function ImageBubble({
     attachments || attachmentsMeta?.map((meta) => meta.path);
   return (
     // eslint-disable-next-line react/jsx-props-no-spreading
-    <div {...props}>
-      <div className="overflow-hidden">
+    <div className={className}>
+      <div className="flex flex-wrap">
         {selectProperty?.map((path) => (
-          <img
-            className="object-cover h-auto max-h-[300px]"
-            src={path}
-            alt="img"
-            onLoad={() => {
-              if (attachments && attachmentsMeta) {
-                URL.revokeObjectURL(path);
-              }
-            }}
-          />
+          <div key={path} className="img-reactive--wrap">
+            <img
+              className="object-cover h-full w-full"
+              src={path}
+              alt="img"
+              onLoad={() => {
+                if (attachments && attachmentsMeta) {
+                  URL.revokeObjectURL(path);
+                }
+              }}
+            />
+          </div>
         ))}
       </div>
+      {description}
     </div>
   );
 }
 
 ImageBubble.defaultProps = {
-  // indicator: undefined,
-  // self: false,
   attachmentsMeta: undefined,
   attachments: undefined,
   description: undefined,
+  className: '',
 };
