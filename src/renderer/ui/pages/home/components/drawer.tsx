@@ -25,6 +25,7 @@ import SocketClient from 'renderer/services/socket';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { LOGIN } from 'renderer/shared/constants';
 import useUI from 'renderer/hooks/use-ui';
+import { LocalDb } from 'renderer/services/localdb';
 import { ReactComponent as IconSetting } from '../../../../../../assets/icons/setting.svg';
 
 type MenuItem = Required<MenuProps>['items'][number];
@@ -170,7 +171,6 @@ export default function Drawer({
         items={items}
         onClick={({ key }) => {
           if (key === 'menu_sign_out') {
-            SocketClient.disconnect();
             setUser(null);
             navigate(`/${LOGIN}`);
           }

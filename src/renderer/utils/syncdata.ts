@@ -12,7 +12,6 @@ import {
 } from 'renderer/services/localdb/schemas/chat.schema';
 
 export async function syncContact(data: User[], db: LocalDb) {
-  console.log(db);
   const localData = data.map(
     (d) => ({ id: d.id, name: d.name, avatar: d.avatar } as LocalUserSchema)
   );

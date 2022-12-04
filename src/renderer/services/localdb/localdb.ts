@@ -15,7 +15,7 @@ export default class LocalDb extends Dexie {
 
   messages!: Dexie.Table<Message, string>;
 
-  private static internalInstance: LocalDb;
+  private static internalInstance: LocalDb | null;
 
   /**
    *
@@ -26,7 +26,11 @@ export default class LocalDb extends Dexie {
   static instance(dbName: string) {
     if (!LocalDb.internalInstance) {
       LocalDb.internalInstance = new LocalDb(dbName);
+      console.log('db namae', dbName);
     }
+    LocalDb.internalInstance.on('close', () => {
+      console.log('db closed', dbName);
+    });
     return LocalDb.internalInstance;
   }
 
@@ -35,17 +39,26 @@ export default class LocalDb extends Dexie {
     if (LocalDb.internalInstance) {
       return LocalDb.internalInstance;
     }
+    console.info('LocalDb not initialized');
     return new Error('LocalDb not initialized');
   }
 
   // first parameter is primary key
   constructor(dbName: string) {
     super(dbName);
-    this.version(1).stores({
+    this.version(0.1).stores({
       chats: 'id,lastUpdate, type',
       messages: 'id, createdAt, [createdAt+receiverId]',
       privateChat: 'id',
       contacts: 'id',
     });
+  }
+
+  static close() {
+    if (!LocalDb.internalInstance)
+      throw new Error('No localdb instance existed');
+
+    LocalDb.internalInstance.close();
+    LocalDb.internalInstance = null;
   }
 }
