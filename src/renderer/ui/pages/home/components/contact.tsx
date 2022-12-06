@@ -1,7 +1,8 @@
-import { SearchOutlined } from '@ant-design/icons';
+import Icon, { SearchOutlined } from '@ant-design/icons';
 import { faker } from '@faker-js/faker';
 import {
   Avatar,
+  Badge,
   Button,
   Divider,
   Input,
@@ -22,7 +23,6 @@ import {
   chatState,
   ChatWithMessages,
   currentChatIdState,
-  useChat,
 } from 'renderer/hooks/new-store';
 import { currentUser } from 'renderer/hooks/use-user';
 import { chatRepository } from 'renderer/repository/chat/chat.repository';
@@ -30,31 +30,77 @@ import HttpClient from 'renderer/services/http';
 import useDebounce from 'renderer/utils/debouce';
 import use from 'renderer/utils/network';
 import formatDTime from 'renderer/utils/time';
-import { async } from 'rxjs';
-
-const contacts = Array.from({ length: 10 }, (_, i) => ({
-  id: i,
-  avatar: faker.internet.avatar(),
-  name: faker.name.fullName(),
-  lastSeen: Math.floor(faker.date.past().getTime() / 1000),
-}));
+import { ReactComponent as DoubleCheckIcon } from '../../../../../../assets/icons/icon-double-check.svg';
 
 const fetchNetworkUsers = async () => {
   return HttpClient.get(ALL_USER);
 };
 const networkUsers = fetchNetworkUsers();
 
-function Networks() {
-  const response = use(networkUsers);
+function NetWorkItem({ data }: { data: User }) {
+  const [added, setAdded] = useState(false);
   return (
-    <ul>
-      {response.data?.map((u) => (
-        <li>
-          <Avatar src={u.avatar} />
-          <Typography.Text strong>{u.name}</Typography.Text>
-        </li>
-      ))}
-    </ul>
+    <List.Item
+      className="group"
+      style={{
+        paddingRight: 0,
+        paddingLeft: 0,
+        cursor: 'pointer',
+      }}
+      onClick={() => setAdded(true)}
+    >
+      <Space
+        style={{ justifyContent: 'space-between', width: '100%' }}
+        align="center"
+      >
+        <Space size="middle">
+          <Avatar src={data.avatar} size={42} />
+          <div className="flex flex-col justify-center">
+            <Typography.Text strong className="no-margin">
+              {data.name}
+            </Typography.Text>
+            <Typography.Text type="secondary">
+              last seen {formatDTime(Math.floor(Date.now() / 1000))}
+            </Typography.Text>
+          </div>
+        </Space>
+        <Button
+          icon={
+            added ? (
+              <Icon component={DoubleCheckIcon} style={{ color: 'white' }} />
+            ) : null
+          }
+          type="ghost"
+          className="mr-2 invisible group-hover:visible transition-transform"
+        >
+          {added ? 'Friend request sent' : 'Click to add'}
+        </Button>
+      </Space>
+    </List.Item>
+  );
+}
+
+function Networks({ handleBack }: { handleBack: () => void }) {
+  const users = use(networkUsers);
+  return (
+    <Layout style={{ background: 'white' }}>
+      <List
+        style={{ minHeight: 400, maxHeight: 500, overflow: 'auto' }}
+        itemLayout="horizontal"
+        dataSource={users.data}
+        split
+        renderItem={(item: User) => <NetWorkItem data={item} />}
+      />
+      <Layout.Footer
+        style={{ padding: '8px 6px 0px 0px', background: 'white' }}
+      >
+        <div className="flex justify-end">
+          <Button onClick={handleBack} type="text">
+            Cancel
+          </Button>
+        </div>
+      </Layout.Footer>
+    </Layout>
   );
 }
 
@@ -62,7 +108,7 @@ function NetworkFallback() {
   const fallback = new Array(4).fill(0).map((_, i) => (
     <li>
       <Avatar style={{ backgroundColor: '#f56a00' }} />
-      <Skeleton paragraph />
+      <Skeleton.Input />
     </li>
   ));
 
@@ -133,7 +179,7 @@ export default function Contacts({
     >
       {showNetwork ? (
         <React.Suspense fallback={<NetworkFallback />}>
-          <Networks />
+          <Networks handleBack={() => setShowNetwork(false)} />
         </React.Suspense>
       ) : (
         <>
@@ -141,11 +187,6 @@ export default function Contacts({
             <Input
               bordered={false}
               ref={searchRef}
-              // onClick={() => {
-              //   if (location.pathname.includes('new-chat')) {
-              //     // navigate('/app/conversations');
-              //   } else navigate('search');
-              // }}
               onChange={(e) => debounceSearch(e.target.value)}
               style={{
                 padding: '8px 0px',
@@ -155,6 +196,46 @@ export default function Contacts({
               prefix={
                 <SearchOutlined className="text-gray-1 mr-2 -scale-x-[1]" />
               }
+            />
+
+            <div className="bg-gray-2 py-1 pl-4">
+              <Typography.Text type="secondary">
+                New friend requests
+              </Typography.Text>
+            </div>
+            <List
+              dataSource={contactList}
+              renderItem={(item) => (
+                <List.Item
+                  className="group"
+                  style={{
+                    paddingRight: 0,
+                    paddingLeft: 0,
+                    cursor: 'pointer',
+                  }}
+                >
+                  <Space
+                    style={{ justifyContent: 'space-between', width: '100%' }}
+                    align="center"
+                  >
+                    <Space size="middle">
+                      <Avatar src={item.avatar} size={42} />
+                      <div className="flex flex-col justify-center">
+                        <Typography.Text strong className="no-margin">
+                          {item.name}
+                        </Typography.Text>
+                        <Typography.Text type="secondary">
+                          last seen {formatDTime(Math.floor(Date.now() / 1000))}
+                        </Typography.Text>
+                      </div>
+                    </Space>
+                    <Space>
+                      <Button>Accept</Button>
+                      <Button type="primary">Reject</Button>
+                    </Space>
+                  </Space>
+                </List.Item>
+              )}
             />
             <Divider className="no-margin" />
             <List

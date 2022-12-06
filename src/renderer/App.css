@@ -89,7 +89,7 @@ h4 {
 }
 
 /* fix overflow conversation preview */
-.ant-space-item:last-child {
+.conv-item .ant-space-item:last-child {
   flex: 1;
   min-width: 0;
 }
