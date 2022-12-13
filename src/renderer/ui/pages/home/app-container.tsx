@@ -7,7 +7,7 @@ import { Outlet } from 'react-router-dom';
 import { useRecoilCallback, useRecoilState } from 'recoil';
 import { currentUser } from 'renderer/hooks/use-user';
 import Preload from '../preload/preload-old';
-import Contacts from './components/contact';
+import Contacts from './pages/contact';
 
 const { Header, Sider, Content } = Layout;
 const { Text } = Typography;

@@ -77,11 +77,9 @@ export default function Chat() {
             <Input
               bordered={false}
               ref={searchRef}
-              // onClick={() => {
-              //   if (location.pathname.includes('new-chat')) {
-              //     // navigate('/app/conversations');
-              //   } else navigate('search');
-              // }}
+              onClick={() => {
+                if (!location.pathname.includes('search')) navigate('search');
+              }}
               onChange={(e) => debounceSearch(e.target.value)}
               style={{
                 color: '#EBEBEB',
@@ -94,7 +92,6 @@ export default function Chat() {
               suffix={<SearchOutlined className="text-gray-1" />}
             />
           </div>
-          {/* {params.search ? <div> seach on</div> : } */}
           <div>
             <Routes>
               <Route index element={<Conversations />} />

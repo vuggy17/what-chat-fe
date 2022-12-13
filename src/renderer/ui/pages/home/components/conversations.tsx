@@ -35,44 +35,17 @@ function List() {
   const debounceSearch = useDebounce(findChat, 500);
 
   const loadMoreData = async () => {
+    // TODO: implement load more
     // const { data, extra } = await loadChat({
     //   repo: chatRepository,
     //   page: listExtra.pageNum + 1,
     // });
     // setList({ data, extra });
-    alert('cc');
+    // alert('load more');
   };
-
-  console.log('====================================');
-  console.log('conversationItems', conversationItems);
-  console.log('====================================');
-
-  const location = useLocation();
-  const navigate = useNavigate();
 
   return (
     <div className="h-full">
-      {/* <ul
-          className="list-none p-0 overflow-hidden"
-          style={{
-            // visibility: chatResult.length !== 0 ? 'visible' : 'hidden',
-            display: 'none',
-          }}
-        >
-          {chatResult.map((item) => (
-            <EmptyChatItem
-              onPress={(id) => {
-                setActiveChat(id);
-                setChatResult([]);
-              }}
-              name={item.name}
-              id={item.id}
-              key={item.id}
-              avatarUrl={item.avatar}
-              active={false}
-            />
-          ))}
-        </ul> */}
       <div
         id="scrollableDiv"
         className="flex-1"

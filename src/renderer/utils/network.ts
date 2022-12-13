@@ -8,7 +8,9 @@ function promiseState(p: Promise<any>) {
   );
 }
 
-export default function use(promise: any) {
+export default function use<T>(
+  promise: Promise<T> | PromiseLike<T> | any
+): Awaited<Promise<T>> {
   if (promise.status === 'fulfilled') {
     return promise.value;
   }

@@ -1,3 +1,4 @@
+import User from 'renderer/domain/user.entity';
 import { Message } from 'renderer/domain';
 
 interface ISocketClient {
@@ -28,9 +29,9 @@ interface ISocketClient {
   /**
    *
    * @param id chatId
-   * @return Promise<any> that resolve when request is success
+   * @return Promise<User> that resolve when request is success
    */
-  sendFriendRequest(id: string): Promise<unknown>;
+  sendFriendRequest(id: string): Promise<User>;
 }
 
 export enum ClientToServerEvent {

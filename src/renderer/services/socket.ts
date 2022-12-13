@@ -1,3 +1,4 @@
+import User from 'renderer/domain/user.entity';
 import {
   ISocketClient,
   HasNewMessagePayload,
@@ -96,8 +97,6 @@ class AppSocketClient implements ISocketClient {
   }
 
   sendPrivateMessage(msg: Message): Promise<any> {
-    // this.setup();
-    // this.socketAdapter.emit(ClientToServerEvent.TEST, 'data');
     return new Promise((resolve, reject) => {
       this.socketAdapter.emit(
         ClientToServerEvent.SEND_PRIVATE_MESSAGE,
@@ -152,8 +151,7 @@ class AppSocketClient implements ISocketClient {
     throw new Error('Method not implemented.');
   }
 
-  sendFriendRequest(id: string): Promise<unknown> {
-    this.setup();
+  sendFriendRequest(id: Id): Promise<User> {
     return new Promise((resolve, reject) => {
       this.socketAdapter.emit(ClientToServerEvent.ADD_FRIEND, id, (res) => {
         resolve(res);
