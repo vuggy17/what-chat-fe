@@ -155,7 +155,7 @@ export default function Drawer({
 }) {
   const setUser = useSetRecoilState(currentUser);
   const navigate = useNavigate();
-  const { setContactOpen } = useUI();
+  const { setContactOpen, setNewGroupOpen } = useUI();
 
   return (
     <AntDrawer
@@ -177,6 +177,11 @@ export default function Drawer({
           if (key === 'menu_contacts') {
             toggleVisibility();
             setContactOpen(true);
+          }
+
+          if (key === 'menu_group') {
+            toggleVisibility();
+            setNewGroupOpen(true);
           }
         }}
         selectable={false}

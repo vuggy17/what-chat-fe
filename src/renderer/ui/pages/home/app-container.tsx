@@ -1,37 +1,14 @@
 /* eslint-disable react/button-has-type */
-import Icon, {
-  ApiOutlined,
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
-  MessageOutlined,
-  SmileOutlined,
-  UserOutlined,
-} from '@ant-design/icons';
-import {
-  Avatar,
-  Button,
-  Divider,
-  Layout,
-  Menu,
-  Modal,
-  Tooltip,
-  Typography,
-} from 'antd';
+import { UserOutlined } from '@ant-design/icons';
+import { Avatar, Button, Divider, Layout, Typography } from 'antd';
 import axios from 'axios';
 import React, { useState } from 'react';
-import { Outlet, useNavigate, useOutletContext } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import { useRecoilCallback, useRecoilState } from 'recoil';
 import { currentUser } from 'renderer/hooks/use-user';
-import SocketClient from 'renderer/services/socket';
-import {
-  C_CONVERSATION,
-  C_FRIEND,
-  C_PROFILE,
-  LOGIN,
-} from 'renderer/shared/constants';
-import { ReactComponent as IconMenu } from '../../../../../assets/icons/menu.svg';
-import Preload from '../preload/preload-old';
+import Preload from '../preload/preload_old';
 import Contacts from './components/contact';
+import Group from './components/group';
 
 const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
@@ -71,6 +48,7 @@ function DebugButton() {
 
 const AppContainer: React.FC = () => {
   const [contactOpen, setContactOpen] = useState(false);
+  const [groupOpen, setGroupOpen] = useState(true);
   const navigate = useNavigate();
   const [user, setUser] = useRecoilState(currentUser);
 
@@ -201,12 +179,16 @@ const AppContainer: React.FC = () => {
             background: 'transparent     ',
           }}
         >
-          <Outlet context={{ setContactOpen }} />
+          <Outlet context={{ setContactOpen, setNewGroupOpen: setGroupOpen }} />
         </Content>
       </Layout>
       <Contacts
         open={contactOpen}
         toggleOpen={() => setContactOpen((status) => !status)}
+      />
+      <Group
+        open={groupOpen}
+        toggleOpen={() => setGroupOpen((opened) => !opened)}
       />
     </Layout>
   );
