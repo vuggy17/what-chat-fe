@@ -2,6 +2,7 @@ import { SearchOutlined } from '@ant-design/icons';
 import { faker } from '@faker-js/faker';
 import {
   Avatar,
+  Badge,
   Button,
   Divider,
   Input,
@@ -9,65 +10,22 @@ import {
   Layout,
   List,
   Modal,
-  Skeleton,
   Space,
   Typography,
 } from 'antd';
 import React, { useEffect, useRef, useState } from 'react';
 import { useRecoilCallback, useRecoilValue, useSetRecoilState } from 'recoil';
-import { ALL_USER } from 'renderer/config/api.routes';
-import User from 'renderer/domain/user.entity';
 import { userContacts } from 'renderer/hooks/contact-store';
 import {
   chatState,
   ChatWithMessages,
   currentChatIdState,
-  useChat,
 } from 'renderer/hooks/new-store';
 import { currentUser } from 'renderer/hooks/use-user';
 import { chatRepository } from 'renderer/repository/chat/chat.repository';
-import HttpClient from 'renderer/services/http';
 import useDebounce from 'renderer/utils/debouce';
-import use from 'renderer/utils/network';
 import formatDTime from 'renderer/utils/time';
-import { async } from 'rxjs';
-
-const contacts = Array.from({ length: 10 }, (_, i) => ({
-  id: i,
-  avatar: faker.internet.avatar(),
-  name: faker.name.fullName(),
-  lastSeen: Math.floor(faker.date.past().getTime() / 1000),
-}));
-
-const fetchNetworkUsers = async () => {
-  return HttpClient.get(ALL_USER);
-};
-const networkUsers = fetchNetworkUsers();
-
-function Networks() {
-  const response = use(networkUsers);
-  return (
-    <ul>
-      {response.data?.map((u) => (
-        <li>
-          <Avatar src={u.avatar} />
-          <Typography.Text strong>{u.name}</Typography.Text>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-function NetworkFallback() {
-  const fallback = new Array(4).fill(0).map((_, i) => (
-    <li>
-      <Avatar style={{ backgroundColor: '#f56a00' }} />
-      <Skeleton paragraph />
-    </li>
-  ));
-
-  return <ul>{fallback}</ul>;
-}
+import { NetworkFallback, Networks } from '../components/network';
 
 export default function Contacts({
   open,
@@ -133,7 +91,7 @@ export default function Contacts({
     >
       {showNetwork ? (
         <React.Suspense fallback={<NetworkFallback />}>
-          <Networks />
+          <Networks handleBack={() => setShowNetwork(false)} />
         </React.Suspense>
       ) : (
         <>
@@ -141,11 +99,6 @@ export default function Contacts({
             <Input
               bordered={false}
               ref={searchRef}
-              // onClick={() => {
-              //   if (location.pathname.includes('new-chat')) {
-              //     // navigate('/app/conversations');
-              //   } else navigate('search');
-              // }}
               onChange={(e) => debounceSearch(e.target.value)}
               style={{
                 padding: '8px 0px',
@@ -156,6 +109,7 @@ export default function Contacts({
                 <SearchOutlined className="text-gray-1 mr-2 -scale-x-[1]" />
               }
             />
+
             <Divider className="no-margin" />
             <List
               style={{ minHeight: 400, maxHeight: 500, overflow: 'auto' }}
@@ -193,7 +147,7 @@ export default function Contacts({
             >
               <div className="flex justify-between">
                 <Button onClick={() => setShowNetwork(true)} type="text">
-                  Add contact
+                  Networks
                 </Button>
                 <Button onClick={toggleOpen} type="text">
                   Close

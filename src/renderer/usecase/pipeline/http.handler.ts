@@ -1,10 +1,10 @@
 /* eslint-disable no-plusplus */
 import axios from 'axios';
-import { FileMessage } from 'renderer/domain';
+import { FileMessage, Message } from 'renderer/domain';
 import HttpClient from 'renderer/services/http';
 import AbstractHandler from './definition';
 
-export default class SendMessageHttp extends AbstractHandler {
+export default class SendMessageHttp extends AbstractHandler<Message, any> {
   public async handle(
     request: WithRequired<FileMessage, 'fileList'>
   ): Promise<any> {

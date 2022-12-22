@@ -62,19 +62,19 @@ const items: MenuItem[] = [
       }}
     />
   ),
-  getItem(
-    <Typography.Text strong>New chat</Typography.Text>,
-    'menu_new_chat',
-    <Avatar
-      icon={<UserOutlined style={{ margin: 'auto' }} />}
-      shape="square"
-      style={{
-        backgroundColor: '#2f54eb',
-        verticalAlign: 'middle',
-        color: 'white',
-      }}
-    />
-  ),
+  // getItem(
+  //   <Typography.Text strong>New chat</Typography.Text>,
+  //   'menu_new_chat',
+  //   <Avatar
+  //     icon={<UserOutlined style={{ margin: 'auto' }} />}
+  //     shape="square"
+  //     style={{
+  //       backgroundColor: '#2f54eb',
+  //       verticalAlign: 'middle',
+  //       color: 'white',
+  //     }}
+  //   />
+  // ),
   getItem(
     <Typography.Text strong>Contacts</Typography.Text>,
     'menu_contacts',
