@@ -1,15 +1,12 @@
-import { Button, Form, Input } from 'antd';
+import { Button, Form, Image, Input, Space, Typography } from 'antd';
 import axios from 'axios';
-import React, { BaseSyntheticEvent, useEffect } from 'react';
-// import { AuthProvider, useAuth } from '@contexts';
-
-import { Link, useNavigate } from 'react-router-dom';
-import { useRecoilState, useResetRecoilState } from 'recoil';
-import { chatIdsState } from 'renderer/hooks/use-chat';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useRecoilState } from 'recoil';
 import { currentUser } from 'renderer/hooks/use-user';
 import SocketClient from 'renderer/services/socket';
 import { APP, REGISTER } from 'renderer/shared/constants';
-import sapiens from '../../../../../../assets/sapiens.svg';
+import loginbg from '../../../../../../assets/login-bg.png';
 
 function Login() {
   const navigate = useNavigate();
@@ -36,64 +33,86 @@ function Login() {
   }, []);
 
   return (
-    <div className=" flex items-center justify-center h-screen w-screen">
-      <div className="mx-4 bg-amber-50 flex flex-col  md:flex-row items-center justify-center p-16 rounded">
-        <img src={sapiens} alt="" className="sm:w-1/2 md:w-[40%]" />
-        <div className="bg-white w-full rounded-3xl border sm:w-2/3 md:w-[480px] pt-[58px] pb-[48px] text-center">
-          <h2 className="font-bold text-3xl rounded text-center mb-2 mt-8 tracking-wide text-orange-600">
-            WhatChat login
-          </h2>
+    <div className="bg-white grid grid-cols-[1fr_0.8fr] grid-flow-row w-screen h-screen ">
+      <div className="relative login-left">
+        <div className="absolute top-[75%] left-0 right-0 bottom-0 pl-20 bg-linear-black">
+          <div>
+            <Typography.Title
+              style={{
+                color: 'white',
+              }}
+              level={2}
+            >
+              Welcome to{' '}
+              <Typography.Title
+                level={2}
+                className="text-gradient"
+                style={{
+                  display: 'inline',
+                }}
+              >
+                WhatChat
+              </Typography.Title>
+            </Typography.Title>
+            <Typography.Text className="text-2xl text-white">
+              Go straight to talk with your
+              <Typography.Text
+                className="text-2xl text-gradient"
+                style={{
+                  color: '#D1E4E8',
+                }}
+              >
+                {' '}
+                fellows
+              </Typography.Text>
+            </Typography.Text>
+          </div>
+        </div>
+      </div>
+      <div className="w-2/3 mx-auto text-center place-self-center">
+        <Typography.Title level={3}>WhatChat login</Typography.Title>
+        <Typography.Text type="secondary">
+          Enter your credential to get sign in <br />
+          to your account
+        </Typography.Text>
 
-          <p className="text-sm text-stone-600 mb-7">
-            Enter your credential to get sign in <br />
-            to your account
-          </p>
-
-          <Form
-            size="large"
-            wrapperCol={{ offset: 2, span: 20 }}
-            initialValues={{
-              remember: true,
-              username: 'Karl_Jones',
-              password: '44lwA5KFn15pNCk',
-            }}
-            onFinish={handleSubmit}
-            // onFinishFailed={onFinishFailed}
-            autoComplete="off"
+        <Form
+          className="pt-4"
+          size="large"
+          wrapperCol={{ offset: 2, span: 20 }}
+          initialValues={{
+            remember: true,
+            username: 'Karl_Jones',
+            password: '44lwA5KFn15pNCk',
+          }}
+          onFinish={handleSubmit}
+          // onFinishFailed={onFinishFailed}
+          autoComplete="off"
+        >
+          <Form.Item
+            name="username"
+            rules={[{ required: true, message: 'Please input your username!' }]}
           >
-            <Form.Item
-              name="username"
-              rules={[
-                { required: true, message: 'Please input your username!' },
-              ]}
-            >
-              <Input placeholder="Username" />
-            </Form.Item>
+            <Input placeholder="Username" />
+          </Form.Item>
 
-            <Form.Item
-              name="password"
-              rules={[
-                { required: true, message: 'Please input your password!' },
-              ]}
-            >
-              <Input.Password placeholder="Passcode" />
-            </Form.Item>
+          <Form.Item
+            name="password"
+            rules={[{ required: true, message: 'Please input your password!' }]}
+          >
+            <Input.Password placeholder="Passcode" />
+          </Form.Item>
 
-            <Form.Item>
-              <Button type="primary" htmlType="submit" block>
-                Login
-              </Button>
-            </Form.Item>
-          </Form>
-          <p className="font-bold text-xs tracking-wide mb-5 ">
-            -- Or
-            <Link to={`/${REGISTER}`} className="text-orange-600 m-1">
-              register
-            </Link>
-            for an account --
-          </p>
+          <Form.Item className="pt-4">
+            <Button type="primary" htmlType="submit" block>
+              Login
+            </Button>
+          </Form.Item>
+        </Form>
+
+        <Space>
           <Button
-            className="mx-3"
+            className="mx-3 "
             type="primary"
             onClick={() => {
               axios
@@ -134,7 +153,19 @@ function Login() {
           >
             Douglas
           </Button>
-        </div>
+        </Space>
+        <br />
+        <br />
+        <br />
+        <br />
+        <Space>
+          <Typography.Text type="secondary">
+            Don't have account yet?
+          </Typography.Text>
+          <Typography.Link strong to={`/${REGISTER}`}>
+            Sign up
+          </Typography.Link>
+        </Space>
       </div>
     </div>
   );

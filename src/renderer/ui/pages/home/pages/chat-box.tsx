@@ -199,16 +199,17 @@ export default function ChatBox({
       .catch((err) => console.error(err));
   };
 
+  // TODO: enable this
   const onEditorGotFocused = useCallback(() => {
-    if (currentUser && messages.length > 0) {
-      seenMessage(
-        chat.id,
-        messages[messages.length - 1].id,
-        currentUser?.id,
-        chat.participants?.find((p) => p.id !== currentUser.id)!.id,
-        Date.now()
-      );
-    }
+    // if (currentUser && messages.length > 0) {
+    //   seenMessage(
+    //     chat.id,
+    //     messages[messages.length - 1].id,
+    //     currentUser?.id,
+    //     chat.participants?.find((p) => p.id !== currentUser.id)!.id,
+    //     Date.now()
+    //   );
+    // }
   }, [messages, currentUser, chat.id, chat.participants]);
 
   return (
@@ -216,19 +217,21 @@ export default function ChatBox({
       <div className="py-1 pr-2">{header}</div>
       <Divider style={{ marginTop: 0, marginBottom: 0 }} />
 
-      <div className="flex-1 relative px-2 transition-all transform duration-700 overflow-hidden min-h-0 pb-1">
-        {messages?.length > 0
-          ? messagesContainer
-          : // <div className="flex w-full items-center justify-center pt-2 flex-col">
-            //   <Avatar src={chat.avatar} size={56} />
-            //   <Typography.Text>{chat.name}</Typography.Text>
-            // </div>
-            null}
-        {hasSearch && (
-          <div className="absolute top-0 inset-x-0 z-50 [&_*]:rounded-none ">
-            <SearchBox />
-          </div>
-        )}
+      <div className="flex-1 relative transition-all transform duration-700 overflow-hidden min-h-0 pb-1 message-box ">
+        <div className=" h-full  pl-2  blurry">
+          {messages?.length > 0
+            ? messagesContainer
+            : // <div className="flex w-full items-center justify-center pt-2 flex-col">
+              //   <Avatar src={chat.avatar} size={56} />
+              //   <Typography.Text>{chat.name}</Typography.Text>
+              // </div>
+              null}
+          {hasSearch && (
+            <div className="absolute top-0 inset-x-0 z-50 [&_*]:rounded-none ">
+              <SearchBox />
+            </div>
+          )}
+        </div>
       </div>
       {hasEditor && (
         <RichEditor onSubmit={onSendMessage} onFocus={onEditorGotFocused} />
