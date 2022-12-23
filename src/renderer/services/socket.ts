@@ -53,6 +53,10 @@ class AppSocketClient implements ISocketClient {
     // });
   }
 
+  createGroup(memberIds: string[]): Promise<any> {
+    throw new Error('Method not implemented.');
+  }
+
   /** send seen signal to chat
    * @param userId my user id
    */

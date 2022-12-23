@@ -32,6 +32,8 @@ interface ISocketClient {
    * @return Promise<User> that resolve when request is success
    */
   sendFriendRequest(id: string): Promise<User>;
+
+  createGroup(memberIds: Id[]): Promise<any>;
 }
 
 export enum ClientToServerEvent {
