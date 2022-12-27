@@ -44,19 +44,18 @@ function Login() {
               level={2}
             >
               Welcome to{' '}
-              <Typography.Title
-                level={2}
+              <span
                 className="text-gradient"
                 style={{
                   display: 'inline',
                 }}
               >
                 WhatChat
-              </Typography.Title>
+              </span>
             </Typography.Title>
             <Typography.Text className="text-2xl text-white">
               Go straight to talk with your
-              <Typography.Text
+              <span
                 className="text-2xl text-gradient"
                 style={{
                   color: '#D1E4E8',
@@ -64,7 +63,7 @@ function Login() {
               >
                 {' '}
                 fellows
-              </Typography.Text>
+              </span>
             </Typography.Text>
           </div>
         </div>
@@ -82,8 +81,8 @@ function Login() {
           wrapperCol={{ offset: 2, span: 20 }}
           initialValues={{
             remember: true,
-            username: 'Karl_Jones',
-            password: '44lwA5KFn15pNCk',
+            username: 'PhiCường10',
+            password: 'cUMWqiKC2TauoH7',
           }}
           onFinish={handleSubmit}
           // onFinishFailed={onFinishFailed}
@@ -117,8 +116,8 @@ function Login() {
             onClick={() => {
               axios
                 .post('/user/login', {
-                  username: 'Glennie_Swaniawski63',
-                  password: 'bSj2x325DhkjQqb',
+                  username: 'TâmLinh.Lý',
+                  password: 'HVRzASZ35rZNU1o',
                 })
                 .then((res) => {
                   setCurrentUser(res.data.data);
@@ -130,15 +129,15 @@ function Login() {
                 .catch((err) => console.error('cant login'));
             }}
           >
-            Rene
+            Hiểu
           </Button>
           <Button
             type="primary"
             onClick={() => {
               axios
                 .post('/user/login', {
-                  username: 'Karl_Jones',
-                  password: '44lwA5KFn15pNCk',
+                  username: 'PhiCường10',
+                  password: 'cUMWqiKC2TauoH7',
                 })
                 .then((res) => {
                   setCurrentUser(res.data.data);
@@ -151,7 +150,7 @@ function Login() {
                 .catch((err) => console.error('cant login'));
             }}
           >
-            Douglas
+            Thiên
           </Button>
         </Space>
         <br />

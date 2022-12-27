@@ -1,1 +1,4 @@
-REACT_APP_BASE_URL = http://localhost:3005
+# use production server#
+#REACT_APP_BASE_URL = http://localhost:3005
+# use production server#
+REACT_APP_BASE_URL = https://what-chat-be-production.up.railway.app/

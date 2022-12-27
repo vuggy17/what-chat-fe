@@ -146,7 +146,7 @@ export default function Contacts({
               style={{ padding: '8px 6px 0px 0px', background: 'white' }}
             >
               <div className="flex justify-between">
-                <Button onClick={() => setShowNetwork(true)} type="text">
+                <Button type="primary" onClick={() => setShowNetwork(true)}>
                   Networks
                 </Button>
                 <Button onClick={toggleOpen} type="text">

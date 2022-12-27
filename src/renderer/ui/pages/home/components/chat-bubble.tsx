@@ -171,7 +171,7 @@ export default function MessageBubble({
 
   return (
     <div
-      className="flex mb-1 min-w-0 "
+      className="flex mt-1 min-w-0 "
       style={{ flexDirection: self ? 'row-reverse' : 'row' }}
     >
       {status && (

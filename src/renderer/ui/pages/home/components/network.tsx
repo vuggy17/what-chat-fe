@@ -25,11 +25,32 @@ const fetchNetworkUsers = async () => {
 const networkUsers = fetchNetworkUsers();
 
 const fetchFriendRequest = async () => {
-  return Array.from({ length: 4 }).map((_, i) => ({
-    id: i,
-    name: `User ${i}`,
-    avatar: 'https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png',
-  }));
+  // return Array.from({ length: 4 }).map((_, i) => ({
+  //   id: i,
+  //   name: `User ${i}`,
+  //   avatar: 'https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png',
+  // }));
+
+  return [
+    {
+      id: '1232',
+      name: 'Rita Ora',
+      avatar:
+        'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTV8fHJhbmRvbSUyMHBlcnNvbnxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=500&q=60',
+    },
+    {
+      id: '1232jdk',
+      name: 'Nhien Nguyen',
+      avatar:
+        'https://images.unsplash.com/photo-1488161628813-04466f872be2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTl8fHJhbmRvbSUyMHBlcnNvbnxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=500&q=60',
+    },
+    {
+      id: '1232ds',
+      name: 'Duy Vu',
+      avatar:
+        'https://images.unsplash.com/photo-1485206412256-701ccc5b93ca?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MzV8fHJhbmRvbSUyMHBlcnNvbnxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=500&q=60',
+    },
+  ];
 };
 
 const friendRequests = fetchFriendRequest();

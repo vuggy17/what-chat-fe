@@ -1,6 +1,5 @@
 /* eslint-disable consistent-return */
-import { Spin, Typography } from 'antd';
-import { StringGradients } from 'antd/es/progress/progress';
+import { Spin } from 'antd';
 import { ReactNode, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
@@ -127,11 +126,11 @@ export default function Preload({ children }: { children: ReactNode }) {
       setChatList(response.data, response.extra);
 
       requestIdleCallback(async () => {
-        if (user) {
-          setLoadingStage('Syncing data...');
-          const db = LocalDb.instance(user.userName);
+        try {
+          if (user) {
+            setLoadingStage('Syncing data...');
+            const db = LocalDb.instance(user.userName);
 
-          if (user.friends && user.friends.length > 0) {
             await db.open();
             db.transaction(
               'rw',
@@ -149,7 +148,8 @@ export default function Preload({ children }: { children: ReactNode }) {
             );
             return 1;
           }
-          return 1;
+        } catch (error) {
+          console.log(error);
         }
         return 0;
       });

@@ -134,7 +134,7 @@ export default function NewGroupContent({
               bordered={false}
               ref={groupNameInput}
               style={{
-                padding: '8px 0px',
+                padding: '8px 0px 0px 12px',
                 height: 38,
               }}
               placeholder="Group name"

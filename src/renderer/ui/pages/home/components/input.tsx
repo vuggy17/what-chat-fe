@@ -13,6 +13,7 @@ import {
   Grid,
   Col,
   Row,
+  message,
 } from 'antd';
 import React, { ChangeEvent, useRef, useState } from 'react';
 import ImagePreview from './image-preview';
@@ -29,7 +30,7 @@ export default function Input({
   onFocus(): void;
 }) {
   const inputRef = useRef<InputRef>(null);
-  const [fileRef, setFileRef] = useState<File[] | undefined>(null);
+  const [fileRef, setFileRef] = useState<File[] | undefined>(undefined);
   const [textContent, setContent] = React.useState('');
 
   const addNewLineToTextArea = () => {
@@ -38,7 +39,7 @@ export default function Input({
   };
 
   const sendMessage = (e: any) => {
-    const hasFile = fileRef !== null;
+    const hasFile = fileRef !== undefined && fileRef?.length > 0;
     const hasText = textContent.trim().length > 0;
     // if we have a file with description
     if (hasFile && hasText) {
@@ -55,13 +56,15 @@ export default function Input({
     }
 
     setContent('');
-    setFileRef(null);
+    setFileRef(undefined);
   };
 
-  const handleKeyPress = (e: any) => {
-    if (e.keyCode === 13) {
+  const handleKeyPress: React.KeyboardEventHandler<HTMLTextAreaElement> = (
+    e
+  ) => {
+    if (e.key === 'Enter' && e.shiftKey) {
       e.preventDefault();
-      if (e.shiftKey) addNewLineToTextArea();
+      addNewLineToTextArea();
     }
   };
 
@@ -74,11 +77,9 @@ export default function Input({
     if (files && files?.length > 0) {
       const fileArray = Array.from(files);
       if (isFileImage(files[0])) {
-        // props.onSubmit(file, 'photo');
         setFileRef(fileArray);
       } else {
-        console.log('not a image file');
-        // props.onSubmit(file, 'file');
+        message.info('Only image files are allowed');
       }
     }
 
@@ -112,7 +113,7 @@ export default function Input({
               // onChange={handleSendFile}
             />
           </label>
-        </Tooltip>{' '}
+        </Tooltip>
         <Tooltip title="Add attachment(s)">
           <label
             htmlFor="chat-input-image"

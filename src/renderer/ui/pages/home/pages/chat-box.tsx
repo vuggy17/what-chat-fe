@@ -146,8 +146,6 @@ export default function ChatBox({
       }
     }
 
-    console.log('client meesage', clientMessage);
-
     // ACTION: update UI
     addMessageToChat(chat.id, clientMessage, {
       insertMessage: appendMessage,

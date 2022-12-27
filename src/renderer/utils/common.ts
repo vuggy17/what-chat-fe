@@ -56,6 +56,10 @@ export function randomNumber(start: number, end: number) {
   return Math.floor(Math.random() * (end - start) + start);
 }
 
+export function isNotEmptyArray<T>(array: T[]) {
+  return Array.isArray(array) && array.length > 0;
+}
+
 // import Cookies from "universal-cookie";
 
 // function getCookie(name: string) {
