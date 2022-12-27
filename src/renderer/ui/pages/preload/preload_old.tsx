@@ -50,7 +50,6 @@ export default function Preload({ children }: { children: ReactNode }) {
   );
   const { insertMessage } = useChatMessage();
   const { updateChat } = useChat();
-  const setUserContact = useSetRecoilState(userContacts);
   const user = useRecoilValue(currentUser);
   const navigate = useNavigate();
 
@@ -121,7 +120,6 @@ export default function Preload({ children }: { children: ReactNode }) {
     );
     (async () => {
       setLoadingStage('Loading data...');
-      setUserContact(user.friends || []);
       const response = await getInitialChat_v1();
       setChatList(response.data, response.extra);
 

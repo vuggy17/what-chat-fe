@@ -53,6 +53,16 @@ class AppSocketClient implements ISocketClient {
     // });
   }
 
+  acceptFrRequest(id: string): Promise<User> {
+    return new Promise<User>((resolve, reject) => {
+      this.socketAdapter.emit(
+        ClientToServerEvent.ACCEPT_FRIEND_REQUEST,
+        id,
+        (res) => resolve(res)
+      );
+    });
+  }
+
   createGroup(memberIds: string[]): Promise<any> {
     throw new Error('Method not implemented.');
   }

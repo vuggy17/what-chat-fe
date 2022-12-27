@@ -25,6 +25,10 @@ import { currentUser } from 'renderer/hooks/use-user';
 import { chatRepository } from 'renderer/repository/chat/chat.repository';
 import useDebounce from 'renderer/utils/debouce';
 import formatDTime from 'renderer/utils/time';
+import axios from 'axios';
+import HttpClient from 'renderer/services/http';
+import use from 'renderer/utils/network';
+import User from 'renderer/domain/user.entity';
 import { NetworkFallback, Networks } from '../components/network';
 
 export default function Contacts({
@@ -35,7 +39,7 @@ export default function Contacts({
   toggleOpen: () => void;
 }) {
   const user = useRecoilValue(currentUser);
-  const contactList = useRecoilValue(userContacts);
+
   const [showNetwork, setShowNetwork] = useState(false);
   const setChat = useRecoilCallback(({ set }) => (data: any) => {
     set(chatState(data.id), data);
@@ -77,8 +81,17 @@ export default function Contacts({
   useEffect(() => {
     if (searchRef && open) {
       searchRef.current?.focus();
+
+      // fetch user friend
+      requestIdleCallback(async () => {
+        if (user) {
+          const friends = await HttpClient.get('/user/friend');
+          if (friends.length === user.friends?.length) return;
+          user.friends = friends;
+        }
+      });
     }
-  }, [open]);
+  }, [open, user]);
 
   return (
     <Modal
@@ -114,9 +127,9 @@ export default function Contacts({
             <List
               style={{ minHeight: 400, maxHeight: 500, overflow: 'auto' }}
               itemLayout="horizontal"
-              dataSource={contactList}
+              dataSource={user?.friends}
               split={false}
-              renderItem={(item) => (
+              renderItem={(item: User) => (
                 <>
                   <List.Item
                     style={{
