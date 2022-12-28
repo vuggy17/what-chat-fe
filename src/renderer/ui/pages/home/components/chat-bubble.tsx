@@ -20,6 +20,7 @@ import BubbleActionMenu from './context-menu';
 import { MessageBubbleProps } from './type';
 
 function Indicator({ status }: { status: MessageStatus }) {
+  console.log(status);
   switch (status) {
     case 'sending':
       return <CircleDashed classname="scale-[0.9] ml-1 " />;
@@ -40,7 +41,13 @@ function Indicator({ status }: { status: MessageStatus }) {
         />
       );
     default:
-      return null;
+      return (
+        <CircleSent
+          color="white"
+          background="#4b5563"
+          classname="scale-[0.9] ml-1 "
+        />
+      );
   }
 }
 /* eslint-disable react/require-default-props */
@@ -50,7 +57,8 @@ export default function MessageBubble({
   ...props
 }: MessageBubbleProps) {
   const { self, type, text, attachments, time, status, ...messageMeta } = props;
-
+  // Set default value for status to sent
+  const messageStatus = status || 'sent';
   const messageContent = () => {
     if (self) {
       switch (type) {
@@ -174,10 +182,10 @@ export default function MessageBubble({
       className="flex mt-1 min-w-0 "
       style={{ flexDirection: self ? 'row-reverse' : 'row' }}
     >
-      {status && (
+      {messageStatus && (
         <div className="flex flex-col ">
           <div className="grow flex flex-col justify-end">
-            <Indicator status={status} />
+            <Indicator status={messageStatus} />
           </div>
         </div>
       )}
