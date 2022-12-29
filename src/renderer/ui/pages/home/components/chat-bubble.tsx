@@ -53,7 +53,7 @@ function Indicator({ status }: { status: MessageStatus }) {
 /* eslint-disable react/require-default-props */
 
 export default function MessageBubble({
-  hasAvatar = false,
+  hasAvatar = true,
   ...props
 }: MessageBubbleProps) {
   const { self, type, text, attachments, time, status, ...messageMeta } = props;
