@@ -1,3 +1,4 @@
+import User from 'renderer/domain/user.entity';
 import { Message } from 'renderer/domain';
 
 interface ISocketClient {
@@ -27,10 +28,19 @@ interface ISocketClient {
   sendGroupMessage(id: string): Promise<unknown>;
   /**
    *
-   * @param id chatId
-   * @return Promise<any> that resolve when request is success
+   * @param id userId
+   * @return Promise<User> that resolve when request is success
    */
-  sendFriendRequest(id: string): Promise<unknown>;
+  sendFriendRequest(id: string): Promise<User>;
+
+  /**
+   *
+   * @param id userId
+   * @return Promise<User> that resolve when request is success
+   */
+  acceptFrRequest(id: Id): Promise<User>;
+
+  createGroup(memberIds: Id[]): Promise<any>;
 }
 
 export enum ClientToServerEvent {
@@ -40,6 +50,8 @@ export enum ClientToServerEvent {
   UN_FRIEND = 'un_friend',
   // TEST = 'TEST',
   SEEN_MESSAGE = 'seen_message',
+  SEND_GROUP_MESSAGE = 'send_group_message',
+  ACCEPT_FRIEND_REQUEST = 'accept_friend_request',
 }
 export enum ServerToClientEvent {
   HAS_NEW_MESSAGE = 'has_new_message',
@@ -85,6 +97,11 @@ export interface IClientToServerEvent {
   ) => void;
   // [ClientToServerEvent.TEST]: (payload: any) => void;
   [ClientToServerEvent.SEEN_MESSAGE]: (payload: SeenMessagePayload) => void;
+  [ClientToServerEvent.SEND_GROUP_MESSAGE]: (payload: any) => void;
+  [ClientToServerEvent.ACCEPT_FRIEND_REQUEST]: (
+    id: string,
+    onSuccess: (val) => void
+  ) => void;
 }
 
 export type HasNewMessagePayload = {

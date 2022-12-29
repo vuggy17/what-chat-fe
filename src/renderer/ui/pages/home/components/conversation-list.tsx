@@ -117,7 +117,12 @@ function Item({
       onClick={() => onSelectItem(id)}
     >
       {breakpoints.lg ? (
-        <Space direction="horizontal" size="small" style={{ width: '100%' }}>
+        <Space
+          direction="horizontal"
+          size="small"
+          className="conv-item"
+          style={{ width: '100%' }}
+        >
           {avatar}
 
           <Row

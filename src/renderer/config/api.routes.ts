@@ -1,4 +1,5 @@
-export const ALL_USER = 'user';
+export const ALL_USER = '/user';
+export const FRIEND_REQUEST = '/user/friend-request';
 export const FRIEND = 'user/friend';
 export const CHAT = '/chat';
 export const CHAT_WITH_MESSAGE = '/chat/with-message';

@@ -116,9 +116,7 @@ const createWindow = async () => {
   mainWindow = new BrowserWindow({
     show: false,
     width: 1024,
-    height: 728,
-    minHeight: 728,
-    minWidth: 600,
+    height: 680,
     icon: getAssetPath('icon.png'),
     webPreferences: {
       sandbox: false,
@@ -128,12 +126,15 @@ const createWindow = async () => {
     },
   });
 
+  // if (!isDebug)
+
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
   mainWindow.on('ready-to-show', () => {
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');
     }
+
     if (process.env.START_MINIMIZED) {
       mainWindow.minimize();
     } else {

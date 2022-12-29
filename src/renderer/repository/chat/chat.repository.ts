@@ -57,6 +57,9 @@ class ChatRepositoryImpl implements IChatRepository {
     });
   }
 
+  /**
+   * get chat of contact using local database
+   */
   async getChatOfContact(contactId: Id) {
     try {
       const db = LocalDb.instance_force();

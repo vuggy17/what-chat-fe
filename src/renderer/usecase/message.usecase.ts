@@ -19,7 +19,7 @@ import { ISocketClient } from 'renderer/services/type';
 import User from 'renderer/domain/user.entity';
 import { blob } from 'stream/consumers';
 import SocketClient from 'renderer/services/socket';
-import SendMessageSocket from './pipeline/socket.handler';
+import SendMessageSocket from './pipeline/socket.sendmessage';
 import SendMessageHttp from './pipeline/http.handler';
 
 // export function createMessage(content: string | any, id?: any): Message {
@@ -129,11 +129,6 @@ export async function sendMessageOnline(
   socket: ISocketClient,
   http = HttpClient
 ) {
-  // if (message.type !== 'text') {
-  //   console.error('Cannot send message of type', message.type);
-  // }
-  // const msg = message as TextMessage;
-  // return socket.sendPrivateMessage(msg);
   console.log('BEGIN PIPELINE', message);
   switch (message.type) {
     case 'text': {

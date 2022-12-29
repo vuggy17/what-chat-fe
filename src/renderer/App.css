@@ -43,19 +43,17 @@ h4 {
   max-height: 300;
 }
 /* only match element if there is 4 items and it is the last one */
-.img-reactive--wrap:nth-child(4):last-child{
+.img-reactive--wrap:nth-child(4):last-child {
   flex-basis: 50%;
 }
 /* only match element if there is 4 items and it is the nearest with last one (3th item) */
-.img-reactive--wrap:nth-child(3):nth-last-child(2){
+.img-reactive--wrap:nth-child(3):nth-last-child(2) {
   flex-basis: 50%;
 }
 /* match items if there is more than 4 item and it is not the only child */
 .img-reactive--wrap:nth-child(3n + 1):last-child:not(:only-child) {
   flex-grow: 0;
 }
-
-
 
 .ant-list-item:hover {
   box-shadow: 0 0 4px #eee;
@@ -89,9 +87,57 @@ h4 {
 }
 
 /* fix overflow conversation preview */
-.ant-space-item:last-child {
+.conv-item .ant-space-item:last-child {
   flex: 1;
   min-width: 0;
+}
+
+.login-left {
+  background-image: url(../../assets/login-bg.png);
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.bg-linear-black {
+  background: linear-gradient(
+    178.6deg,
+    rgba(16, 16, 16, 0.4) 11.8%,
+    rgba(110, 117, 123, 0.3) 83.8%
+  );
+}
+
+.background-gradient {
+  background-image: linear-gradient(180deg, #2af598 0%, #009efd 100%);
+  background-size: 400% 400%;
+  animation: gradient 3s ease infinite;
+}
+
+.text-gradient {
+  background: -webkit-linear-gradient(180deg, #2af598 0%, #009efd 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.message-box {
+  background: url(../../assets/login-bg.png);
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+.blurry{
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .ant-input-prefix {

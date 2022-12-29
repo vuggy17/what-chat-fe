@@ -25,6 +25,7 @@ import SocketClient from 'renderer/services/socket';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { LOGIN } from 'renderer/shared/constants';
 import useUI from 'renderer/hooks/use-ui';
+import { LocalDb } from 'renderer/services/localdb';
 import { ReactComponent as IconSetting } from '../../../../../../assets/icons/setting.svg';
 
 type MenuItem = Required<MenuProps>['items'][number];
@@ -61,19 +62,19 @@ const items: MenuItem[] = [
       }}
     />
   ),
-  getItem(
-    <Typography.Text strong>New chat</Typography.Text>,
-    'menu_new_chat',
-    <Avatar
-      icon={<UserOutlined style={{ margin: 'auto' }} />}
-      shape="square"
-      style={{
-        backgroundColor: '#2f54eb',
-        verticalAlign: 'middle',
-        color: 'white',
-      }}
-    />
-  ),
+  // getItem(
+  //   <Typography.Text strong>New chat</Typography.Text>,
+  //   'menu_new_chat',
+  //   <Avatar
+  //     icon={<UserOutlined style={{ margin: 'auto' }} />}
+  //     shape="square"
+  //     style={{
+  //       backgroundColor: '#2f54eb',
+  //       verticalAlign: 'middle',
+  //       color: 'white',
+  //     }}
+  //   />
+  // ),
   getItem(
     <Typography.Text strong>Contacts</Typography.Text>,
     'menu_contacts',
@@ -154,7 +155,7 @@ export default function Drawer({
 }) {
   const setUser = useSetRecoilState(currentUser);
   const navigate = useNavigate();
-  const { setContactOpen } = useUI();
+  const { setContactOpen, setNewGroupOpen } = useUI();
 
   return (
     <AntDrawer
@@ -170,13 +171,17 @@ export default function Drawer({
         items={items}
         onClick={({ key }) => {
           if (key === 'menu_sign_out') {
-            SocketClient.disconnect();
             setUser(null);
             navigate(`/${LOGIN}`);
           }
           if (key === 'menu_contacts') {
             toggleVisibility();
             setContactOpen(true);
+          }
+
+          if (key === 'menu_group') {
+            toggleVisibility();
+            setNewGroupOpen(true);
           }
         }}
         selectable={false}
