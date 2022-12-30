@@ -5,4 +5,8 @@ export async function createGroup(memberIds: Id[]) {
   return handler.handle(memberIds);
 }
 
+export async function uploadGroupAvatar(avatar: File) {
+  const handler = new UploadGroupAvatar();
+  return handler.handle(avatar);
+}
 export function foo() {}

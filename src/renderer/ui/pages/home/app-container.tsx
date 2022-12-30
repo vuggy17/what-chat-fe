@@ -19,7 +19,7 @@ const { Text } = Typography;
 
 const AppContainer: React.FC = () => {
   const [contactOpen, setContactOpen] = useState(false);
-  const [groupOpen, setGroupOpen] = useState(true);
+  const [groupOpen, setGroupOpen] = useState(false);
   const [user, setUser] = useRecoilState(currentUser);
 
   return (
