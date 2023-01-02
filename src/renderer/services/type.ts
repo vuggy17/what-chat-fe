@@ -1,5 +1,6 @@
 import User from 'renderer/domain/user.entity';
 import { Message } from 'renderer/domain';
+import { Group } from '../domain/type';
 
 interface ISocketClient {
   seenMessage(
@@ -40,7 +41,7 @@ interface ISocketClient {
    */
   acceptFrRequest(id: Id): Promise<User>;
 
-  createGroup(memberIds: Id[]): Promise<any>;
+  createGroup(payload: Group): Promise<any>;
 }
 
 export enum ClientToServerEvent {
@@ -52,6 +53,7 @@ export enum ClientToServerEvent {
   SEEN_MESSAGE = 'seen_message',
   SEND_GROUP_MESSAGE = 'send_group_message',
   ACCEPT_FRIEND_REQUEST = 'accept_friend_request',
+  CREATE_GROUP = 'create_group',
 }
 export enum ServerToClientEvent {
   HAS_NEW_MESSAGE = 'has_new_message',
@@ -100,6 +102,11 @@ export interface IClientToServerEvent {
   [ClientToServerEvent.SEND_GROUP_MESSAGE]: (payload: any) => void;
   [ClientToServerEvent.ACCEPT_FRIEND_REQUEST]: (
     id: string,
+    onSuccess: (val) => void
+  ) => void;
+
+  [ClientToServerEvent.CREATE_GROUP]: (
+    payload: Group,
     onSuccess: (val) => void
   ) => void;
 }

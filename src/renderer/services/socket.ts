@@ -15,6 +15,7 @@ import { message } from 'antd';
 import { Message, TextMessage } from 'renderer/domain';
 import { BASEURL } from 'renderer/shared/constants';
 import { io, Socket } from 'socket.io-client';
+import { Group } from 'renderer/domain/type';
 
 class AppSocketClient implements ISocketClient {
   private readonly socketAdapter: Socket<
@@ -63,8 +64,14 @@ class AppSocketClient implements ISocketClient {
     });
   }
 
-  createGroup(memberIds: string[]): Promise<any> {
-    throw new Error('Method not implemented.');
+  createGroup(payload: Group): Promise<any> {
+    return new Promise<Group>((resolve, reject) => {
+      this.socketAdapter.emit(
+        ClientToServerEvent.CREATE_GROUP,
+        payload,
+        (res) => resolve(res)
+      );
+    });
   }
 
   /** send seen signal to chat

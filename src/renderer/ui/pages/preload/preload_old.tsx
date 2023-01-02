@@ -148,6 +148,7 @@ export default function Preload({ children }: { children: ReactNode }) {
           }
         } catch (error) {
           console.log(error);
+          setLoadingStage(LOADCOMPLETED);
         }
         return 0;
       });

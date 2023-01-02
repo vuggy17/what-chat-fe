@@ -1,4 +1,5 @@
 export const ALL_USER = '/user';
+export const SUGGESTED_USER = '/user/suggested-user';
 export const FRIEND_REQUEST = '/user/friend-request';
 export const FRIEND = 'user/friend';
 export const CHAT = '/chat';
