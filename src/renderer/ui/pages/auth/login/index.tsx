@@ -2,15 +2,15 @@ import { Button, Form, Image, Input, Space, Typography } from 'antd';
 import axios from 'axios';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useRecoilState } from 'recoil';
-import { currentUser } from 'renderer/hooks/use-user';
+import { useRecoilState, useSetRecoilState } from 'recoil';
+import { currentUser, userContacts } from 'renderer/hooks/use-user';
 import SocketClient from 'renderer/services/socket';
 import { APP, REGISTER } from 'renderer/shared/constants';
-import loginbg from '../../../../../../assets/login-bg.png';
 
 function Login() {
   const navigate = useNavigate();
   const [user, setCurrentUser] = useRecoilState(currentUser);
+  const setUserContacts = useSetRecoilState(userContacts);
   // const resetList = useResetRecoilState(chatIdsState);
 
   const handleSubmit = (values) => {
@@ -19,6 +19,8 @@ function Login() {
       .post('/user/login', { username, password })
       .then((res) => {
         setCurrentUser(res.data.data);
+        setUserContacts(res.data.data.friends);
+
         SocketClient.setup();
         navigate(`/${APP}`);
         return null;
@@ -114,19 +116,10 @@ function Login() {
             className="mx-3 "
             type="primary"
             onClick={() => {
-              axios
-                .post('/user/login', {
-                  username: 'TâmLinh.Lý',
-                  password: 'HVRzASZ35rZNU1o',
-                })
-                .then((res) => {
-                  setCurrentUser(res.data.data);
-
-                  SocketClient.setup();
-                  navigate(`/${APP}`);
-                  return null;
-                })
-                .catch((err) => console.error('cant login'));
+              handleSubmit({
+                username: 'TâmLinh.Lý',
+                password: 'HVRzASZ35rZNU1o',
+              });
             }}
           >
             Hiểu
@@ -134,20 +127,10 @@ function Login() {
           <Button
             type="primary"
             onClick={() => {
-              axios
-                .post('/user/login', {
-                  username: 'PhiCường10',
-                  password: 'cUMWqiKC2TauoH7',
-                })
-                .then((res) => {
-                  setCurrentUser(res.data.data);
-
-                  SocketClient.setup();
-                  navigate(`/${APP}`);
-
-                  return null;
-                })
-                .catch((err) => console.error('cant login'));
+              handleSubmit({
+                username: 'PhiCường10',
+                password: 'cUMWqiKC2TauoH7',
+              });
             }}
           >
             Thiên

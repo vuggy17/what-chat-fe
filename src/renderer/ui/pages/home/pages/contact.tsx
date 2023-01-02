@@ -12,13 +12,13 @@ import {
   Typography,
 } from 'antd';
 import { useEffect, useRef } from 'react';
-import { useRecoilCallback, useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilCallback, useRecoilState, useRecoilValue, useResetRecoilState, useSetRecoilState } from 'recoil';
 import {
   chatState,
   ChatWithMessages,
   currentChatIdState,
 } from 'renderer/hooks/new-store';
-import { currentUser } from 'renderer/hooks/use-user';
+import { currentUser, userContacts } from 'renderer/hooks/use-user';
 import { chatRepository } from 'renderer/repository/chat/chat.repository';
 import useDebounce from 'renderer/utils/debouce';
 import formatDTime from 'renderer/utils/time';
@@ -33,6 +33,7 @@ export default function Contacts({
   toggleOpen: () => void;
 }) {
   const user = useRecoilValue(currentUser);
+  const [contacts, setContacts] = useRecoilState(userContacts)
 
   const setChat = useRecoilCallback(({ set }) => (data: any) => {
     set(chatState(data.id), data);
@@ -41,8 +42,9 @@ export default function Contacts({
 
   const searchRef = useRef<InputRef>(null);
   const findContact = async (key: string) => {
-    if (!key) {
+    if (key) {
       // setChatResult([]);
+      console.log('chat result', key)
     }
     // const data = await chatRepository.findChatByParticipantName(key);
     // setChatResult(data.data);
@@ -76,13 +78,13 @@ export default function Contacts({
       searchRef.current?.focus();
 
       // fetch user friend
-      requestIdleCallback(async () => {
-        if (user) {
-          const friends = await HttpClient.get('/user/friend');
-          if (friends.length === user.friends?.length) return;
-          user.friends = friends;
-        }
-      });
+      // requestIdleCallback(async () => {
+      //   if (user) {
+      //     const req = await HttpClient.get('/user/friend');
+      //     if (req.data.length === contacts?.length) return;
+      //     setContacts(req.data);
+      //   }
+      // });
     }
   }, [open, user]);
 
@@ -112,7 +114,7 @@ export default function Contacts({
         <List
           style={{ minHeight: 400, maxHeight: 500, overflow: 'auto' }}
           itemLayout="horizontal"
-          dataSource={user?.friends}
+          dataSource={contacts}
           split={false}
           renderItem={(item: User) => (
             <>

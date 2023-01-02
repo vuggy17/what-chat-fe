@@ -4,7 +4,6 @@ import { ReactNode, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { Message } from 'renderer/domain';
-import { userContacts } from 'renderer/hooks/contact-store';
 import { useChat, useChatMessage } from 'renderer/hooks/new-store';
 
 import { currentUser } from 'renderer/hooks/use-user';
