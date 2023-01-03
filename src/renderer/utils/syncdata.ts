@@ -17,13 +17,14 @@ export async function syncContact(data: User[], db: LocalDb) {
     const localData = data.map(
       (d) => ({ id: d.id, name: d.name, avatar: d.avatar } as LocalUserSchema)
     );
-    return db.contacts.bulkPut(localData);
+    await db.contacts.bulkPut(localData);
+    return localData;
   }
 
   return [];
 }
 
-export function syncChat(data: Chat[], db: LocalDb) {
+export async function syncChat(data: Chat[], db: LocalDb) {
   if (isNotEmptyArray(data)) {
     const localData = data.map(
       (d) =>
@@ -37,12 +38,17 @@ export function syncChat(data: Chat[], db: LocalDb) {
           lastMessage: d.lastMessage,
         } as LocalChatSchema)
     );
-    return db.chats.bulkPut(localData);
+    await db.chats.bulkPut(localData);
+    return localData;
   }
   return [];
 }
 
-export function mapContactToChat(currentUser: User, data: Chat[], db: LocalDb) {
+export async function mapContactToChat(
+  currentUser: User,
+  data: Chat[],
+  db: LocalDb
+) {
   if (isNotEmptyArray(data)) {
     const internalChat = data.slice();
     const localData = internalChat.map(
@@ -52,15 +58,17 @@ export function mapContactToChat(currentUser: User, data: Chat[], db: LocalDb) {
           chatId: c.id,
         } as LocalPrivateChatSchema)
     );
-    return db.privateChat.bulkPut(localData);
+    await db.privateChat.bulkPut(localData);
+    return localData;
   }
   return [];
 }
 
-export function syncMessage(data: Message[], db: LocalDb) {
+export async function syncMessage(data: Message[], db: LocalDb) {
   const localData = data.map(
     // add property chatId to message
     (d) => ({ ...d, receiverId: d.receiver.id })
   );
-  return db.messages.bulkPut(localData);
+  await db.messages.bulkPut(localData);
+  return localData;
 }

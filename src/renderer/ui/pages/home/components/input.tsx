@@ -39,6 +39,8 @@ export default function Input({
   };
 
   const sendMessage = (e: any) => {
+    e.preventDefault(); // prevent new line from being added
+
     const hasFile = fileRef !== undefined && fileRef?.length > 0;
     const hasText = textContent.trim().length > 0;
     // if we have a file with description

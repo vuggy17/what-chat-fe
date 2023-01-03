@@ -77,7 +77,13 @@ function MessagesList({
       }
 
       return (
-        <div className="overflow-hidden" key={id}>
+        <div
+          className="overflow-hidden"
+          style={{
+            paddingBottom: nextMessage ? 0 : '0.3rem',
+          }}
+          key={id}
+        >
           <MessageBubble
             key={id}
             self={sender.id === currentUserId}

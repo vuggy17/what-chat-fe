@@ -12,8 +12,15 @@ import {
   Typography,
 } from 'antd';
 import { useEffect, useRef } from 'react';
-import { useRecoilCallback, useRecoilState, useRecoilValue, useResetRecoilState, useSetRecoilState } from 'recoil';
 import {
+  useRecoilCallback,
+  useRecoilState,
+  useRecoilValue,
+  useResetRecoilState,
+  useSetRecoilState,
+} from 'recoil';
+import {
+  chatIdsState,
   chatState,
   ChatWithMessages,
   currentChatIdState,
@@ -33,18 +40,20 @@ export default function Contacts({
   toggleOpen: () => void;
 }) {
   const user = useRecoilValue(currentUser);
-  const [contacts, setContacts] = useRecoilState(userContacts)
+  const [contacts, setContacts] = useRecoilState(userContacts);
 
   const setChat = useRecoilCallback(({ set }) => (data: any) => {
     set(chatState(data.id), data);
+    set(chatIdsState, (old) => [...old, data.id]);
   });
+
   const setCurrentChatId = useSetRecoilState(currentChatIdState);
 
   const searchRef = useRef<InputRef>(null);
   const findContact = async (key: string) => {
     if (key) {
       // setChatResult([]);
-      console.log('chat result', key)
+      console.log('chat result', key);
     }
     // const data = await chatRepository.findChatByParticipantName(key);
     // setChatResult(data.data);
@@ -54,6 +63,7 @@ export default function Contacts({
     // load contact
 
     const chat = await chatRepository.getChatOfContact(contact.id);
+
     if (!chat) {
       const newItem: ChatWithMessages = {
         id: contact.id,
@@ -65,6 +75,8 @@ export default function Contacts({
       };
       setChat(newItem);
       setCurrentChatId(newItem.id);
+      // TODO: create new chat in local db
+      await chatRepository.saveChat(newItem);
     } else {
       setCurrentChatId(chat.id);
     }

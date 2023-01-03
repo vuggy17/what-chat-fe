@@ -55,8 +55,11 @@ export default class LocalDb extends Dexie {
   }
 
   static close() {
-    if (!LocalDb.internalInstance)
-      throw new Error('No localdb instance existed');
+    if (!LocalDb.internalInstance) {
+      // throw new Error('No localdb instance existed');
+      console.error('Attempt to close a non-existed localdb instance');
+      return;
+    }
 
     LocalDb.internalInstance.close();
     LocalDb.internalInstance = null;

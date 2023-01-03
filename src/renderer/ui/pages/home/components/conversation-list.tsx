@@ -3,7 +3,7 @@ import { QuestionOutlined } from '@ant-design/icons';
 import { Avatar, Badge, Col, Grid, Row, Space, Typography } from 'antd';
 import { useEffect, useRef } from 'react';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
-import { Chat as ChatEntity } from 'renderer/domain';
+import { Chat as ChatEntity, Message } from 'renderer/domain';
 import { parseDescription } from 'renderer/ui/helper/string-converter';
 import formatDTime from 'renderer/utils/time';
 import { currentUser } from 'renderer/hooks/use-user';
@@ -62,11 +62,16 @@ function Item({
   });
 
   const preview = typing ? (
-    <Text ellipsis className="text-primary" style={{ minWidth: 0 }}>
+    <Text
+      ellipsis
+      type="secondary"
+      className="text-primary"
+      style={{ minWidth: 0 }}
+    >
       {description}
     </Text>
   ) : (
-    <Text ellipsis style={{ minWidth: 0 }}>
+    <Text ellipsis type="secondary" style={{ minWidth: 0 }}>
       {description}
     </Text>
   );
@@ -182,6 +187,48 @@ interface ListProps {
   data: ChatEntity[];
 }
 
+function extractProperty(item: ChatEntity, currentUserId: Id): ItemProps {
+  const { id, avatar, name, messages, lastUpdate, status } = item;
+  const lastMessage = messages[messages.length - 1];
+
+  const getPreviewMessage = (originalMessage: Message): string => {
+    if (!originalMessage) return 'No message yet';
+    const hasText =
+      originalMessage.text !== undefined && originalMessage.text !== '';
+    if (hasText) {
+      if (originalMessage.sender.id === currentUserId) {
+        return `You: ${originalMessage.text}`;
+      }
+      return originalMessage.text;
+    }
+
+    if (originalMessage.type === 'photo') {
+      if (originalMessage.sender.id === currentUserId) {
+        return 'You send a file';
+      }
+      return `${originalMessage.sender.name} send a file`;
+    }
+
+    return 'No message yet';
+  };
+
+  return {
+    id,
+    avatar,
+    name,
+    description: parseDescription({
+      preview:
+        lastMessage !== undefined
+          ? getPreviewMessage(lastMessage)
+          : 'No message yet',
+      typing: false,
+      status: status || 'idle',
+    }), // TODO: not implement typing yet
+    muted: false, // TODO: not implement muted yet
+    time: lastUpdate || Date.now(),
+  };
+}
+
 function InternalItem({ id }: { id: Id }) {
   // const { listItem } = useChatItem(id);
   const listItem = useRecoilValue(chatState(id));
@@ -189,63 +236,12 @@ function InternalItem({ id }: { id: Id }) {
   const setActiveChatId = useSetRecoilState(currentChatIdState);
   const activeChat = useRecoilValue(currentChatQuery);
   const user = useRecoilValue(currentUser);
-  const location = useLocation();
-  const navigate = useNavigate();
 
   if (!listItem) return <></>;
 
-  const extractProperty = (item: ChatEntity) => {
-    const {
-      id: internalId,
-      avatar,
-      name,
-      lastMessage,
-      lastUpdate,
-      status,
-    } = item;
-
-    console.log('item', item);
-
-    const getPreviewMessage = (
-      originalMessage: Pick<ChatEntity, 'lastMessage'>['lastMessage']
-    ) => {
-      if (user?.id === originalMessage?.sender.id) {
-        switch (originalMessage?.type) {
-          case 'photo':
-            return `You send a file`;
-          default:
-            return `You: ${originalMessage?.text}`;
-        }
-      }
-
-      switch (originalMessage?.type) {
-        case 'photo':
-          return `${originalMessage?.sender.name} send a file`;
-        default:
-          return originalMessage?.text;
-      }
-    };
-
-    return {
-      id: internalId,
-      avatar,
-      name,
-      description: parseDescription({
-        preview:
-          lastMessage !== undefined
-            ? getPreviewMessage(lastMessage)
-            : 'unhandled',
-        typing: false,
-        status: status || 'idle',
-      }), // TODO: not implement typing yet
-      muted: false, // TODO: not implement muted yet
-      time: lastUpdate || Date.now(),
-    };
-  };
-
   return (
     <MemorizedItem
-      {...extractProperty(listItem)}
+      {...extractProperty(listItem, user!.id)}
       onSelectItem={(key) => {
         setActiveChatId(key);
       }}

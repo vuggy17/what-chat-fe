@@ -117,6 +117,11 @@ export default function Preload({ children }: { children: ReactNode }) {
       ServerToClientEvent.SEEN_MESSAGE,
       onMessageRead
     );
+    SocketClient.addEventHandler(
+      ServerToClientEvent.SEEN_MESSAGE,
+      onMessageRead
+    );
+
     (async () => {
       setLoadingStage('Loading data...');
       const response = await getInitialChat_v1();
@@ -136,10 +141,14 @@ export default function Preload({ children }: { children: ReactNode }) {
               db.privateChat,
               db.messages,
               async () => {
-                if (user.friends) syncContact(user.friends, db);
-                syncChat(response.data, db);
-                mapContactToChat(user, response.data, db);
-                response.data.forEach((chat) => syncMessage(chat.messages, db));
+                if (user.friends) await syncContact(user.friends, db);
+                await syncChat(response.data, db);
+                await mapContactToChat(user, response.data, db);
+                const syncMessageResults = response.data.map((chat) =>
+                  syncMessage(chat.messages, db)
+                );
+
+                await Promise.all(syncMessageResults);
                 setLoadingStage(LOADCOMPLETED);
               }
             );

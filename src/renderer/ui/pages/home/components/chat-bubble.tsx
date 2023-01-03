@@ -20,7 +20,6 @@ import BubbleActionMenu from './context-menu';
 import { MessageBubbleProps } from './type';
 
 function Indicator({ status }: { status: MessageStatus }) {
-  console.log(status);
   switch (status) {
     case 'sending':
       return <CircleDashed classname="scale-[0.9] ml-1 " />;

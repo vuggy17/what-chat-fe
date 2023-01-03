@@ -15,7 +15,6 @@ export default function RecentChat() {
   const [seachOpen, setSearchOpen] = useState(false);
   const activeChat = useRecoilValue(currentChatQuery);
   const { infoOpen } = useChatBoxContext();
-
   return (
     <>
       <Content className="h-full w-full shrink-0">
@@ -27,6 +26,7 @@ export default function RecentChat() {
             messagesContainer={
               <MessageList key={activeChat.id} chat={activeChat} />
             }
+            hasEditor={Object.keys(activeChat).length > 0}
           />
         </Suspense>
       </Content>

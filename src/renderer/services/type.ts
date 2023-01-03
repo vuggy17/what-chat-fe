@@ -55,13 +55,12 @@ export enum ClientToServerEvent {
   ACCEPT_FRIEND_REQUEST = 'accept_friend_request',
   CREATE_GROUP = 'create_group',
 }
+
 export enum ServerToClientEvent {
   HAS_NEW_MESSAGE = 'has_new_message',
-  TEST = 'TEST_ACK',
-  SEEN_MESSAGE = 'seen_message',
   MESSAGE_RECEIVED_BY = 'message_received_by',
-  // ADD_FRIEND_RES = 'add_friend_res',
-  // UN_FRIEND_RES = 'un_friend_res',
+  SEEN_MESSAGE = 'seen_message',
+  FRIEND_REQUEST_ACCEPTED = 'friend_request_accepted',
 }
 
 export type EventListenerWithAck<T> = (
@@ -75,7 +74,6 @@ export interface IServerToClientEvent {
     payload: any,
     ackFn: (res: any) => void
   ) => void;
-  [ServerToClientEvent.TEST]: (payload: any, ackFn: (res: any) => void) => void;
   [ServerToClientEvent.MESSAGE_RECEIVED_BY]: EventListener<PrivateMessageReceivedByPayload>;
   [ServerToClientEvent.SEEN_MESSAGE]: EventListener<SeenMessagePayload>;
 }

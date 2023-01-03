@@ -36,8 +36,10 @@ export function Header({ data }: { data: ChatEntity }) {
   const { toggleInfoOpen: toggleOpenConvOption } = useChatBoxContext();
   const navigate = useNavigate();
 
+  if (Object.keys(data).length === 0) return null;
+
   return (
-    <>
+    <div className="py-1 pr-2">
       <div className="flex justify-between items-center pl-2   ">
         <Space size="middle" align="center">
           <Avatar
@@ -93,7 +95,7 @@ export function Header({ data }: { data: ChatEntity }) {
           />
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
@@ -212,11 +214,11 @@ export default function ChatBox({
 
   return (
     <div className="flex flex-col min-h-0 h-full ">
-      <div className="py-1 pr-2">{header}</div>
+      {header}
       <Divider style={{ marginTop: 0, marginBottom: 0 }} />
 
-      <div className="flex-1 relative transition-all transform duration-700 overflow-hidden min-h-0 pb-1 message-box ">
-        <div className=" h-full  pl-2  blurry">
+      <div className="flex-1 relative transition-all transform duration-700 overflow-hidden min-h-0 message-box ">
+        <div className=" h-full pl-2 blurry">
           {messages?.length > 0
             ? messagesContainer
             : // <div className="flex w-full items-center justify-center pt-2 flex-col">

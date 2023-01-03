@@ -144,7 +144,12 @@ function Login() {
           <Typography.Text type="secondary">
             Don't have account yet?
           </Typography.Text>
-          <Typography.Link strong to={`/${REGISTER}`}>
+          <Typography.Link
+            strong
+            onClick={() => {
+              navigate(`/${REGISTER}`);
+            }}
+          >
             Sign up
           </Typography.Link>
         </Space>
