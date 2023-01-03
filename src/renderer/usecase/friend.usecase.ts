@@ -1,3 +1,4 @@
+import AcceptFriendRequestSocket from './pipeline/socket.acceptfrrequest';
 import SendFriendRequestSocket from './pipeline/socket.sendfriendrequest';
 
 export async function sendFriendRequest(friendId: Id) {
@@ -5,4 +6,7 @@ export async function sendFriendRequest(friendId: Id) {
   return handler.handle(friendId);
 }
 
-export function foo() {}
+export function acceptFriendRequest(friendId: Id) {
+  const handler = new AcceptFriendRequestSocket();
+  return handler.handle(friendId);
+}

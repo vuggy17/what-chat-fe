@@ -1,8 +1,6 @@
 import { SearchOutlined } from '@ant-design/icons';
-import { faker } from '@faker-js/faker';
 import {
   Avatar,
-  Badge,
   Button,
   Divider,
   Input,
@@ -13,19 +11,19 @@ import {
   Space,
   Typography,
 } from 'antd';
-import React, { useEffect, useRef, useState } from 'react';
-import { useRecoilCallback, useRecoilValue, useSetRecoilState } from 'recoil';
-import { userContacts } from 'renderer/hooks/contact-store';
+import { useEffect, useRef } from 'react';
+import { useRecoilCallback, useRecoilState, useRecoilValue, useResetRecoilState, useSetRecoilState } from 'recoil';
 import {
   chatState,
   ChatWithMessages,
   currentChatIdState,
 } from 'renderer/hooks/new-store';
-import { currentUser } from 'renderer/hooks/use-user';
+import { currentUser, userContacts } from 'renderer/hooks/use-user';
 import { chatRepository } from 'renderer/repository/chat/chat.repository';
 import useDebounce from 'renderer/utils/debouce';
 import formatDTime from 'renderer/utils/time';
-import { NetworkFallback, Networks } from '../components/network';
+import HttpClient from 'renderer/services/http';
+import User from 'renderer/domain/user.entity';
 
 export default function Contacts({
   open,
@@ -35,8 +33,8 @@ export default function Contacts({
   toggleOpen: () => void;
 }) {
   const user = useRecoilValue(currentUser);
-  const contactList = useRecoilValue(userContacts);
-  const [showNetwork, setShowNetwork] = useState(false);
+  const [contacts, setContacts] = useRecoilState(userContacts)
+
   const setChat = useRecoilCallback(({ set }) => (data: any) => {
     set(chatState(data.id), data);
   });
@@ -44,8 +42,9 @@ export default function Contacts({
 
   const searchRef = useRef<InputRef>(null);
   const findContact = async (key: string) => {
-    if (!key) {
+    if (key) {
       // setChatResult([]);
+      console.log('chat result', key)
     }
     // const data = await chatRepository.findChatByParticipantName(key);
     // setChatResult(data.data);
@@ -73,12 +72,21 @@ export default function Contacts({
     toggleOpen();
   };
 
-  // auto focus on component mount
   useEffect(() => {
+    // auto focus on component mount
     if (searchRef && open) {
       searchRef.current?.focus();
+
+      // fetch user friend
+      // requestIdleCallback(async () => {
+      //   if (user) {
+      //     const req = await HttpClient.get('/user/friend');
+      //     if (req.data.length === contacts?.length) return;
+      //     setContacts(req.data);
+      //   }
+      // });
     }
-  }, [open]);
+  }, [open, user]);
 
   return (
     <Modal
@@ -89,74 +97,65 @@ export default function Contacts({
       // width={450}
       footer={null}
     >
-      {showNetwork ? (
-        <React.Suspense fallback={<NetworkFallback />}>
-          <Networks handleBack={() => setShowNetwork(false)} />
-        </React.Suspense>
-      ) : (
-        <>
-          <Layout style={{ background: 'white' }}>
-            <Input
-              bordered={false}
-              ref={searchRef}
-              onChange={(e) => debounceSearch(e.target.value)}
-              style={{
-                padding: '8px 0px',
-                height: 38,
-              }}
-              placeholder="Search"
-              prefix={
-                <SearchOutlined className="text-gray-1 mr-2 -scale-x-[1]" />
-              }
-            />
+      <Layout style={{ background: 'white' }}>
+        <Input
+          bordered={false}
+          ref={searchRef}
+          onChange={(e) => debounceSearch(e.target.value)}
+          style={{
+            padding: '8px 0px',
+            height: 38,
+          }}
+          placeholder="Search"
+          prefix={<SearchOutlined className="text-gray-1 mr-2 -scale-x-[1]" />}
+        />
 
-            <Divider className="no-margin" />
-            <List
-              style={{ minHeight: 400, maxHeight: 500, overflow: 'auto' }}
-              itemLayout="horizontal"
-              dataSource={contactList}
-              split={false}
-              renderItem={(item) => (
-                <>
-                  <List.Item
-                    style={{
-                      paddingRight: 0,
-                      paddingLeft: 0,
-                      cursor: 'pointer',
-                    }}
-                    onClick={() => handleContactClick(item)}
-                  >
-                    <Space size="middle">
-                      <Avatar src={item.avatar} size={42} />
-                      <div className="flex flex-col justify-center">
-                        <Typography.Text strong className="no-margin">
-                          {item.name}
-                        </Typography.Text>
-                        <Typography.Text type="secondary">
-                          last seen {formatDTime(Math.floor(Date.now() / 1000))}
-                        </Typography.Text>
-                      </div>
-                    </Space>
-                  </List.Item>
-                  <Divider className="no-margin" />
-                </>
-              )}
-            />
-            <Layout.Footer
-              style={{ padding: '8px 6px 0px 0px', background: 'white' }}
-            >
-              <div className="flex justify-between">
-                <Button type="primary" onClick={() => setShowNetwork(true)}>
-                  Networks
-                </Button>
-                <Button onClick={toggleOpen} type="text">
-                  Close
-                </Button>
-              </div>
-            </Layout.Footer>
-          </Layout>
-        </>
-      )}
+        <Divider className="no-margin" />
+        <List
+          style={{ minHeight: 400, maxHeight: 500, overflow: 'auto' }}
+          itemLayout="horizontal"
+          dataSource={contacts}
+          split={false}
+          renderItem={(item: User) => (
+            <>
+              <List.Item
+                style={{
+                  paddingRight: 0,
+                  paddingLeft: 0,
+                  cursor: 'pointer',
+                }}
+                onClick={() => handleContactClick(item)}
+              >
+                <Space size="middle">
+                  <Avatar src={item.avatar} size={42} />
+                  <div className="flex flex-col justify-center">
+                    <Typography.Text strong className="no-margin">
+                      {item.name}
+                    </Typography.Text>
+                    <Typography.Text type="secondary">
+                      last seen {formatDTime(Math.floor(Date.now() / 1000))}
+                    </Typography.Text>
+                  </div>
+                </Space>
+              </List.Item>
+              <Divider className="no-margin" />
+            </>
+          )}
+        />
+        <Layout.Footer
+          style={{
+            padding: '8px 6px 0px 0px',
+            background: 'white',
+            textAlign: 'right',
+          }}
+        >
+          {/* <div className="flex justify-between"> */}
+          <Button onClick={toggleOpen} type="text">
+            Close
+          </Button>
+          {/* </div> */}
+        </Layout.Footer>
+      </Layout>
     </Modal>
   );
 }

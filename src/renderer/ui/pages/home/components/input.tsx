@@ -114,13 +114,13 @@ export default function Input({
             />
           </label>
         </Tooltip>
-        <Tooltip title="Add attachment(s)">
+        <Tooltip title="Upload Image">
           <label
             htmlFor="chat-input-image"
             className="flex items-center justify-center  font-semibold text-md pl-1 pr-2 hover:text-primary transform duration-300 cursor-pointer w-fit"
           >
             <span>
-              <PaperClipOutlined className="scale-125 text-neutral-500" />
+              <FileImageOutlined className="scale-125 text-neutral-500" />
             </span>
             <input
               id="chat-input-image"

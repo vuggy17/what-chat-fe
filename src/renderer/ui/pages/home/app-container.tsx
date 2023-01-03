@@ -10,6 +10,7 @@ import Preload from '../preload/preload_old';
 
 import Group from './components/group';
 import Contacts from './pages/contact';
+import Social from './components/social';
 
 const { Header, Content } = Layout;
 const { Text } = Typography;
@@ -20,6 +21,7 @@ const { Text } = Typography;
 const AppContainer: React.FC = () => {
   const [contactOpen, setContactOpen] = useState(false);
   const [groupOpen, setGroupOpen] = useState(false);
+  const [socialOpen, setSocialOpen] = useState(false);
   const [user, setUser] = useRecoilState(currentUser);
 
   return (
@@ -48,7 +50,13 @@ const AppContainer: React.FC = () => {
             background: 'transparent',
           }}
         >
-          <Outlet context={{ setContactOpen, setNewGroupOpen: setGroupOpen }} />
+          <Outlet
+            context={{
+              setContactOpen,
+              setNewGroupOpen: setGroupOpen,
+              setSocialOpen,
+            }}
+          />
         </Content>
       </Layout>
       <Contacts
@@ -59,6 +67,10 @@ const AppContainer: React.FC = () => {
       <Group
         open={groupOpen}
         toggleOpen={() => setGroupOpen((opened) => !opened)}
+      />
+      <Social
+        open={socialOpen}
+        toggleOpen={() => setSocialOpen((opened) => !opened)}
       />
     </Layout>
   );

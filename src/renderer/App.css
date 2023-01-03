@@ -124,8 +124,8 @@ h4 {
   background-size: cover;
 }
 .blurry{
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
 }
 
 @keyframes gradient {

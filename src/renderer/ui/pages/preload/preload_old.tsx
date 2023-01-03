@@ -4,7 +4,6 @@ import { ReactNode, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { Message } from 'renderer/domain';
-import { userContacts } from 'renderer/hooks/contact-store';
 import { useChat, useChatMessage } from 'renderer/hooks/new-store';
 
 import { currentUser } from 'renderer/hooks/use-user';
@@ -50,7 +49,6 @@ export default function Preload({ children }: { children: ReactNode }) {
   );
   const { insertMessage } = useChatMessage();
   const { updateChat } = useChat();
-  const setUserContact = useSetRecoilState(userContacts);
   const user = useRecoilValue(currentUser);
   const navigate = useNavigate();
 
@@ -121,7 +119,6 @@ export default function Preload({ children }: { children: ReactNode }) {
     );
     (async () => {
       setLoadingStage('Loading data...');
-      setUserContact(user.friends || []);
       const response = await getInitialChat_v1();
       setChatList(response.data, response.extra);
 
@@ -150,6 +147,7 @@ export default function Preload({ children }: { children: ReactNode }) {
           }
         } catch (error) {
           console.log(error);
+          setLoadingStage(LOADCOMPLETED);
         }
         return 0;
       });

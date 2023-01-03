@@ -1,104 +1,10 @@
 /* eslint-disable promise/catch-or-return */
-import { SendOutlined } from '@ant-design/icons';
-import {
-  Avatar,
-  Button,
-  Divider,
-  Image,
-  Input,
-  message,
-  Popover,
-  Space,
-  Typography,
-} from 'antd';
+import { Button, Divider, Image, message, Space, Typography } from 'antd';
 import axios from 'axios';
 import { useState, useEffect } from 'react';
-import { useRecoilCallback, useRecoilValue } from 'recoil';
 import { ALL_USER, FRIEND } from 'renderer/config/api.routes';
-import { Chat, Message } from 'renderer/domain';
 import User from 'renderer/domain/user.entity';
-import { useChatItem } from 'renderer/hooks/use-chat';
-import { draffMessageState } from 'renderer/hooks/use-chat-message';
-import { currentUser as userState } from 'renderer/hooks/use-user';
 import SocketClient from 'renderer/services/socket';
-import { addMessageToChat } from 'renderer/usecase/conversation.usecase';
-import {
-  createMsgPlaceholder,
-  sendMessageOnline,
-} from 'renderer/usecase/message.usecase';
-
-const INITIAL_CHAT_ID = '';
-
-function TinyChatBox({ receiver }: { receiver: User }) {
-  const { upsertListItem: updateOrInsertChatItem, getChatItemByParticipants } =
-    useChatItem(receiver.id);
-  const currentUser = useRecoilValue(userState);
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const insertOne_Draff = useRecoilCallback(
-    ({ set }) =>
-      (id: Id, m: Message) => {
-        set(draffMessageState(id), (prev) => [...prev, m]);
-      }
-  );
-  const onSend = (text: string) => {
-    if (currentUser) {
-      // const msg = createMsgPlaceholder(currentUser, receiver, text).text();
-      // const chat = getChatItemByParticipants([currentUser, receiver]);
-      // let chatUpdate: Partial<Chat> = {};
-      // if (chat) {
-      //   chatUpdate = {
-      //     status: 'sending',
-      //     lastUpdate: msg.createdAt,
-      //     previewText: msg.text,
-      //   };
-      // } else {
-      //   // if a chat not existed, create new one
-      //   chatUpdate = {
-      //     status: 'sending',
-      //     lastUpdate: msg.createdAt,
-      //     name: receiver.name,
-      //     avatar: receiver.avatar,
-      //     participants: [receiver, currentUser],
-      //   };
-      //   console.log('my chat update', chatUpdate);
-      // }
-      // // we don't add message to chat here
-      // addMessageToChat(receiver.id, msg, {
-      //   insertMessage: insertOne_Draff,
-      //   updateChat: updateOrInsertChatItem,
-      //   updates: chatUpdate,
-      // });
-      // sendMessageOnline(msg, SocketClient)
-      //   .then((res) => {
-      //     console.log('message successfully delivered to server', res);
-      //     return null;
-      //   })
-      //   .catch((err) => console.error(err));
-    }
-  };
-  return (
-    <div>
-      <Space direction="horizontal">
-        <Avatar src={receiver.avatar} />
-        <div className="flex flex-col">
-          <Typography.Text>{receiver.name}</Typography.Text>
-          <Typography.Text className="text-sm" type="secondary">
-            @{receiver.userName}
-          </Typography.Text>
-        </div>
-      </Space>
-      <div className="h-8" />
-      <Input.Search
-        // size="small"
-        placeholder="Say hi."
-        enterButton={<SendOutlined />}
-        onSearch={onSend}
-        // suffix={<SendOutlined />}
-      />
-    </div>
-  );
-}
 
 export default function Friends() {
   const [users, setUsers] = useState(new Array<User>());

@@ -21,3 +21,9 @@ export const selectUserWithId = selectorFamily<User | null, Id>({
       return get(usersState(id));
     },
 });
+
+// contacts of user
+export const userContacts = atom<User[] | undefined>({
+  key: 'userContacts',
+  default: undefined,
+});
