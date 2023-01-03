@@ -8,7 +8,7 @@ import {
 } from 'react-router-dom';
 import './App.css';
 import 'tailwindcss/tailwind.css';
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, createContext } from 'react';
 import {
   RecoilRoot,
   RecoilValue,
@@ -34,6 +34,20 @@ import './node-event';
 import HeaderFallback from './ui/pages/home/components/loaders/header.fallback';
 import NewChat from './ui/pages/home/components/new-chat';
 import RecentChat from './ui/pages/home/components/recent-chat';
+import { useResetApp } from './hooks/new-store';
+
+function DebugObserver() {
+  const snapshot = useRecoilSnapshot();
+  useEffect(() => {
+    console.debug('The following atoms were modified:');
+    // eslint-disable-next-line no-restricted-syntax
+    for (const node of snapshot.getNodes_UNSTABLE({ isModified: true })) {
+      console.debug(node.key, snapshot.getLoadable(node));
+    }
+  }, [snapshot]);
+
+  return null;
+}
 
 const RecoilCachResetEntry = ({ node }: { node: RecoilValue<unknown> }) => {
   const resetNode = useRecoilRefresher_UNSTABLE(node);
@@ -54,50 +68,53 @@ const RecoilCacheReset = () => {
   );
 };
 
+// context for reset recoil state by reset it's key
+type AppContextType = {
+  key: number;
+  reset: () => void;
+};
+const AppContext = createContext({} as AppContextType);
+
 export default function App() {
+  const { key, reset } = useResetApp();
+
   return (
-    <Router>
-      <Routes>
-        <Route path={LOGIN} element={<Login />} />
-        <Route path={REGISTER} element={<Register />} />
+    <RecoilRoot key={key}>
+      <DebugObserver />
+      <RecoilCacheReset />
+      <Router>
+        <Routes>
+          <Route path={LOGIN} element={<Login />} />
+          <Route path={REGISTER} element={<Register />} />
 
-        <Route
-          path={APP}
-          element={
-            <>
-              <RecoilRoot override={false}>
-                <AppContainer />
-                <RecoilCacheReset />
-              </RecoilRoot>
-            </>
-          }
-        >
-          <Route
-            path={`${C_CONVERSATION}/*`}
-            element={
-              <ChatBoxProvider>
-                <Chat />
-              </ChatBoxProvider>
-            }
-          />
-          {/* <Route index element={<RecentChat />} />
-            <Route path="new-chat" element={<NewChat />} /> */}
-          <Route
-            path={C_FRIEND}
-            element={
-              <Suspense fallback={<HeaderFallback />}>
+          <Route path={APP} element={<AppContainer reset={reset} />}>
+            <Route
+              path={`${C_CONVERSATION}/*`}
+              element={
                 <ChatBoxProvider>
-                  <Friends />
+                  <Chat />
                 </ChatBoxProvider>
-              </Suspense>
-            }
-          />
-          <Route path={C_PROFILE} element={<Profile />} />
-          <Route index element={<Navigate to={C_CONVERSATION} />} />
-        </Route>
+              }
+            />
+            {/* <Route index element={<RecentChat />} />
+            <Route path="new-chat" element={<NewChat />} /> */}
+            <Route
+              path={C_FRIEND}
+              element={
+                <Suspense fallback={<HeaderFallback />}>
+                  <ChatBoxProvider>
+                    <Friends />
+                  </ChatBoxProvider>
+                </Suspense>
+              }
+            />
+            <Route path={C_PROFILE} element={<Profile />} />
+            <Route index element={<Navigate to={C_CONVERSATION} />} />
+          </Route>
 
-        <Route path="*" element={<Navigate to={LOGIN} />} />
-      </Routes>
-    </Router>
+          <Route path="*" element={<Navigate to={LOGIN} />} />
+        </Routes>
+      </Router>
+    </RecoilRoot>
   );
 }

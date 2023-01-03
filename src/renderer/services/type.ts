@@ -76,6 +76,7 @@ export interface IServerToClientEvent {
   ) => void;
   [ServerToClientEvent.MESSAGE_RECEIVED_BY]: EventListener<PrivateMessageReceivedByPayload>;
   [ServerToClientEvent.SEEN_MESSAGE]: EventListener<SeenMessagePayload>;
+  [ServerToClientEvent.FRIEND_REQUEST_ACCEPTED]: EventListener<AcceptFriendPayload>;
 }
 
 export interface IClientToServerEvent {
@@ -136,5 +137,7 @@ interface SeenMessagePayload {
   toId: Id;
   time: number; // seen unix timestamp
 }
+
+export type AcceptFriendPayload = User;
 
 export { SeenMessagePayload, ISocketClient };

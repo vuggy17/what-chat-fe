@@ -1,13 +1,7 @@
 import { LocalChatSchema, LocalDb } from 'renderer/services/localdb';
 import { Chat } from 'renderer/domain';
-import { CONV_PAGE_SIZE } from 'renderer/shared/constants';
-import { genMockChat } from 'renderer/mock/chats';
 import HttpClient from 'renderer/services/http';
-import {
-  CHAT,
-  CHAT_WITH_NAME,
-  CHAT_WITH_MESSAGE,
-} from 'renderer/config/api.routes';
+import { CHAT_WITH_NAME, CHAT_WITH_MESSAGE } from 'renderer/config/api.routes';
 import { ChatKind } from 'renderer/services/localdb/schemas/chat.schema';
 import IDataSource from '../type';
 

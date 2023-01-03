@@ -6,10 +6,11 @@ import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { Message } from 'renderer/domain';
 import { useChat, useChatMessage } from 'renderer/hooks/new-store';
 
-import { currentUser } from 'renderer/hooks/use-user';
+import { currentUser, userContacts } from 'renderer/hooks/use-user';
 import { LocalDb } from 'renderer/services/localdb';
 import SocketClient from 'renderer/services/socket';
 import {
+  AcceptFriendPayload,
   EventListener,
   EventListenerWithAck,
   HasNewMessagePayload,
@@ -43,7 +44,13 @@ const Loader: React.FC<{ status: string }> = ({ status }) => {
 };
 
 const LOADCOMPLETED = 'complete';
-export default function Preload({ children }: { children: ReactNode }) {
+export default function Preload({
+  children,
+  reset,
+}: {
+  children: ReactNode;
+  reset: () => void;
+}) {
   const [loadingStage, setLoadingStage] = useState<string>(
     'Application initializing...'
   );
@@ -51,6 +58,7 @@ export default function Preload({ children }: { children: ReactNode }) {
   const { updateChat } = useChat();
   const user = useRecoilValue(currentUser);
   const navigate = useNavigate();
+  const setUserContact = useSetRecoilState(userContacts);
 
   // init chat items
   const { batchInitChats: setChatList } = useChat();
@@ -102,6 +110,12 @@ export default function Preload({ children }: { children: ReactNode }) {
     insertMessage(chatId, { id: messageId, status: 'seen' }, messageId);
   };
 
+  const onFriendRequestAccepted: EventListener<AcceptFriendPayload> = (
+    friend: AcceptFriendPayload
+  ) => {
+    setUserContact((old) => (old ? [...old, friend] : [friend]));
+  };
+
   useEffect(() => {
     // init local db
     if (!user) return;
@@ -120,6 +134,10 @@ export default function Preload({ children }: { children: ReactNode }) {
     SocketClient.addEventHandler(
       ServerToClientEvent.SEEN_MESSAGE,
       onMessageRead
+    );
+    SocketClient.addEventHandler(
+      ServerToClientEvent.FRIEND_REQUEST_ACCEPTED,
+      onFriendRequestAccepted
     );
 
     (async () => {
@@ -166,7 +184,7 @@ export default function Preload({ children }: { children: ReactNode }) {
       console.log('users', user);
       SocketClient.disconnect();
       LocalDb.close();
-      navigate(0); // refresh recoil state
+      reset(); // refresh recoil state
     };
   }, [user]);
 

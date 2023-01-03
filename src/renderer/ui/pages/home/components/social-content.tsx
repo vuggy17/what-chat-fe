@@ -9,6 +9,8 @@ import HttpClient from 'renderer/services/http';
 import { sendFriendRequest } from 'renderer/usecase/friend.usecase';
 import formatDTime from 'renderer/utils/time';
 import { FriendRequest } from 'renderer/domain/type';
+import { useRecoilState, useSetRecoilState } from 'recoil';
+import { userContacts } from 'renderer/hooks/use-user';
 import { ReactComponent as DoubleCheckIcon } from '../../../../../../assets/icons/icon-double-check.svg';
 
 const fetchNetworkUsers = async () => {
@@ -51,8 +53,9 @@ type LineProp = {
   receiver: { name: string; id: string; avatar: string };
   sender: { name: string; id: string; avatar: string };
 };
-function FriendLline({ receiver, sender, id }: LineProp) {
+function FriendLine({ receiver, sender, id }: LineProp) {
   const [accepted, setAccepted] = useState(false);
+  const [contacts, setContacts] = useRecoilState(userContacts);
   return (
     <Space
       style={{ justifyContent: 'space-between', width: '100%' }}
@@ -78,11 +81,13 @@ function FriendLline({ receiver, sender, id }: LineProp) {
         <Space>
           <Button
             onClick={async () => {
-              await HttpClient.get(
+              setAccepted(true);
+              const friend = await HttpClient.get(
                 `/user/friend-request-accept/${sender.id}/${id}`
               );
-              // await acceptFriendRequest(sender.id);
-              setAccepted(true);
+              setContacts((prev) =>
+                prev ? [...prev, friend.data] : [friend.data]
+              );
             }}
           >
             Accept
@@ -190,7 +195,7 @@ export default function SocialContent({
                 cursor: 'pointer',
               }}
             >
-              <FriendLline receiver={receiver} sender={sender} id={id} />
+              <FriendLine receiver={receiver} sender={sender} id={id} />
             </List.Item>
           )}
         />

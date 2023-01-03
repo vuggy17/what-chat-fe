@@ -1,5 +1,5 @@
 /* eslint-disable react/button-has-type */
-import { UserOutlined } from '@ant-design/icons';
+import { ConsoleSqlOutlined, UserOutlined } from '@ant-design/icons';
 import { Avatar, Button, Divider, Layout, Typography } from 'antd';
 import axios from 'axios';
 import React, { useState } from 'react';
@@ -76,9 +76,12 @@ const AppContainer: React.FC = () => {
   );
 };
 
-const AppContainerWithPreload: React.FC = () => {
+const AppContainerWithPreload: React.FC<{
+  reset: () => void;
+}> = ({ reset }) => {
+  console.log('i got reseted');
   return (
-    <Preload>
+    <Preload reset={reset}>
       <AppContainer />
     </Preload>
   );

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   atom,
   atomFamily,
@@ -167,4 +168,9 @@ export const useChat = () => {
   );
 
   return { batchInitChats, updateChat };
+};
+
+export const useResetApp = () => {
+  const [resetApp, setResetApp] = useState(Math.random());
+  return { key: resetApp, reset: () => setResetApp(Math.random()) };
 };

@@ -209,7 +209,7 @@ const Register = () => {
           <Button icon={<UploadOutlined />}>Click to upload</Button>
         </Upload>
       </Form.Item>
-
+      <br />
       <Form.Item {...tailFormItemLayout}>
         <Button
           type="primary"

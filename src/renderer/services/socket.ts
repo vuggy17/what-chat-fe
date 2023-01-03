@@ -10,6 +10,7 @@ import {
   EventListener,
   PrivateMessageReceivedByPayload,
   SeenMessagePayload,
+  AcceptFriendPayload,
 } from 'renderer/services/type';
 import { message } from 'antd';
 import { Message, TextMessage } from 'renderer/domain';
@@ -164,6 +165,7 @@ class AppSocketClient implements ISocketClient {
       | EventListenerWithAck<HasNewMessagePayload>
       | EventListener<PrivateMessageReceivedByPayload>
       | EventListener<SeenMessagePayload>
+      | EventListener<AcceptFriendPayload>
   ) {
     this.socketAdapter.on(eventName, handler);
   }
