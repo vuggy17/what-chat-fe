@@ -1,5 +1,5 @@
 import User from 'renderer/domain/user.entity';
-import { Message } from 'renderer/domain';
+import { Chat, Message } from 'renderer/domain';
 import { Group } from '../domain/type';
 
 interface ISocketClient {
@@ -113,6 +113,7 @@ export interface IClientToServerEvent {
 export type HasNewMessagePayload = {
   chatId: Id;
   message: Message;
+  chat: Chat | false;
 };
 
 export type PrivateMessageReceivedByPayload = Pick<

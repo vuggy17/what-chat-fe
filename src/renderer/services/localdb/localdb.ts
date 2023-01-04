@@ -48,7 +48,8 @@ export default class LocalDb extends Dexie {
     super(dbName);
     this.version(0.1).stores({
       chats: 'id,lastUpdate, type',
-      messages: 'id, createdAt, [createdAt+receiverId]',
+      messages:
+        'id, createdAt, [createdAt+senderId], [createdAt+senderId+type]',
       privateChat: 'id',
       contacts: 'id',
     });

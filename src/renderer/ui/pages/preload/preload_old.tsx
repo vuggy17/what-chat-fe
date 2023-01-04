@@ -7,6 +7,7 @@ import { Message } from 'renderer/domain';
 import { useChat, useChatMessage } from 'renderer/hooks/new-store';
 
 import { currentUser, userContacts } from 'renderer/hooks/use-user';
+import HttpClient from 'renderer/services/http';
 import { LocalDb } from 'renderer/services/localdb';
 import SocketClient from 'renderer/services/socket';
 import {
@@ -55,7 +56,7 @@ export default function Preload({
     'Application initializing...'
   );
   const { insertMessage } = useChatMessage();
-  const { updateChat } = useChat();
+  const { updateChat, setChat } = useChat();
   const user = useRecoilValue(currentUser);
   const navigate = useNavigate();
   const setUserContact = useSetRecoilState(userContacts);
@@ -67,12 +68,22 @@ export default function Preload({
     payload,
     ack
   ) => {
-    const { chatId, message } = payload;
+    const { chatId, message, chat: newChat } = payload;
     console.log('[HAS_NEW_MESSAGE]: ', payload);
 
     // DO NOT REMOVE SET TIMEOUT
     // settimeout to prevent recoil state update error
     setTimeout(() => {
+      if (newChat) {
+        setChat({
+          ...newChat,
+          messages: [],
+          lastMessage: convertToPreview(message),
+          lastUpdate: message.createdAt,
+          total: 1,
+        });
+      }
+
       addMessageToChat(chatId, message as Message, {
         insertMessage,
       });
@@ -180,9 +191,10 @@ export default function Preload({
       });
     })();
 
-    return () => {
+    return async () => {
       console.log('users', user);
       SocketClient.disconnect();
+      await HttpClient.get('/user/logout');
       LocalDb.close();
       reset(); // refresh recoil state
     };

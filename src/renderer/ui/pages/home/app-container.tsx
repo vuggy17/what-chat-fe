@@ -36,7 +36,7 @@ const AppContainer: React.FC = () => {
           }}
         >
           <div className="flex justify-center items-center h-full">
-            <div className="flex gap-2 items-center bg-slate-400 rounded-full pr-2 ">
+            <div className="flex gap-2 items-center rounded-full pr-2 bg-[#d9d9d9] hover:bg-[#bfbfbf] hover:cursor-pointer ">
               <Avatar src={user?.avatar} icon={<UserOutlined />} />
               <Text>{user?.name}</Text>
             </div>

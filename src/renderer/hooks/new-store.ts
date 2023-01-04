@@ -136,7 +136,6 @@ export const useChat = () => {
         extra: { pageNum: 1; totalCount: 0; totalPage: 0 }
       ) => {
         const ids = data.map((chat) => chat.id);
-        console.log('batchInitChats', data);
         data.forEach((chat) => {
           set(chatState(chat.id), chat);
         });
@@ -144,6 +143,12 @@ export const useChat = () => {
         set(chatExtraState, extra);
       }
   );
+
+  const setChat = useRecoilCallback(({ set }) => (data: ChatWithMessages) => {
+    set(chatState(data.id), data);
+    set(chatIdsState, (oldIds) => [...oldIds, data.id]);
+    // TODO: update chat extra state
+  });
 
   /**
    * update or insert a chat
@@ -167,7 +172,7 @@ export const useChat = () => {
     []
   );
 
-  return { batchInitChats, updateChat };
+  return { batchInitChats, updateChat, setChat };
 };
 
 export const useResetApp = () => {
