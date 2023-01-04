@@ -83,8 +83,8 @@ function Login() {
           wrapperCol={{ offset: 2, span: 20 }}
           initialValues={{
             remember: true,
-            username: 'PhiCường10',
-            password: 'cUMWqiKC2TauoH7',
+            username: 'vuggy17',
+            password: '17052001',
           }}
           onFinish={handleSubmit}
           // onFinishFailed={onFinishFailed}

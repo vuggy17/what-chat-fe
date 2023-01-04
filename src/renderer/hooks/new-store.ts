@@ -49,7 +49,6 @@ export const sortedChatsQuery = selector<Chat[]>({
     return [];
   },
 });
-
 // get current displayed chat
 export const currentChatQuery = selector<ChatWithMessages>({
   key: 'currentChat',

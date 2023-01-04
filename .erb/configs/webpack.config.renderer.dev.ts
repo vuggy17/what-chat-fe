@@ -18,7 +18,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 const port = process.env.PORT || 1212;
-console.log('port', process.env.PORT);
+console.log('🧑‍🚀Application running on', port);
 const manifest = path.resolve(webpackPaths.dllPath, 'renderer.json');
 const skipDLLs =
   module.parent?.filename.includes('webpack.config.renderer.dev.dll') ||

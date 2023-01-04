@@ -38,9 +38,7 @@ export default function Input({
     setContent(msgText);
   };
 
-  const sendMessage = (e: any) => {
-    e.preventDefault(); // prevent new line from being added
-
+  const sendMessage = () => {
     const hasFile = fileRef !== undefined && fileRef?.length > 0;
     const hasText = textContent.trim().length > 0;
     // if we have a file with description
@@ -53,7 +51,7 @@ export default function Input({
     }
 
     // or text only
-    if (hasText && !hasFile) {
+    if (!hasFile && hasText) {
       props.onSubmit('text', textContent);
     }
 
@@ -166,8 +164,10 @@ export default function Input({
         <Row className="py-3" align="middle" justify="end">
           <Col flex={1}>
             <AntInput.TextArea
-              // size="large"
-              onPressEnter={sendMessage}
+              onPressEnter={(e) => {
+                e.preventDefault(); // prevent new line from being added
+                sendMessage();
+              }}
               onKeyDown={handleKeyPress}
               ref={inputRef}
               className="w-full"
@@ -184,7 +184,7 @@ export default function Input({
                 className="mx-auto table group"
                 type="text"
                 onClick={() => {
-                  sendMessage(textContent);
+                  sendMessage();
                 }}
                 icon={
                   <Icon

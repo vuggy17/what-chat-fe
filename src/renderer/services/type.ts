@@ -57,6 +57,7 @@ export enum ClientToServerEvent {
 }
 
 export enum ServerToClientEvent {
+  ADDED_TO_GROUP = 'added_to_group',
   HAS_NEW_MESSAGE = 'has_new_message',
   MESSAGE_RECEIVED_BY = 'message_received_by',
   SEEN_MESSAGE = 'seen_message',

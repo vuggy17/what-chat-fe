@@ -63,7 +63,6 @@ export default function Contacts({
     // load contact
 
     const chat = await chatRepository.getChatOfContact(contact.id);
-
     if (!chat) {
       const newItem: ChatWithMessages = {
         id: contact.id,

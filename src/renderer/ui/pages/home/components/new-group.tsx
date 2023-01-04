@@ -18,7 +18,7 @@ import {
   Image,
 } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
-import { useRecoilValue } from 'recoil';
+import { useRecoilCallback, useRecoilValue, useSetRecoilState } from 'recoil';
 import { currentUser } from 'renderer/hooks/use-user';
 import type { UploadChangeParam } from 'antd/es/upload';
 import type { RcFile, UploadFile, UploadProps } from 'antd/es/upload/interface';
@@ -32,6 +32,13 @@ import debounce from 'lodash.debounce';
 import { createGroup as createGroupSocket } from 'renderer/usecase/group.usecase';
 import CreateGroup from 'renderer/usecase/pipeline/socket.creategroup';
 import HttpClient from 'renderer/services/http';
+import {
+  ChatWithMessages,
+  chatIdsState,
+  chatState,
+  currentChatIdState,
+} from 'renderer/hooks/new-store';
+import avatar from 'antd/es/avatar';
 // #region upload group avatar
 const getBase64 = (img: RcFile, callback: (url: string) => void) => {
   const reader = new FileReader();
@@ -127,10 +134,15 @@ export default function NewGroupContent({
   const groupNameInput = useRef<InputRef>(null);
   const userRef = useRef<InputRef>(null);
   const userFriends = useRecoilValue(currentUser)?.friends;
+  const setChat = useRecoilCallback(({ set }) => (data: any) => {
+    set(chatState(data.id), data);
+    set(chatIdsState, (old) => [...old, data.id]);
+  });
+  const setCurrentChatId = useSetRecoilState(currentChatIdState);
 
   const [searchUser, setSearchUser] = useState(userFriends);
   const [selectedFriend, setSelectedFriend] = useState(new Set<Id>());
-  const [avatar, setAvatar] = useState<string | null>(null);
+  const [avatarUrl, setAvatar] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleSearchUser = debounce(async (e: any) => {
@@ -143,14 +155,42 @@ export default function NewGroupContent({
       groupNameInput.current?.focus();
       return;
     }
+
+    if (!avatarUrl) {
+      message.info('Group avatar is must be uploaded');
+      return;
+    }
+
     if (selectedFriend.size === 0) {
       userRef.current?.focus();
       return;
     }
     setLoading(true);
+
+    const groupPayload: {
+      name: string;
+      members: Id[];
+      avatar: string;
+    } = {
+      name: groupNameInput.current?.input?.value,
+      members: Array.from(selectedFriend).map((id) => id),
+      avatar: avatarUrl,
+    };
     // create group
-    await createGroupSocket(Array.from(selectedFriend));
-    // TODO: create group
+    // await createGroupSocket(Array.from(selectedFriend));
+    const res = await HttpClient.save('/chat/create-group', groupPayload);
+    const { id, name, avatar, members: participants } = res.data;
+
+    const newChat: ChatWithMessages = {
+      id,
+      name,
+      avatar,
+      participants,
+      messages: [],
+      total: 0,
+    };
+    setChat(newChat);
+    setCurrentChatId(newChat.id);
     setLoading(false);
     closeModal();
   };
@@ -165,7 +205,10 @@ export default function NewGroupContent({
       <Layout style={{ background: 'white', minHeight: 500, maxHeight: 500 }}>
         <Space direction="vertical" className="flex-1">
           <span>
-            <GroupUpload onCompleted={(url) => setAvatar(url)} url={avatar} />
+            <GroupUpload
+              onCompleted={(url) => setAvatar(url)}
+              url={avatarUrl}
+            />
             <Input
               bordered={false}
               ref={groupNameInput}
