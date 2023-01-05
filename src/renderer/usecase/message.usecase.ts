@@ -124,19 +124,15 @@ export async function getMessageOfChat(
   return repo.getMessages(chatId, offset);
 }
 
-export async function sendMessageOnline(
-  message: Message,
-  socket: ISocketClient,
-  http = HttpClient
-) {
+export async function sendMessageOnline(message: Message, isGroup: boolean) {
   console.log('BEGIN PIPELINE', message);
   switch (message.type) {
     case 'text': {
-      const handler = new SendMessageSocket();
+      const handler = new SendMessageSocket(isGroup);
       return handler.handle(message);
     }
     case 'photo': {
-      const socketHandler = new SendMessageSocket();
+      const socketHandler = new SendMessageSocket(isGroup);
       const httpHandler = new SendMessageHttp();
       httpHandler.setNext(socketHandler);
       return httpHandler.handle(
@@ -158,6 +154,21 @@ export function convertToPreview(message: Message): PreviewMessage {
   const preview: PreviewMessage = {
     ...message,
     receiverName: (message.receiver as User).name,
+    senderName: (message.sender as User).name,
+    text: previewText,
+  };
+
+  return preview;
+}
+
+export function convertToGroupPreview(message: Message): PreviewMessage {
+  let previewText = `${message.text}`;
+  if (message.type === 'photo') {
+    previewText = `${(message.sender as User).name} send a photo`;
+  }
+  const preview: PreviewMessage = {
+    ...message,
+    receiverName: 'group name',
     senderName: (message.sender as User).name,
     text: previewText,
   };

@@ -1,4 +1,7 @@
-import { CHAT_WITH_MESSAGE } from 'renderer/config/api.routes';
+import {
+  CHAT_WITH_MESSAGE,
+  GROUP_CHAT_WITH_MESSAGE,
+} from 'renderer/config/api.routes';
 import { Chat, Message } from 'renderer/domain';
 import { IChatRepository } from 'renderer/repository/chat/chat.repository';
 import HttpClient from 'renderer/services/http';
@@ -34,6 +37,17 @@ export async function getInitialChat(repo: IChatRepository) {
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export async function getInitialChat_v1() {
   const response = await HttpClient.get<Chat[]>(`${CHAT_WITH_MESSAGE}?page=1`);
+  const { data, pageNum, totalCount, totalPage } = response.data;
+  return {
+    data: data.map((d) => ({ ...d, isGroup: false })),
+    extra: { pageNum, totalCount, totalPage },
+  };
+}
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export async function getInitialGroupChat() {
+  const response = await HttpClient.get<Chat[]>(
+    `${GROUP_CHAT_WITH_MESSAGE}?page=1`
+  );
   const { data, pageNum, totalCount, totalPage } = response.data;
   return {
     data,

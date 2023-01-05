@@ -28,6 +28,12 @@ export default function Input({
     attachments?: File[]
   ): void;
   onFocus(): void;
+  onSendGroupMessage(
+    type: 'file' | 'photo' | 'text',
+    text?: string,
+    attachments?: File[]
+  ): void;
+  isGroup: boolean;
 }) {
   const inputRef = useRef<InputRef>(null);
   const [fileRef, setFileRef] = useState<File[] | undefined>(undefined);
@@ -59,6 +65,26 @@ export default function Input({
     setFileRef(undefined);
   };
 
+  const sendGroupMessage = () => {
+    const hasFile = fileRef !== undefined && fileRef?.length > 0;
+    const hasText = textContent.trim().length > 0;
+    // if we have a file with description
+    if (hasFile && hasText) {
+      props.onSendGroupMessage('photo', textContent, fileRef);
+    }
+    // or file only
+    if (hasFile && !hasText) {
+      props.onSendGroupMessage('photo', '', fileRef);
+    }
+
+    // or text only
+    if (!hasFile && hasText) {
+      props.onSendGroupMessage('text', textContent);
+    }
+
+    setContent('');
+    setFileRef(undefined);
+  };
   const handleKeyPress: React.KeyboardEventHandler<HTMLTextAreaElement> = (
     e
   ) => {
@@ -166,7 +192,12 @@ export default function Input({
             <AntInput.TextArea
               onPressEnter={(e) => {
                 e.preventDefault(); // prevent new line from being added
-                sendMessage();
+                console.log('sroup', props.isGroup);
+                if (props.isGroup) {
+                  sendGroupMessage();
+                } else {
+                  sendMessage();
+                }
               }}
               onKeyDown={handleKeyPress}
               ref={inputRef}
@@ -184,7 +215,11 @@ export default function Input({
                 className="mx-auto table group"
                 type="text"
                 onClick={() => {
-                  sendMessage();
+                  if (props.isGroup) {
+                    sendGroupMessage();
+                  } else {
+                    sendMessage();
+                  }
                 }}
                 icon={
                   <Icon

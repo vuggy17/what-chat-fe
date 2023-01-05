@@ -11,6 +11,7 @@ export type Chat = {
   lastUpdate?: number;
   contactId?: Id;
   messages: Message[];
+  isGroup: boolean;
   // unreadCount: number;
   // pinned: boolean;
 };

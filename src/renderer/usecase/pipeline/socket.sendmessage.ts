@@ -9,11 +9,18 @@ export default class SendMessageSocket extends AbstractHandler<
 > {
   public handle(request: Message) {
     console.log('HANDLER: ', 'socket handler');
-
+    if (this.isGroupMessage) {
+      // return this.socketInstance.sendGroupMessage(request);
+      console.log('SENDING GROUP MESSAGE');
+      return this.socketInstance.sendGroupMessage(request);
+    }
     return this.socketInstance.sendPrivateMessage(request);
   }
 
-  constructor(private socketInstance: ISocketClient = SocketClient) {
+  constructor(
+    private readonly isGroupMessage: boolean,
+    private socketInstance: ISocketClient = SocketClient
+  ) {
     super();
   }
 }

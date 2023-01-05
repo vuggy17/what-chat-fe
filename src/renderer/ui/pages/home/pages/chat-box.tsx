@@ -19,6 +19,7 @@ import {
   updateChat as updateChatUseCase,
 } from 'renderer/usecase/conversation.usecase';
 import {
+  convertToGroupPreview,
   convertToPreview,
   createMsgPlaceholder,
   seenMessage,
@@ -118,6 +119,8 @@ export default function ChatBox({
   const currentUser = useRecoilValue(userState);
   const { messages } = chat;
 
+  console.log('CHAT', chat);
+
   const onSendMessage = (
     type: MessageType,
     text?: string,
@@ -166,7 +169,7 @@ export default function ChatBox({
 
     console.log('SENDING MESASGE: ', clientMessage);
     // ACTION: send message
-    sendMessageOnline(clientMessage, SocketClient)
+    sendMessageOnline(clientMessage, chat.isGroup)
       .then(({ data: { message } }) => {
         console.log('SEND COMPLETED: ', message);
         // FINAL: update chat
@@ -176,6 +179,87 @@ export default function ChatBox({
             status: 'idle',
             lastUpdate: message.createdAt,
             lastMessage: convertToPreview(message),
+          },
+          {
+            updateChatItem: updateChat,
+          }
+        );
+
+        // FINAL: update message status
+        insertMessage(
+          chat.id,
+          {
+            id: message.id,
+            status: 'sent',
+            createdAt: message.createdAt,
+            attachments: message.attachments,
+          },
+          clientMessage.id
+        );
+
+        return null;
+      })
+      .catch((err) => console.error(err));
+  };
+
+  const onSendGroupMessage = (
+    type: MessageType,
+    text?: string,
+    fileList?: File[]
+  ) => {
+    // SETUP: construct message
+    let clientMessage = {} as Message;
+    if (currentUser) {
+      const receiver = chat.id;
+      switch (type) {
+        case 'file':
+          clientMessage = createMsgPlaceholder(currentUser, receiver).file(
+            fileList!,
+            text
+          );
+          break;
+        case 'photo':
+          clientMessage = createMsgPlaceholder(currentUser, receiver).image(
+            fileList!,
+            text
+          );
+          break;
+        default:
+          clientMessage = createMsgPlaceholder(currentUser, receiver).text(
+            text!
+          );
+          break;
+      }
+    }
+
+    // ACTION: update UI
+    addMessageToChat(chat.id, clientMessage, {
+      insertMessage: appendMessage,
+    });
+    updateChatUseCase(
+      chat.id,
+      {
+        status: 'sending',
+        lastUpdate: clientMessage.createdAt,
+        lastMessage: convertToGroupPreview(clientMessage),
+      },
+      {
+        updateChatItem: updateChat,
+      }
+    );
+
+    console.log('SENDING MESASGE: ', chat.isGroup);
+    // ACTION: send message
+    sendMessageOnline(clientMessage, chat.isGroup)
+      .then(({ data: { message } }) => {
+        console.log('SEND COMPLETED: ', message);
+        // FINAL: update chat
+        updateChatUseCase(
+          chat.id,
+          {
+            status: 'idle',
+            lastUpdate: message.createdAt,
+            lastMessage: convertToGroupPreview(clientMessage),
           },
           {
             updateChatItem: updateChat,
@@ -234,7 +318,12 @@ export default function ChatBox({
         </div>
       </div>
       {hasEditor && (
-        <RichEditor onSubmit={onSendMessage} onFocus={onEditorGotFocused} />
+        <RichEditor
+          isGroup={chat.isGroup}
+          onSubmit={onSendMessage}
+          onFocus={onEditorGotFocused}
+          onSendGroupMessage={onSendGroupMessage}
+        />
       )}
     </div>
   );

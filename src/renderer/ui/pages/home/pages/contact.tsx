@@ -71,6 +71,7 @@ export default function Contacts({
         messages: [],
         total: 0,
         participants: [contact, user],
+        isGroup: false,
       };
       setChat(newItem);
       setCurrentChatId(newItem.id);

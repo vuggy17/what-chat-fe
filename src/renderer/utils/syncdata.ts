@@ -44,6 +44,26 @@ export async function syncChat(data: Chat[], db: LocalDb) {
   return [];
 }
 
+export async function syncGroup(data: Chat[], db: LocalDb) {
+  if (isNotEmptyArray(data)) {
+    const localData = data.map(
+      (d) =>
+        ({
+          id: d.id,
+          lastUpdate: d.lastUpdate,
+          type: ChatKind.group,
+          name: d.name,
+          avatar: d.avatar,
+          participants: d.participants,
+          lastMessage: d.lastMessage,
+        } as LocalChatSchema)
+    );
+    await db.chats.bulkPut(localData);
+    return localData;
+  }
+  return [];
+}
+
 export async function mapContactToChat(
   currentUser: User,
   data: Chat[],

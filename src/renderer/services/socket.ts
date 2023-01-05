@@ -11,6 +11,7 @@ import {
   PrivateMessageReceivedByPayload,
   SeenMessagePayload,
   AcceptFriendPayload,
+  SendMessageResponse,
 } from 'renderer/services/type';
 import { message } from 'antd';
 import { Message, TextMessage } from 'renderer/domain';
@@ -33,26 +34,18 @@ class AppSocketClient implements ISocketClient {
     this.socketAdapter.on('connect', () => {
       console.log('connected');
     });
-    // this.socketAdapter.on('connect_error', (err) => {
-    //   console.error('error', err);
-    // });
-    // this.socketAdapter.on(ServerToClientEvent.SEEN_MESSAGE, (data) => {
-    //   console.log('seen_message', data);
-    // });
-    // this.socketAdapter.on(ServerToClientEvent.TEST, (data, ack) => {
-    //   if (typeof ack === 'function') {
-    //     console.log('cc func');
-    //     ack('ack');
-    //   }
-    // });
-    // this.socketAdapter.on('disconnect', (reason) => {
-    //   if (reason === 'io server disconnect') {
-    //     // the disconnection was initiated by the server, you need to reconnect manually
-    //     this.socketAdapter.connect();
-    //   }
-    //   message.error('Chat server disconnected');
-    //   console.error('Client disconnected', reason);
-    // });
+  }
+
+  sendGroupMessage(msg: Message): Promise<SendMessageResponse> {
+    return new Promise((resolve, reject) => {
+      this.socketAdapter.emit(
+        ClientToServerEvent.SEND_GROUP_MESSAGE,
+        msg,
+        (res) => {
+          resolve(res);
+        }
+      );
+    });
   }
 
   acceptFrRequest(id: string): Promise<User> {
@@ -168,10 +161,6 @@ class AppSocketClient implements ISocketClient {
       | EventListener<AcceptFriendPayload>
   ) {
     this.socketAdapter.on(eventName, handler);
-  }
-
-  sendGroupMessage(id: string): Promise<unknown> {
-    throw new Error('Method not implemented.');
   }
 
   sendFriendRequest(id: Id): Promise<User> {

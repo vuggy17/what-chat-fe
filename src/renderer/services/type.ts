@@ -23,10 +23,10 @@ interface ISocketClient {
   sendPrivateMessage(message: Message): Promise<SendMessageResponse>;
   /**
    *
-   * @param id chatId
+   * @param {Message} message
    * @return Promise<any> that resolve when request is success
    */
-  sendGroupMessage(id: string): Promise<unknown>;
+  sendGroupMessage(message: Message): Promise<SendMessageResponse>;
   /**
    *
    * @param id userId
@@ -99,7 +99,10 @@ export interface IClientToServerEvent {
   ) => void;
   // [ClientToServerEvent.TEST]: (payload: any) => void;
   [ClientToServerEvent.SEEN_MESSAGE]: (payload: SeenMessagePayload) => void;
-  [ClientToServerEvent.SEND_GROUP_MESSAGE]: (payload: any) => void;
+  [ClientToServerEvent.SEND_GROUP_MESSAGE]: (
+    payload: Message,
+    onSuccess: (val) => void
+  ) => void;
   [ClientToServerEvent.ACCEPT_FRIEND_REQUEST]: (
     id: string,
     onSuccess: (val) => void

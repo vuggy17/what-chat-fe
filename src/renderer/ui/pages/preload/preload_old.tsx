@@ -21,6 +21,7 @@ import {
 import {
   addMessageToChat,
   getInitialChat_v1,
+  getInitialGroupChat,
 } from 'renderer/usecase/conversation.usecase';
 import {
   convertToPreview,
@@ -30,6 +31,7 @@ import {
   mapContactToChat,
   syncChat,
   syncContact,
+  syncGroup,
   syncMessage,
 } from 'renderer/utils/syncdata';
 
@@ -153,8 +155,10 @@ export default function Preload({
 
     (async () => {
       setLoadingStage('Loading data...');
-      const response = await getInitialChat_v1();
-      setChatList(response.data, response.extra);
+      const { data: chats, extra: chatExtra } = await getInitialChat_v1();
+      const { data: groups, extra: groupExtra } = await getInitialGroupChat();
+
+      setChatList([...chats, ...groups], chatExtra);
 
       requestIdleCallback(async () => {
         try {
@@ -171,9 +175,10 @@ export default function Preload({
               db.messages,
               async () => {
                 if (user.friends) await syncContact(user.friends, db);
-                await syncChat(response.data, db);
-                await mapContactToChat(user, response.data, db);
-                const syncMessageResults = response.data.map((chat) =>
+                await syncChat(chats, db);
+                await syncGroup(groups, db);
+                await mapContactToChat(user, chats, db);
+                const syncMessageResults = chats.map((chat) =>
                   syncMessage(chat.messages, db)
                 );
 
@@ -198,7 +203,7 @@ export default function Preload({
       LocalDb.close();
       reset(); // refresh recoil state
     };
-  }, [user]);
+  }, []);
 
   return (
     <div className="w-screen h-screen">
