@@ -16,6 +16,13 @@ import { useNavigate } from 'react-router-dom';
 import { BASEURL, LOGIN } from 'renderer/shared/constants';
 import CreateGroup from 'renderer/usecase/pipeline/socket.creategroup';
 
+function hashCode(s: string) {
+  return s.split('').reduce(function (a, b) {
+    a = (a << 5) - a + b.charCodeAt(0);
+    return a & a;
+  }, 0);
+}
+
 const props: UploadProps = {
   name: 'file',
   maxCount: 1,
@@ -181,7 +188,10 @@ const Register = () => {
           },
           ({ getFieldValue }) => ({
             validator(_, value) {
+              // hash password
               if (!value || getFieldValue('password') === value) {
+                hashCode(value);
+                console.log('hashcode', hashCode(value));
                 return Promise.resolve();
               }
 
