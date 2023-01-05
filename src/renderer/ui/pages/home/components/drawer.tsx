@@ -104,25 +104,6 @@ const items: MenuItem[] = [
     />
   ),
   getItem(
-    <Typography.Text strong>Setting</Typography.Text>,
-    'menu_setting',
-    <Avatar
-      icon={
-        <Icon
-          component={IconSetting}
-          style={{ fontSize: 20, margin: 'auto' }}
-          // color="white"
-        />
-      }
-      shape="square"
-      style={{
-        backgroundColor: '#a0d911',
-        verticalAlign: 'middle',
-        color: 'transparent',
-      }}
-    />
-  ),
-  getItem(
     <Typography.Text strong>Sign out</Typography.Text>,
     'menu_sign_out',
     <Avatar
