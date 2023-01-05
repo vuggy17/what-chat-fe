@@ -125,10 +125,25 @@ h4 {
   background-repeat: no-repeat;
   background-size: cover;
 }
-.blurry{
+.blurry {
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
 }
+/* region: disable antd dropdown padding */
+
+body > div:nth-child(6) > div > div > ul {
+  padding: 0 !important;
+}
+
+body > div:nth-child(5) > div > div > ul {
+  padding: 0 !important;
+}
+
+body > div:nth-child(5) > div > div > ul > li {
+  padding: 0 !important;
+}
+
+/* end region */
 
 @keyframes gradient {
   0% {

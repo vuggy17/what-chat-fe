@@ -3,6 +3,7 @@ import Icon, {
   FileImageOutlined,
   FileOutlined,
   PaperClipOutlined,
+  SmileOutlined,
 } from '@ant-design/icons';
 import {
   Tooltip,
@@ -14,10 +15,21 @@ import {
   Col,
   Row,
   message,
+  Dropdown,
+  ConfigProvider,
 } from 'antd';
 import React, { ChangeEvent, useRef, useState } from 'react';
+import {
+  EmojiObject,
+  EmojiPicker,
+  unifiedToNative,
+} from 'react-twemoji-picker';
+import EmojiData from 'react-twemoji-picker/data/twemoji.json';
 import ImagePreview from './image-preview';
 import { ReactComponent as SendIcon } from '../../../../../../assets/icons/send.svg';
+import 'react-twemoji-picker/dist/EmojiPicker.css';
+
+const emojiData = Object.freeze(EmojiData);
 
 export default function Input({
   ...props
@@ -42,6 +54,10 @@ export default function Input({
   const addNewLineToTextArea = () => {
     const msgText = `${textContent}\r\n`;
     setContent(msgText);
+  };
+
+  const handleEmojiSelect = (emoji: EmojiObject) => {
+    setContent(textContent + unifiedToNative(emoji.unicode));
   };
 
   const sendMessage = () => {
@@ -122,8 +138,8 @@ export default function Input({
   return (
     <div className="bg-white">
       <Divider className="my-0 mb-2" />
-      <div className="flex gap-1 pb-1 pl-1">
-        <Tooltip title="Record a Voice Clip">
+      <div className="flex pb-1 pl-1">
+        {/* <Tooltip title="Record a Voice Clip">
           <label
             htmlFor="chat-input-voice"
             className="flex items-center justify-center  font-semibold text-md pl-1 pr-2 hover:text-primary transform duration-300 cursor-pointer w-fit"
@@ -139,15 +155,20 @@ export default function Input({
               // onChange={handleSendFile}
             />
           </label>
-        </Tooltip>
+        </Tooltip> */}
         <Tooltip title="Upload Image">
           <label
             htmlFor="chat-input-image"
-            className="flex items-center justify-center  font-semibold text-md pl-1 pr-2 hover:text-primary transform duration-300 cursor-pointer w-fit"
+            className="flex items-center justify-center  "
           >
-            <span>
-              <FileImageOutlined className="scale-125 text-neutral-500" />
-            </span>
+            <Button
+              onClick={(e: any) => {
+                e.preventDefault();
+                document.getElementById('chat-input-image')?.click();
+              }}
+              type="text"
+              icon={<FileImageOutlined className="scale-125" />}
+            />
             <input
               id="chat-input-image"
               type="file"
@@ -157,6 +178,32 @@ export default function Input({
               onChange={handleSendFile}
             />
           </label>
+        </Tooltip>
+
+        <Tooltip title="Choose emoji">
+          <Dropdown
+            className="no-padding"
+            trigger={['click']}
+            menu={{
+              items: [
+                {
+                  key: 1,
+                  label: (
+                    <EmojiPicker
+                      numberScrollRows={9}
+                      theme="light"
+                      emojiData={emojiData}
+                      onEmojiSelect={handleEmojiSelect}
+                      // showNavbar
+                    />
+                  ),
+                },
+              ],
+            }}
+            placement="topRight"
+          >
+            <Button type="text" icon={<SmileOutlined />} />
+          </Dropdown>
         </Tooltip>
       </div>
       <Divider className="my-0" />
