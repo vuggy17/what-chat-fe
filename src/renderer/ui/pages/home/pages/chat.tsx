@@ -14,12 +14,16 @@ import {
   Outlet,
   Route,
   Routes,
+  createSearchParams,
   useLocation,
   useNavigate,
+  useOutletContext,
   useParams,
   useSearchParams,
 } from 'react-router-dom';
 import useDebounce from 'renderer/utils/debouce';
+import HttpClient from 'renderer/services/http';
+import axios from 'axios';
 import Conversations from '../components/conversations';
 import { ReactComponent as IconMenu } from '../../../../../../assets/icons/menu.svg';
 import RecentChat from '../components/recent-chat';
@@ -31,17 +35,33 @@ const { Header, Sider, Content } = Layout;
 export default function Chat() {
   const navigate = useNavigate();
   const location = useLocation();
-  console.log(location.pathname);
   const searchRef = useRef<InputRef>(null);
+  const [result, setSearchResult] = useState<{
+    privateMessages: any[];
+    groupMessages: any[];
+  }>();
+
+  console.log('cc', result);
 
   const findChat = async (key: string) => {
     if (!key) {
       // setChatResult([]);
+      console.log('key', key);
+      // console.log('res', res);
+      return;
     }
     console.log('INPUT TEXT: ', key);
+
+    const res = await axios.get(`/chat/search?key=${key}`);
+    setSearchResult({
+      privateMessages: res.data.privateMessages,
+      groupMessages: res.data.groupMessages,
+    });
+    console.log('res', res.data);
     // const data = await chatRepository.findChatByParticipantName(key);
     // setChatResult(data.data);
   };
+
   const debounceSearch = useDebounce(findChat, 500);
   const [open, setOpen] = useState(false);
 
@@ -78,7 +98,13 @@ export default function Chat() {
               bordered={false}
               ref={searchRef}
               onClick={() => {
-                if (!location.pathname.includes('search')) navigate('search');
+                if (!location.pathname.includes('search'))
+                  navigate({
+                    pathname: 'search',
+                    search: createSearchParams({
+                      chatOnly: 'true',
+                    }).toString(),
+                  });
               }}
               onChange={(e) => debounceSearch(e.target.value)}
               style={{
@@ -97,7 +123,7 @@ export default function Chat() {
               <Route index element={<Conversations />} />
               <Route path="search" element={<SearchResult />} />
             </Routes>
-            <Outlet />
+            <Outlet context={result} />
           </div>
         </Sider>
 
