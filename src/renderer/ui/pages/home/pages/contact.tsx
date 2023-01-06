@@ -31,6 +31,7 @@ import useDebounce from 'renderer/utils/debouce';
 import formatDTime from 'renderer/utils/time';
 import HttpClient from 'renderer/services/http';
 import User from 'renderer/domain/user.entity';
+import axios from 'axios';
 
 export default function Contacts({
   open,
@@ -51,14 +52,13 @@ export default function Contacts({
 
   const searchRef = useRef<InputRef>(null);
   const findContact = async (key: string) => {
-    if (key) {
-      // setChatResult([]);
-      console.log('chat result', key);
-    }
+    const response = await axios.get(`/user/friend?name=${key}`);
+    console.log('response', response);
+    setContacts(response.data);
     // const data = await chatRepository.findChatByParticipantName(key);
     // setChatResult(data.data);
   };
-  const debounceSearch = useDebounce(findContact, 500);
+  const debounceSearch = useDebounce(findContact, 300);
   const handleContactClick = async (contact: any) => {
     // load contact
 
