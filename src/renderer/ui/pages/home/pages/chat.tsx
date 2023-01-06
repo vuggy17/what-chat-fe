@@ -121,7 +121,7 @@ export default function Chat() {
           <div>
             <Routes>
               <Route index element={<Conversations />} />
-              <Route path="search" element={<SearchResult />} />
+              <Route path="search" element={<SearchResult result={result} />} />
             </Routes>
             <Outlet context={result} />
           </div>
