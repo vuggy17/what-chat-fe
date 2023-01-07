@@ -4,6 +4,7 @@ import { Suspense, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { currentChatQuery } from 'renderer/hooks/new-store';
 import { useChatBoxContext } from 'renderer/shared/context/chatbox.context';
+import { useNavigate } from 'react-router-dom';
 import ChatBox, { Header } from '../pages/chat-box';
 import ChatOptionToggle from './chat-side-menu';
 import ChatBoxFallback from './loaders/chatbox.fallback';
@@ -15,6 +16,8 @@ export default function RecentChat() {
   const [seachOpen, setSearchOpen] = useState(false);
   const activeChat = useRecoilValue(currentChatQuery);
   const { infoOpen } = useChatBoxContext();
+  const navigate = useNavigate();
+
   return (
     <>
       <Content className="h-full w-full shrink-0">
@@ -46,7 +49,7 @@ export default function RecentChat() {
           />
           <ChatOptionToggle
             activeChat={activeChat}
-            toggleSearch={() => setSearchOpen((opened) => !opened)}
+            toggleSearch={() => navigate('search')}
           />
         </Sider>
       )}

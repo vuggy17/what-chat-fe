@@ -319,6 +319,7 @@ export default function ChatBox({
       </div>
       {hasEditor && (
         <RichEditor
+          key={chat.id}
           isGroup={chat.isGroup}
           onSubmit={onSendMessage}
           onFocus={onEditorGotFocused}

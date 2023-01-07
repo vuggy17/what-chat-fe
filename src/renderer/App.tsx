@@ -35,6 +35,7 @@ import HeaderFallback from './ui/pages/home/components/loaders/header.fallback';
 import NewChat from './ui/pages/home/components/new-chat';
 import RecentChat from './ui/pages/home/components/recent-chat';
 import { useResetApp } from './hooks/new-store';
+import { SearchChatProvider } from './hooks/use-ui';
 
 function DebugObserver() {
   const snapshot = useRecoilSnapshot();
@@ -92,7 +93,9 @@ export default function App() {
               path={`${C_CONVERSATION}/*`}
               element={
                 <ChatBoxProvider>
-                  <Chat />
+                  <SearchChatProvider>
+                    <Chat />
+                  </SearchChatProvider>
                 </ChatBoxProvider>
               }
             />

@@ -35,7 +35,7 @@ type ItemSelectProps = {
   active: boolean;
 };
 
-function Item({
+export function Item({
   id,
   avatar: avatarUrl,
   name,

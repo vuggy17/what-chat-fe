@@ -28,6 +28,10 @@ import {
 import useDebounce from 'renderer/utils/debouce';
 import HttpClient from 'renderer/services/http';
 import axios from 'axios';
+import { serialize } from 'v8';
+import { SearchChatProvider, useSearchChatResult } from 'renderer/hooks/use-ui';
+import { useRecoilValue } from 'recoil';
+import { currentChatIdState, currentChatQuery } from 'renderer/hooks/new-store';
 import Conversations from '../components/conversations';
 import { ReactComponent as IconMenu } from '../../../../../../assets/icons/menu.svg';
 import RecentChat from '../components/recent-chat';
@@ -58,41 +62,30 @@ export default function Chat() {
   const navigate = useNavigate();
   const location = useLocation();
   const searchRef = useRef<InputRef>(null);
-  const [searchFocused, setSearchFocused] = useState(false);
-  const [result, setSearchResult] = useState<{
-    privateMessages: any[];
-    groupMessages: any[];
-  }>();
+
+  const [searchValue, setSearchValue] = useState('');
+  const { setResults } = useSearchChatResult();
+  const currentChat = useRecoilValue(currentChatQuery);
 
   const findChat = async (key: string) => {
     if (!key) {
-      // setChatResult([]);
-      console.log('key', key);
-      // console.log('res', res);
+      if (location.pathname.includes('search')) navigate(-1);
       return;
     }
-    console.log('INPUT TEXT: ', key);
-
-    const res = await axios.get(`/chat/search?key=${key}`);
-    setSearchResult({
-      privateMessages: res.data.privateMessages,
-      groupMessages: res.data.groupMessages,
-    });
-    console.log('res', res.data);
-    // const data = await chatRepository.findChatByParticipantName(key);
-    // setChatResult(data.data);
+    const res = await axios.get(
+      `/chat/group-or-user?key=${key}&current=${currentChat.id}&isGroup=${currentChat.isGroup}`
+    );
+    setResults(res.data);
   };
 
   const debounceSearch = useDebounce(findChat, 500);
   const [open, setOpen] = useState(false);
 
-  // useEffect(() => {
-  //   if (searchRef.current && location.pathname.includes('search')) {
-  //     searchRef.current.focus();
-
-  //   }
-  // }, [location.pathname]);
-  console.log('cc', searchFocused);
+  useEffect(() => {
+    if (searchRef.current && location.pathname.includes('search')) {
+      searchRef.current.focus();
+    }
+  });
 
   return (
     <Layout className="h-full" style={{ background: 'white' }}>
@@ -119,10 +112,10 @@ export default function Chat() {
             />
             <Input
               bordered={false}
-              // ref={searchRef}
+              ref={searchRef}
+              value={searchValue}
               onClick={() => {
                 if (!location.pathname.includes('search')) {
-                  searchRef.current?.focus();
                   navigate({
                     pathname: 'search',
                     search: createSearchParams({
@@ -131,36 +124,29 @@ export default function Chat() {
                   });
                 }
               }}
-              onChange={(e) => debounceSearch(e.target.value)}
+              onChange={(e) => {
+                setSearchValue(e.target.value);
+                debounceSearch(e.target.value);
+              }}
               style={{
-                color: '#EBEBEB',
                 paddingInline: 8,
                 background: '#d9d9d990',
                 height: 38,
               }}
-              onFocus={() => {
-                console.log('cc');
-                setSearchFocused(true);
-
-                // setSearchForcused(true);
-              }}
-              onBlur={() => {
-                console.log('blured');
-                setSearchFocused(false);
-              }}
               placeholder="Search a chat or message"
               className="input-transparent focus-within:ring-2 ring-primary"
-              //   suffix={
-              //     <Suffix
-              //       onClick={() => {
-              //         // setTimeout(() => {
-              //         // }, 100);
-              //         // searchRef.current?.blur();
-              //         navigate(-1);
-              //       }}
-              //       parentFocused={searchFocused}
-              //     />
-              //   }
+              suffix={
+                <Suffix
+                  onClick={() => {
+                    navigate(-1);
+                    setSearchValue('');
+                    // if (searchRef.current?.input) {
+                    // searchRef.current.focus();
+                    // }
+                  }}
+                  parentFocused={location.pathname.includes('search')}
+                />
+              }
             />
           </div>
           <div>
@@ -168,7 +154,7 @@ export default function Chat() {
               <Route index element={<Conversations />} />
               <Route path="search" element={<SearchResult />} />
             </Routes>
-            <Outlet context={result} />
+            <Outlet />
           </div>
         </Sider>
 

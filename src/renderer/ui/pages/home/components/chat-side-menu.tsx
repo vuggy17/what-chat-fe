@@ -99,94 +99,6 @@ function Main({
             <Typography.Text type="secondary">Coding 🐱‍🐉</Typography.Text>
           </div>
 
-          <Row
-            gutter={8}
-            className="pt-5 px-3 w-[80%]"
-            justify="center"
-            style={{ margin: '0 auto' }}
-          >
-            <Col flex="1" className="flex justify-center text-center">
-              <AppSwitch
-                defaultChecked
-                // onChange={(muted) =>
-                //   upsertListItem({ id: data.id, updates: { muted } })
-                // }
-                CheckedComponent={({ toggleState }) => (
-                  <span>
-                    <Tooltip title="Click to unmute">
-                      <Button
-                        icon={<BellOff />}
-                        style={{ backgroundColor: '#EBEBEB' }}
-                        type="text"
-                        onClick={() => toggleState()}
-                      />
-                    </Tooltip>
-                    <p className="ant-badge block mt-1">Muted</p>
-                  </span>
-                )}
-              >
-                {({ toggleState }) => (
-                  <span>
-                    <Button
-                      icon={<Bell />}
-                      style={{ backgroundColor: '#EBEBEB' }}
-                      type="text"
-                      onClick={() => toggleState()}
-                    />
-
-                    <p className="ant-badge block mt-1">Mute</p>
-                  </span>
-                )}
-              </AppSwitch>
-            </Col>
-            <Col flex="1" className="flex justify-center text-center">
-              {/* <AppSwitch
-                onChange={(pinned) =>
-                  ConversationController.updateConverstationMeta(data.id, {
-                    pinned,
-                  })
-                }
-                defaultChecked={data.pinned}
-                CheckedComponent={({ toggleState }) => (
-                  <span>
-                    <Tooltip title="Click to unpin">
-                      <Button
-                        icon={<Pin />}
-                        style={{ backgroundColor: '#EBEBEB' }}
-                        type="text"
-                        onClick={toggleState}
-                      />
-                    </Tooltip>
-                    <p className="ant-badge block mt-1">Pinned</p>
-                  </span>
-                )}
-              >
-                {({ toggleState }) => (
-                  <span>
-                    <Button
-                      icon={<PinOff />}
-                      style={{ backgroundColor: '#EBEBEB' }}
-                      type="text"
-                      onClick={() => toggleState()}
-                    />
-
-                    <p className="ant-badge block mt-1">Pin</p>
-                  </span>
-                )}
-              </AppSwitch> */}
-            </Col>
-            <Col flex="1" className="flex justify-center text-center">
-              <span>
-                <Button
-                  icon={<SearchOutlined />}
-                  type="text"
-                  style={{ backgroundColor: '#EBEBEB' }}
-                  onClick={onSearchClick}
-                />
-                <p className="ant-badge block mt-1">Search</p>
-              </span>
-            </Col>
-          </Row>
           <div className="py-5">
             <Menu
               selectedKeys={['23']}
@@ -259,27 +171,26 @@ export default function ChatOptionToggle({
 
               children: (
                 <div className="relative flex flex-col h-screen">
-                  <Space className="absolute left-0">
+                  <Space className="py-4">
                     <Button
                       icon={<ArrowLeftOutlined />}
                       onClick={() => setActiveTab('main')}
-                      type="link"
+                      type="text"
                     >
                       Back
                     </Button>
-                  </Space>
-                  <Space align="center" className="w-full ">
-                    <Typography.Title
-                      level={5}
-                      className=" text-center"
-                      style={{ marginBottom: 0 }}
-                    >
-                      Media, image
-                    </Typography.Title>
+                    <Space align="center">
+                      <Typography.Title
+                        level={5}
+                        className=" text-center"
+                        style={{ margin: 0 }}
+                      >
+                        Images
+                      </Typography.Title>
+                    </Space>
                   </Space>
 
-                  <div className="h-6" />
-                  <MediaGalery id={activeChat.id} />
+                  <MediaGalery id={activeChat.id} key={Math.random()} />
                 </div>
               ),
             },
@@ -288,26 +199,25 @@ export default function ChatOptionToggle({
               label: undefined,
               children: (
                 <div className="relative flex flex-col h-screen">
-                  <Space className="absolute left-0">
+                  <Space className="py-4 relative">
                     <Button
                       icon={<ArrowLeftOutlined />}
                       onClick={() => setActiveTab('main')}
-                      type="link"
+                      type="text"
                     >
                       Back
                     </Button>
-                  </Space>
-                  <Space align="center" className="w-full ">
-                    <Typography.Title
-                      level={5}
-                      className=" text-center"
-                      style={{ marginBottom: 0 }}
-                    >
-                      Files
-                    </Typography.Title>
+                    <Space align="center">
+                      <Typography.Title
+                        level={5}
+                        className=" text-center"
+                        style={{ margin: 0 }}
+                      >
+                        Files
+                      </Typography.Title>
+                    </Space>
                   </Space>
 
-                  <div className="h-2" />
                   <FileList id={activeChat.id} />
                 </div>
               ),

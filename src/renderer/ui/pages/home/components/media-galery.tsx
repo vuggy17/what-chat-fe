@@ -1,6 +1,10 @@
 import { Col, Divider, Row, Skeleton } from 'antd';
-import { useState } from 'react';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import { useRecoilValue } from 'recoil';
+import { FileMessage } from 'renderer/domain';
+import { currentChatQuery } from 'renderer/hooks/new-store';
 import { groupBy } from 'renderer/utils/common';
 
 const genMockImage = (count: number, lastIndex: number) => {
@@ -13,14 +17,22 @@ const genMockImage = (count: number, lastIndex: number) => {
 const images = genMockImage(100, 0);
 
 export default function MediaGalery({ id }: { id: Id }) {
-  const [data, setData] = useState(groupBy<typeof images[0]>(images, 3));
+  const messages = useRecoilValue(currentChatQuery)?.messages ?? [];
+
+  const fileMessages = messages.filter(
+    (m) => m.type === 'photo'
+  ) as FileMessage[];
+
+  const urls = fileMessages.map((m) => m.attachments).flat(2);
+
+  console.log('urls', urls);
 
   const loadMoreData = () => {
-    const newitems = groupBy<typeof images[0]>(
-      genMockImage(12, data.length - 1),
-      3
-    );
-    setData([...data, ...newitems]);
+    // const newitems = groupBy<typeof images[0]>(
+    //   genMockImage(12, data.length - 1),
+    //   3
+    // );
+    // setData([...data, ...newitems]);
   };
 
   return (
@@ -32,24 +44,24 @@ export default function MediaGalery({ id }: { id: Id }) {
       }}
     >
       <InfiniteScroll
-        dataLength={data.length}
+        dataLength={urls.length}
         next={loadMoreData}
         hasMore
         loader={<Skeleton active />}
         endMessage={<Divider plain>It is all, nothing more 🤐</Divider>}
         scrollableTarget="imagelist"
       >
-        {data.map((row) => {
+        {groupBy<typeof urls[0]>(urls, 3).map((row) => {
           return (
             <Row className="h-[150px]">
-              {row.map((image: { src: string; alt: string }) => {
+              {row.map((url) => {
                 return (
                   <Col span={8} className="overflow-hidden">
                     <img
-                      src={image.src}
+                      src={url}
                       loading="lazy"
                       className="object-cover w-full h-full"
-                      alt={image.alt}
+                      alt={url}
                     />
                   </Col>
                 );
@@ -57,6 +69,11 @@ export default function MediaGalery({ id }: { id: Id }) {
             </Row>
           );
         })}
+        {/* {data.map((row) => {
+          return (
+
+          );
+        })} */}
       </InfiniteScroll>
     </div>
   );
