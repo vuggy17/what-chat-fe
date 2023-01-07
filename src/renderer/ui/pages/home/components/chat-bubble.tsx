@@ -63,7 +63,7 @@ export default function MessageBubble({
       switch (type) {
         case 'file':
           return (
-            <BubbleActionMenu actions={['download']} msg={props}>
+            <BubbleActionMenu actions={['download', 'delete']} msg={props}>
               <FileBubble
                 uploaded={messageMeta.uploaded!}
                 name={messageMeta.name!}
@@ -74,7 +74,10 @@ export default function MessageBubble({
           );
         case 'photo':
           return (
-            <BubbleActionMenu actions={['download', 'edit']} msg={props}>
+            <BubbleActionMenu
+              actions={['download', 'edit', 'delete']}
+              msg={props}
+            >
               <ImageBubble
                 className="bg-[#EBEBEB] rounded w-fit  rounded-br-none  max-w-[60%] float-right"
                 description={
@@ -120,7 +123,7 @@ export default function MessageBubble({
       // case 'photo':
       //   return (
       //     <BubbleActionMenu
-      //       actions={['download', 'edit']}
+      //       actions={['download', 'edit', 'delete']}
       //       msg={props}
       //     >
       //       <ImageBubble
@@ -141,7 +144,10 @@ export default function MessageBubble({
       //   );
       case 'photo':
         return (
-          <BubbleActionMenu actions={['download', 'edit']} msg={props}>
+          <BubbleActionMenu
+            actions={['download', 'edit', 'delete']}
+            msg={props}
+          >
             <ImageBubble
               className="bg-[#EBEBEB] rounded rounded-bl-none w-fit max-w-[60%] "
               description={

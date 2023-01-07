@@ -204,7 +204,7 @@ function extractProperty(item: ChatEntity, currentUserId: Id): ItemProps {
 
     if (originalMessage.type === 'photo') {
       if (originalMessage.sender.id === currentUserId) {
-        return 'You sent a file';
+        return 'You send a file';
       }
       return `${originalMessage.sender.name} send a file`;
     }
