@@ -83,8 +83,8 @@ function Login() {
           wrapperCol={{ offset: 2, span: 20 }}
           initialValues={{
             remember: true,
-            username: 'vuggy17',
-            password: '17052001',
+            username: '',
+            password: '',
           }}
           onFinish={handleSubmit}
           // onFinishFailed={onFinishFailed}
@@ -111,31 +111,6 @@ function Login() {
           </Form.Item>
         </Form>
 
-        <Space>
-          <Button
-            className="mx-3 "
-            type="primary"
-            onClick={() => {
-              handleSubmit({
-                username: 'TâmLinh.Lý',
-                password: 'HVRzASZ35rZNU1o',
-              });
-            }}
-          >
-            Hiểu
-          </Button>
-          <Button
-            type="primary"
-            onClick={() => {
-              handleSubmit({
-                username: 'PhiCường10',
-                password: 'cUMWqiKC2TauoH7',
-              });
-            }}
-          >
-            Thiên
-          </Button>
-        </Space>
         <br />
         <br />
         <br />
