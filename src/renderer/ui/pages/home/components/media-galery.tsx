@@ -1,4 +1,4 @@
-import { Col, Divider, Row, Skeleton } from 'antd';
+import { Col, Divider, Empty, Image, Row, Skeleton, Typography } from 'antd';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
@@ -46,9 +46,9 @@ export default function MediaGalery({ id }: { id: Id }) {
       <InfiniteScroll
         dataLength={urls.length}
         next={loadMoreData}
-        hasMore
+        hasMore={false}
         loader={<Skeleton active />}
-        endMessage={<Divider plain>It is all, nothing more 🤐</Divider>}
+        endMessage={<Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />}
         scrollableTarget="imagelist"
       >
         {groupBy<typeof urls[0]>(urls, 3).map((row) => {
@@ -57,11 +57,13 @@ export default function MediaGalery({ id }: { id: Id }) {
               {row.map((url) => {
                 return (
                   <Col span={8} className="overflow-hidden">
-                    <img
+                    <Image
+                      height={150}
                       src={url}
                       loading="lazy"
-                      className="object-cover w-full h-full"
+                      className="object-cover"
                       alt={url}
+                      style={{ height: '100%' }}
                     />
                   </Col>
                 );

@@ -16,14 +16,11 @@ function InternalImage({ file, onClose }: { file: File; onClose: () => void }) {
       </Tooltip>
       <div className="h-auto relative">
         <Image
-          width="80px"
-          height="80px"
+          width={80}
+          height={80}
           src={src.current}
-          preview={false}
-          onLoad={() => {
-            URL.revokeObjectURL(src.current);
-          }}
-          className="block max-w-full max-h-full absolute inset-0 "
+          preview
+          className="object-cover"
         />
       </div>
     </div>

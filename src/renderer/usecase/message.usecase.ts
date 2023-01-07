@@ -125,7 +125,7 @@ export async function getMessageOfChat(
 }
 
 export async function sendMessageOnline(message: Message, isGroup: boolean) {
-  console.log('BEGIN PIPELINE', message);
+  console.log('BEGIN PIPELINE', message, isGroup);
   switch (message.type) {
     case 'text': {
       const handler = new SendMessageSocket(isGroup);
@@ -140,6 +140,14 @@ export async function sendMessageOnline(message: Message, isGroup: boolean) {
       );
     }
 
+    case 'file': {
+      const socketHandler = new SendMessageSocket(isGroup);
+      const httpHandler = new SendMessageHttp();
+      httpHandler.setNext(socketHandler);
+      return httpHandler.handle(
+        message as WithRequired<FileMessage, 'fileList'>
+      );
+    }
     default:
       // eslint-disable-next-line prefer-promise-reject-errors
       return new Promise((resolve, reject) => reject('Message type not found'));

@@ -18,7 +18,7 @@ import {
   Dropdown,
   ConfigProvider,
 } from 'antd';
-import React, { ChangeEvent, useRef, useState } from 'react';
+import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 import {
   EmojiObject,
   EmojiPicker,
@@ -50,6 +50,7 @@ export default function Input({
   const inputRef = useRef<InputRef>(null);
   const [fileRef, setFileRef] = useState<File[] | undefined>(undefined);
   const [textContent, setContent] = React.useState('');
+  const [imNotImage, setImNotImage] = useState(false);
 
   const addNewLineToTextArea = () => {
     const msgText = `${textContent}\r\n`;
@@ -63,6 +64,14 @@ export default function Input({
   const sendMessage = () => {
     const hasFile = fileRef !== undefined && fileRef?.length > 0;
     const hasText = textContent.trim().length > 0;
+
+    if (hasFile && imNotImage) {
+      props.onSubmit('file', textContent, fileRef);
+      setContent('');
+      setFileRef(undefined);
+      return;
+    }
+
     // if we have a file with description
     if (hasFile && hasText) {
       props.onSubmit('photo', textContent, fileRef);
@@ -84,7 +93,14 @@ export default function Input({
   const sendGroupMessage = () => {
     const hasFile = fileRef !== undefined && fileRef?.length > 0;
     const hasText = textContent.trim().length > 0;
-    // if we have a file with description
+
+    if (hasFile && imNotImage) {
+      props.onSendGroupMessage('file', textContent, fileRef);
+      setContent('');
+      setFileRef(undefined);
+      return;
+    }
+
     if (hasFile && hasText) {
       props.onSendGroupMessage('photo', textContent, fileRef);
     }
@@ -121,7 +137,8 @@ export default function Input({
       if (isFileImage(files[0])) {
         setFileRef(fileArray);
       } else {
-        message.info('Only image files are allowed');
+        setFileRef(fileArray);
+        // message.info('Only image files are allowed');
       }
     }
 
@@ -134,6 +151,25 @@ export default function Input({
       cursor: 'end',
     });
   }
+
+  useEffect(() => {
+    if (fileRef !== undefined && fileRef?.length > 0) {
+      // const file = fileRef[0];
+      // const isImage = file.type.startsWith('image/');
+      // if (!isImage) {
+      //   setImNotImage(true);
+      // }
+
+      if (imNotImage) {
+        if (props.isGroup) {
+          sendGroupMessage();
+        } else {
+          sendMessage();
+        }
+        setImNotImage(false);
+      }
+    }
+  }, [fileRef]);
 
   return (
     <div className="bg-white">
@@ -156,6 +192,33 @@ export default function Input({
             />
           </label>
         </Tooltip> */}
+        <Tooltip title="Upload file">
+          <label
+            htmlFor="chat-input-file"
+            className="flex items-center justify-center  "
+          >
+            <Button
+              onClick={(e: any) => {
+                e.preventDefault();
+                setImNotImage(true);
+                document.getElementById('chat-input-file')?.click();
+              }}
+              type="text"
+              icon={<PaperClipOutlined className="scale-125" />}
+            />
+            <input
+              id="chat-input-file"
+              type="file"
+              hidden
+              multiple={false}
+              accept=".xlsx,.xls,.doc, .docx,.ppt, .pptx,.txt,.pdf"
+              onChange={(e: any) => {
+                handleSendFile(e);
+              }}
+            />
+          </label>
+        </Tooltip>
+
         <Tooltip title="Upload Image">
           <label
             htmlFor="chat-input-image"
@@ -210,7 +273,7 @@ export default function Input({
       <div>
         <Row>
           <Col span={22}>
-            {fileRef && (
+            {fileRef && !imNotImage && (
               <ul className="flex p-0 m-0 px-2 space-x-1 list-none  preview-scroll">
                 {fileRef.map((file) => (
                   <li
@@ -239,7 +302,6 @@ export default function Input({
             <AntInput.TextArea
               onPressEnter={(e) => {
                 e.preventDefault(); // prevent new line from being added
-                console.log('sroup', props.isGroup);
                 if (props.isGroup) {
                   sendGroupMessage();
                 } else {

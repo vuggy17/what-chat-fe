@@ -26,6 +26,7 @@ import {
   sendMessageOnline,
 } from 'renderer/usecase/message.usecase';
 import { useNavigate } from 'react-router-dom';
+import { createNoSubstitutionTemplateLiteral } from 'typescript';
 import { ReactComponent as IconSearch } from '../../../../../../assets/icons/search.svg';
 import { ReactComponent as SideBarRight } from '../../../../../../assets/icons/layout-sidebar-right.svg';
 import { ReactComponent as DotsVertical } from '../../../../../../assets/icons/dots-vertical.svg';
@@ -126,6 +127,7 @@ export default function ChatBox({
     text?: string,
     fileList?: File[]
   ) => {
+    console.log('sending messgaes ========================');
     // SETUP: construct message
     let clientMessage = {} as Message;
     if (currentUser) {
@@ -211,6 +213,9 @@ export default function ChatBox({
     let clientMessage = {} as Message;
     if (currentUser) {
       const receiver = chat.id;
+
+      console.log('gg', chat.isGroup);
+      console.log('send group message', receiver);
       switch (type) {
         case 'file':
           clientMessage = createMsgPlaceholder(currentUser, receiver).file(

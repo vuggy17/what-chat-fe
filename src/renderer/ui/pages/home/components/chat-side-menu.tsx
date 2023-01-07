@@ -7,6 +7,8 @@ import {
   Avatar,
   Button,
   Col,
+  Divider,
+  Empty,
   Menu,
   MenuProps,
   Modal,
@@ -22,6 +24,7 @@ import FileList from './file-list';
 import { Bell, BellOff, FileText, Photo } from './icons';
 import MediaGalery from './media-galery';
 import AppSwitch from './switch';
+import Chat from '../pages/chat';
 
 const { confirm } = Modal;
 interface ChatOptionToggleProps {
@@ -64,11 +67,6 @@ const items: MenuItem[] = [
       ),
     ]
   ),
-
-  getItem(
-    <Typography.Text type="danger">Delete chat</Typography.Text>,
-    'delete'
-  ),
 ];
 
 function Main({
@@ -86,9 +84,13 @@ function Main({
       {data && (
         <>
           <div
-            className="pt-4 pb-3 flex items-center flex-col"
+            className="pt-4 flex items-center flex-col"
             style={{ width: '100%' }}
           >
+            <Space>
+              <Typography.Text strong>About conversation</Typography.Text>
+            </Space>
+            <Divider />
             <Avatar
               size={{ xs: 24, sm: 32, md: 40, lg: 64, xl: 80, xxl: 90 }}
               src={data.avatar}
@@ -96,7 +98,18 @@ function Main({
             <Typography.Title level={4} style={{ marginBottom: 0 }}>
               {data.name}
             </Typography.Title>
-            <Typography.Text type="secondary">Coding 🐱‍🐉</Typography.Text>
+
+            {data.isGroup ? (
+              <Avatar.Group>
+                {data?.participants?.map((p) => (
+                  <Tooltip title={p.name}>
+                    <Avatar src={p.avatar} alt={p.name} />
+                  </Tooltip>
+                ))}
+              </Avatar.Group>
+            ) : (
+              <Typography.Text type="secondary">Coding 🐱‍🐉</Typography.Text>
+            )}
           </div>
 
           <div className="py-5">
@@ -218,7 +231,8 @@ export default function ChatOptionToggle({
                     </Space>
                   </Space>
 
-                  <FileList id={activeChat.id} />
+                  {/* <FileList id={activeChat.id} /> */}
+                  <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
                 </div>
               ),
             },

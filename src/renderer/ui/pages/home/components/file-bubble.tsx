@@ -12,7 +12,10 @@ type FileBubbleProps = MessageBubbleProps & {
 
 export default function FileBubble({ ...props }: FileBubbleProps) {
   return (
-    <div className="flex gap-4 items-center justify-center bg-white shadow-sm  max-w-[300px] rounded-md px-3 py-5 ">
+    <div
+      className="flex gap-4 items-center justify-center bg-white shadow-sm  max-w-[300px] rounded-md px-3 py-5 "
+      style={{ float: props.self ? 'right' : 'left' }}
+    >
       <span>
         <FileOutlined style={{ fontSize: '1.2rem' }} />
       </span>

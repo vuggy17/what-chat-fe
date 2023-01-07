@@ -79,7 +79,7 @@ export default function MessageBubble({
               msg={props}
             >
               <ImageBubble
-                className="bg-primary rounded w-fit  rounded-br-none text-white max-w-[60%] float-right"
+                className="bg-[#EBEBEB] rounded w-fit  rounded-br-none  max-w-[60%] float-right"
                 description={
                   text && (
                     <div className="break-words py-1 pl-2 pr-3">
