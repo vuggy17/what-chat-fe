@@ -1,1 +1,4 @@
 xu li ack tu server toi client khi send event HAS_NEW_MESSAGE
+
+
+nhan event add to group

@@ -1,4 +1,4 @@
-import { PreviewMessage } from './message.entity';
+import { Message, PreviewMessage } from './message.entity';
 import User from './user.entity';
 
 export type Chat = {
@@ -10,6 +10,8 @@ export type Chat = {
   participants?: User[];
   lastUpdate?: number;
   contactId?: Id;
+  messages: Message[];
+  isGroup: boolean;
   // unreadCount: number;
   // pinned: boolean;
 };

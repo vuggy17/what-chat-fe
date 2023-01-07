@@ -11,36 +11,20 @@ import App from './App';
 import './config/axios.config';
 import ErrorBoundary from './ui/pages/components/ErrorBoundary/ErrorBoundary';
 
-function DebugObserver() {
-  const snapshot = useRecoilSnapshot();
-  useEffect(() => {
-    console.debug('The following atoms were modified:');
-    // eslint-disable-next-line no-restricted-syntax
-    for (const node of snapshot.getNodes_UNSTABLE({ isModified: true })) {
-      console.debug(node.key, snapshot.getLoadable(node));
-    }
-  }, [snapshot]);
-
-  return null;
-}
-
 const container = document.getElementById('root')!;
 const root = createRoot(container);
 root.render(
   <ErrorBoundary>
-    <RecoilRoot>
-      <DebugObserver />
-      <ConfigProvider
-        theme={{
-          token: {
-            colorPrimary: '#128C7E',
-            colorPrimaryBg: '#ecf7f4',
-          },
-        }}
-      >
-        <App />
-      </ConfigProvider>
-    </RecoilRoot>
+    <ConfigProvider
+      theme={{
+        token: {
+          colorPrimary: '#128C7E',
+          colorPrimaryBg: '#ecf7f4',
+        },
+      }}
+    >
+      <App />
+    </ConfigProvider>
   </ErrorBoundary>
 );
 

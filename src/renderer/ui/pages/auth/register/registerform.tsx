@@ -1,33 +1,33 @@
+/* eslint-disable promise/catch-or-return */
 /* eslint-disable react/jsx-props-no-spreading */
 import { UploadOutlined } from '@ant-design/icons';
 import {
-  AutoComplete,
   Button,
-  Cascader,
-  Checkbox,
-  Col,
   Form,
   Input,
-  InputNumber,
   message,
-  Row,
   Select,
   Upload,
   UploadProps,
 } from 'antd';
 import axios from 'axios';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { REGISTER_USER } from 'renderer/config/api.routes';
-import HttpClient from 'renderer/services/http';
 import { BASEURL, LOGIN } from 'renderer/shared/constants';
+import CreateGroup from 'renderer/usecase/pipeline/socket.creategroup';
 
-const { Option } = Select;
+function hashCode(s: string) {
+  return s.split('').reduce(function (a, b) {
+    a = (a << 5) - a + b.charCodeAt(0);
+    return a & a;
+  }, 0);
+}
+
 const props: UploadProps = {
   name: 'file',
-  action: `${BASEURL}/upload`,
   maxCount: 1,
   multiple: false,
+  action: `${BASEURL}/upload-single`,
   onChange(info) {
     if (info.file.status !== 'uploading') {
       console.log(info.file, info.fileList);
@@ -96,10 +96,10 @@ const Register = () => {
         })
         .then((res) => {
           message.destroy('msg_register_forcewait');
-          message.success({
-            content: 'Registration successful. You can now login.',
-            key: 'msg_register_success',
-          });
+          // message.success({
+          //   content: 'Registration successful. You can now login.',
+          //   key: 'msg_register_success',
+          // });
 
           setTimeout(() => {
             message.destroy('msg_register_success');
@@ -119,37 +119,12 @@ const Register = () => {
     }
   };
 
-  const prefixSelector = (
-    <Form.Item name="prefix" noStyle>
-      <Select
-        disabled
-        style={{
-          width: 70,
-        }}
-      >
-        <Option value="84">+84</Option>
-      </Select>
-    </Form.Item>
-  );
-  const suffixSelector = (
-    <Form.Item name="suffix" noStyle>
-      <Select
-        style={{
-          width: 70,
-        }}
-      >
-        <Option value="USD">$</Option>
-        <Option value="CNY">¥</Option>
-      </Select>
-    </Form.Item>
-  );
-  const [autoCompleteResult, setAutoCompleteResult] = useState([]);
-
   return (
     <Form
       {...formItemLayout}
       labelAlign="left"
       form={form}
+      labelWrap
       // layout="vertical".
       name="register"
       onFinish={onFinish}
@@ -159,18 +134,30 @@ const Register = () => {
       scrollToFirstError
     >
       <Form.Item
+        name="name"
+        label="Name"
+        tooltip="What do you want others to call you?"
+        rules={[
+          {
+            required: true,
+            message: 'Please input your name!',
+            whitespace: true,
+          },
+        ]}
+      >
+        <Input />
+      </Form.Item>
+      <Form.Item
         name="username"
         label="Username"
         rules={[
           {
-            min: 6,
-            max: 20,
             required: true,
-            message: 'Please input your E-mail!',
+            message: 'Please input your username!',
           },
         ]}
       >
-        <Input showCount maxLength={20} minLength={6} />
+        <Input />
       </Form.Item>
 
       <Form.Item
@@ -181,7 +168,7 @@ const Register = () => {
             min: 6,
             max: 30,
             required: true,
-            message: 'Please input your password!',
+            message: 'Password must be between 6 and 30 characters!',
           },
         ]}
         hasFeedback
@@ -201,7 +188,10 @@ const Register = () => {
           },
           ({ getFieldValue }) => ({
             validator(_, value) {
+              // hash password
               if (!value || getFieldValue('password') === value) {
+                hashCode(value);
+                console.log('hashcode', hashCode(value));
                 return Promise.resolve();
               }
 
@@ -214,60 +204,6 @@ const Register = () => {
       >
         <Input.Password showCount maxLength={30} minLength={6} />
       </Form.Item>
-
-      {/* <Form.Item
-        name="nickname"
-        label="Nickname"
-        tooltip="What do you want others to call you?"
-        rules={[
-          {
-            required: true,
-            message: 'Please input your nickname!',
-            whitespace: true,
-          },
-        ]}
-      >
-        <Input />
-      </Form.Item> */}
-
-      {/* <Form.Item
-        name="phone"
-        label="Phone Number"
-        rules={[
-          {
-            required: true,
-            message: 'Please input your phone number!',
-          },
-        ]}
-      >
-        <Input
-          addonBefore={prefixSelector}
-          style={{
-            width: '100%',
-          }}
-        />
-      </Form.Item> */}
-
-      {/* <Form.Item
-        name="gender"
-        label="Gender"
-        rules={[
-          {
-            required: true,
-            message: 'Please select gender!',
-          },
-        ]}
-      >
-        <Select placeholder="select your gender">
-          <Option value="male">Male</Option>
-          <Option value="female">Female</Option>
-          <Option value="other">Other</Option>
-        </Select>
-      </Form.Item> */}
-
-      {/* <Form.Item name="intro" label="Intro">
-        <Input.TextArea showCount maxLength={100} />
-      </Form.Item> */}
 
       <Form.Item
         name="avatar"
@@ -283,7 +219,7 @@ const Register = () => {
           <Button icon={<UploadOutlined />}>Click to upload</Button>
         </Upload>
       </Form.Item>
-
+      <br />
       <Form.Item {...tailFormItemLayout}>
         <Button
           type="primary"

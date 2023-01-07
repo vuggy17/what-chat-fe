@@ -48,15 +48,19 @@ export default class LocalDb extends Dexie {
     super(dbName);
     this.version(0.1).stores({
       chats: 'id,lastUpdate, type',
-      messages: 'id, createdAt, [createdAt+receiverId]',
+      messages:
+        'id, createdAt, [createdAt+senderId], [createdAt+senderId+type]',
       privateChat: 'id',
       contacts: 'id',
     });
   }
 
   static close() {
-    if (!LocalDb.internalInstance)
-      throw new Error('No localdb instance existed');
+    if (!LocalDb.internalInstance) {
+      // throw new Error('No localdb instance existed');
+      console.error('Attempt to close a non-existed localdb instance');
+      return;
+    }
 
     LocalDb.internalInstance.close();
     LocalDb.internalInstance = null;

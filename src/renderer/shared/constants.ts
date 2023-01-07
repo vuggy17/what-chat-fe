@@ -15,9 +15,7 @@ const MSG_PAGE_SIZE = 30;
 const CONV_PAGE_SIZE = 20;
 
 // NETWORK
-const BASEURL =
-  process.env.REACT_APP_BASE_URL ||
-  'https://what-chat-be-production.up.railway.app';
+const BASEURL = process.env.REACT_APP_BASE_URL || 'http://localhost:3005';
 const REQUEST_TIMEOUT = 5000;
 const HTTP_ERROR = {
   401: 'Wrong username or password',

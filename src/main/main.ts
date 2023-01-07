@@ -118,6 +118,7 @@ const createWindow = async () => {
     width: 1024,
     height: 680,
     icon: getAssetPath('icon.png'),
+    autoHideMenuBar: true,
     webPreferences: {
       sandbox: false,
       preload: app.isPackaged
@@ -126,6 +127,7 @@ const createWindow = async () => {
     },
   });
 
+  mainWindow.setMenu(null);
   // if (!isDebug)
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));

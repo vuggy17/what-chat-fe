@@ -1,8 +1,10 @@
 export const ALL_USER = '/user';
+export const SUGGESTED_USER = '/user/suggested-user';
 export const FRIEND_REQUEST = '/user/friend-request';
 export const FRIEND = 'user/friend';
 export const CHAT = '/chat';
 export const CHAT_WITH_MESSAGE = '/chat/with-message';
+export const GROUP_CHAT_WITH_MESSAGE = '/chat/group-with-message';
 export const CHAT_MESSAGE = `${CHAT}/messages`;
 export const CHAT_WITH_NAME = `${CHAT}/by-name`;
 export const CREATE_CHAT = 'room/create';

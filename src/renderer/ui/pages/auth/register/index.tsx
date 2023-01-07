@@ -3,7 +3,7 @@
 import React, { FormEventHandler, SyntheticEvent } from 'react';
 import { ArrowLeftOutlined, UploadOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { Button, message, Upload, UploadProps } from 'antd';
+import { Button, message, Space, Typography, Upload, UploadProps } from 'antd';
 import { LOGIN } from 'renderer/shared/constants';
 import RegisterForm from './registerform';
 
@@ -11,7 +11,7 @@ export default function Register() {
   const navigate = useNavigate();
   return (
     <div className=" py-7 h-screen flex w-full items-center justify-center">
-      <div className="mx-4 w-full max-w-4xl max-w-sce  overflow-auto ">
+      <div className="mx-4 w-full max-w-lg  overflow-auto ">
         <div className="bg-white rounded border pt-[38px] pb-[48px] px-11 text-left ">
           <div className="mb-4">
             <ArrowLeftOutlined
@@ -22,30 +22,24 @@ export default function Register() {
               }}
             />
           </div>
-          <h2 className="font-bold text-2xl mb-2">Register for an account</h2>
-          <p className="text-sm text-stone-600 mb-7">
-            Enter your credential to start chating <br />
-          </p>
+          <Space direction="vertical" size="large" className="w-full">
+            <Space direction="vertical">
+              <Typography.Title
+                level={3}
+                className="mt-0"
+                style={{
+                  marginBottom: 0,
+                }}
+              >
+                Register for an account
+              </Typography.Title>
 
-          <RegisterForm />
-          {/* <p className="font-bold text-xs tracking-wide mb-5">
-            -- Or Sign in with --{" "}
-          </p>
-
-          <div className="flex space-x-1 justify-center">
-            <Button>
-              <div className="flex items-center gap-1">
-                <img src="google.svg" width="24" />
-                Google
-              </div>
-            </Button>
-            <Button>
-              <div className="flex items-center gap-1">
-                <img src="facebook.svg" width="24" />
-                Facebook
-              </div>
-            </Button>
-          </div> */}
+              <Typography.Text type="secondary">
+                Enter your credential to start chating
+              </Typography.Text>
+            </Space>
+            <RegisterForm />
+          </Space>
         </div>
       </div>
     </div>

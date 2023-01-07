@@ -9,17 +9,29 @@ import {
 } from 'antd';
 import { Suspense, useEffect, useRef, useState } from 'react';
 
-import Icon, { FormOutlined, SearchOutlined } from '@ant-design/icons';
+import Icon, {
+  CloseOutlined,
+  FormOutlined,
+  SearchOutlined,
+} from '@ant-design/icons';
 import {
   Outlet,
   Route,
   Routes,
+  createSearchParams,
   useLocation,
   useNavigate,
+  useOutletContext,
   useParams,
   useSearchParams,
 } from 'react-router-dom';
 import useDebounce from 'renderer/utils/debouce';
+import HttpClient from 'renderer/services/http';
+import axios from 'axios';
+import { serialize } from 'v8';
+import { SearchChatProvider, useSearchChatResult } from 'renderer/hooks/use-ui';
+import { useRecoilValue } from 'recoil';
+import { currentChatIdState, currentChatQuery } from 'renderer/hooks/new-store';
 import Conversations from '../components/conversations';
 import { ReactComponent as IconMenu } from '../../../../../../assets/icons/menu.svg';
 import RecentChat from '../components/recent-chat';
@@ -28,20 +40,44 @@ import Drawer from '../components/drawer';
 
 const { Header, Sider, Content } = Layout;
 
+function Suffix({
+  onClick,
+  parentFocused,
+}: {
+  onClick: () => void;
+  parentFocused: boolean;
+}) {
+  console.log('pr', parentFocused);
+  return parentFocused ? (
+    <CloseOutlined
+      className="text-gray-1 cursor-pointer hover:text-primary duration-150 rotate-180"
+      onClick={onClick}
+    />
+  ) : (
+    <SearchOutlined className="text-gray-1" />
+  );
+}
+
 export default function Chat() {
   const navigate = useNavigate();
   const location = useLocation();
-  console.log(location.pathname);
   const searchRef = useRef<InputRef>(null);
+
+  const [searchValue, setSearchValue] = useState('');
+  const { setResults } = useSearchChatResult();
+  const currentChat = useRecoilValue(currentChatQuery);
 
   const findChat = async (key: string) => {
     if (!key) {
-      // setChatResult([]);
+      if (location.pathname.includes('search')) navigate(-1);
+      return;
     }
-    console.log('INPUT TEXT: ', key);
-    // const data = await chatRepository.findChatByParticipantName(key);
-    // setChatResult(data.data);
+    const res = await axios.get(
+      `/chat/group-or-user?key=${key}&current=${currentChat.id}&isGroup=${currentChat.isGroup}`
+    );
+    setResults(res.data);
   };
+
   const debounceSearch = useDebounce(findChat, 500);
   const [open, setOpen] = useState(false);
 
@@ -77,19 +113,40 @@ export default function Chat() {
             <Input
               bordered={false}
               ref={searchRef}
+              value={searchValue}
               onClick={() => {
-                if (!location.pathname.includes('search')) navigate('search');
+                if (!location.pathname.includes('search')) {
+                  navigate({
+                    pathname: 'search',
+                    search: createSearchParams({
+                      chatOnly: 'true',
+                    }).toString(),
+                  });
+                }
               }}
-              onChange={(e) => debounceSearch(e.target.value)}
+              onChange={(e) => {
+                setSearchValue(e.target.value);
+                debounceSearch(e.target.value);
+              }}
               style={{
-                color: '#EBEBEB',
                 paddingInline: 8,
                 background: '#d9d9d990',
                 height: 38,
               }}
               placeholder="Search a chat or message"
               className="input-transparent focus-within:ring-2 ring-primary"
-              suffix={<SearchOutlined className="text-gray-1" />}
+              suffix={
+                <Suffix
+                  onClick={() => {
+                    navigate(-1);
+                    setSearchValue('');
+                    // if (searchRef.current?.input) {
+                    // searchRef.current.focus();
+                    // }
+                  }}
+                  parentFocused={location.pathname.includes('search')}
+                />
+              }
             />
           </div>
           <div>

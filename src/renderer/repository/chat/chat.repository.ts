@@ -1,13 +1,8 @@
-import { LocalDb } from 'renderer/services/localdb';
+import { LocalChatSchema, LocalDb } from 'renderer/services/localdb';
 import { Chat } from 'renderer/domain';
-import { CONV_PAGE_SIZE } from 'renderer/shared/constants';
-import { genMockChat } from 'renderer/mock/chats';
 import HttpClient from 'renderer/services/http';
-import {
-  CHAT,
-  CHAT_WITH_NAME,
-  CHAT_WITH_MESSAGE,
-} from 'renderer/config/api.routes';
+import { CHAT_WITH_NAME, CHAT_WITH_MESSAGE } from 'renderer/config/api.routes';
+import { ChatKind } from 'renderer/services/localdb/schemas/chat.schema';
 import IDataSource from '../type';
 
 export interface IChatRepository {
@@ -15,7 +10,7 @@ export interface IChatRepository {
     data: Chat[];
     extra: { pageNum: number; totalCount: number; totalPage: number };
   }>;
-  saveChats(chats: Chat[]): Promise<void>;
+  saveChat(chats: Chat): Promise<void>;
   // createChat(chat: Id[]): Promise<Chat>;
 }
 
@@ -26,10 +21,22 @@ class ChatRepositoryImpl implements IChatRepository {
     this._dataSource = dataSource;
   }
 
-  saveChats(chats: Chat[]): Promise<void> {
-    console.log('save chats to local database');
+  async saveChat(chat: Chat): Promise<void> {
+    const db = LocalDb.instance_force();
+    if (db instanceof Error) {
+      throw db;
+    }
 
-    throw new Error('Method not implemented.');
+    const d = {
+      id: chat.id,
+      lastUpdate: chat.lastUpdate,
+      type: ChatKind.private,
+      name: chat.name,
+      avatar: chat.avatar,
+      participants: chat.participants,
+      lastMessage: chat.lastMessage,
+    } as LocalChatSchema;
+    await db.chats.add(d);
   }
 
   async findChatByParticipantName(key: string) {
@@ -48,13 +55,6 @@ class ChatRepositoryImpl implements IChatRepository {
       data,
       extra: { pageNum, totalCount, totalPage },
     };
-  }
-
-  saveChat(chat: Chat): Promise<Chat> {
-    // save chat to local database
-    return new Promise((resolve, reject) => {
-      resolve(chat);
-    });
   }
 
   /**

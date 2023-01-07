@@ -4,13 +4,14 @@ import { ReactNode, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { Message } from 'renderer/domain';
-import { userContacts } from 'renderer/hooks/contact-store';
 import { useChat, useChatMessage } from 'renderer/hooks/new-store';
 
-import { currentUser } from 'renderer/hooks/use-user';
+import { currentUser, userContacts } from 'renderer/hooks/use-user';
+import HttpClient from 'renderer/services/http';
 import { LocalDb } from 'renderer/services/localdb';
 import SocketClient from 'renderer/services/socket';
 import {
+  AcceptFriendPayload,
   EventListener,
   EventListenerWithAck,
   HasNewMessagePayload,
@@ -20,6 +21,7 @@ import {
 import {
   addMessageToChat,
   getInitialChat_v1,
+  getInitialGroupChat,
 } from 'renderer/usecase/conversation.usecase';
 import {
   convertToPreview,
@@ -29,6 +31,7 @@ import {
   mapContactToChat,
   syncChat,
   syncContact,
+  syncGroup,
   syncMessage,
 } from 'renderer/utils/syncdata';
 
@@ -44,14 +47,21 @@ const Loader: React.FC<{ status: string }> = ({ status }) => {
 };
 
 const LOADCOMPLETED = 'complete';
-export default function Preload({ children }: { children: ReactNode }) {
+export default function Preload({
+  children,
+  reset,
+}: {
+  children: ReactNode;
+  reset: () => void;
+}) {
   const [loadingStage, setLoadingStage] = useState<string>(
     'Application initializing...'
   );
   const { insertMessage } = useChatMessage();
-  const { updateChat } = useChat();
+  const { updateChat, setChat } = useChat();
   const user = useRecoilValue(currentUser);
   const navigate = useNavigate();
+  const setUserContact = useSetRecoilState(userContacts);
 
   // init chat items
   const { batchInitChats: setChatList } = useChat();
@@ -60,12 +70,22 @@ export default function Preload({ children }: { children: ReactNode }) {
     payload,
     ack
   ) => {
-    const { chatId, message } = payload;
+    const { chatId, message, chat: newChat } = payload;
     console.log('[HAS_NEW_MESSAGE]: ', payload);
 
     // DO NOT REMOVE SET TIMEOUT
     // settimeout to prevent recoil state update error
     setTimeout(() => {
+      if (newChat) {
+        setChat({
+          ...newChat,
+          messages: [],
+          lastMessage: convertToPreview(message),
+          lastUpdate: message.createdAt,
+          total: 1,
+        });
+      }
+
       addMessageToChat(chatId, message as Message, {
         insertMessage,
       });
@@ -103,6 +123,12 @@ export default function Preload({ children }: { children: ReactNode }) {
     insertMessage(chatId, { id: messageId, status: 'seen' }, messageId);
   };
 
+  const onFriendRequestAccepted: EventListener<AcceptFriendPayload> = (
+    friend: AcceptFriendPayload
+  ) => {
+    setUserContact((old) => (old ? [...old, friend] : [friend]));
+  };
+
   useEffect(() => {
     // init local db
     if (!user) return;
@@ -118,10 +144,21 @@ export default function Preload({ children }: { children: ReactNode }) {
       ServerToClientEvent.SEEN_MESSAGE,
       onMessageRead
     );
+    SocketClient.addEventHandler(
+      ServerToClientEvent.SEEN_MESSAGE,
+      onMessageRead
+    );
+    SocketClient.addEventHandler(
+      ServerToClientEvent.FRIEND_REQUEST_ACCEPTED,
+      onFriendRequestAccepted
+    );
+
     (async () => {
       setLoadingStage('Loading data...');
-      const response = await getInitialChat_v1();
-      setChatList(response.data, response.extra);
+      const { data: chats, extra: chatExtra } = await getInitialChat_v1();
+      const { data: groups, extra: groupExtra } = await getInitialGroupChat();
+
+      setChatList([...chats, ...groups], chatExtra);
 
       requestIdleCallback(async () => {
         try {
@@ -137,10 +174,15 @@ export default function Preload({ children }: { children: ReactNode }) {
               db.privateChat,
               db.messages,
               async () => {
-                if (user.friends) syncContact(user.friends, db);
-                syncChat(response.data, db);
-                mapContactToChat(user, response.data, db);
-                response.data.forEach((chat) => syncMessage(chat.messages, db));
+                if (user.friends) await syncContact(user.friends, db);
+                await syncChat(chats, db);
+                await syncGroup(groups, db);
+                await mapContactToChat(user, chats, db);
+                const syncMessageResults = chats.map((chat) =>
+                  syncMessage(chat.messages, db)
+                );
+
+                await Promise.all(syncMessageResults);
                 setLoadingStage(LOADCOMPLETED);
               }
             );
@@ -148,18 +190,20 @@ export default function Preload({ children }: { children: ReactNode }) {
           }
         } catch (error) {
           console.log(error);
+          setLoadingStage(LOADCOMPLETED);
         }
         return 0;
       });
     })();
 
-    return () => {
+    return async () => {
       console.log('users', user);
       SocketClient.disconnect();
+      await HttpClient.get('/user/logout');
       LocalDb.close();
-      navigate(0); // refresh recoil state
+      reset(); // refresh recoil state
     };
-  }, [user]);
+  }, []);
 
   return (
     <div className="w-screen h-screen">

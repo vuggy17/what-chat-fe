@@ -51,16 +51,14 @@ export default function ImageBubble({
         {selectProperty?.map((path, index) => (
           // eslint-disable-next-line react/no-array-index-key
           <div className="img-reactive--wrap" key={index}>
-            <img
-              className="object-cover h-full w-full "
+            <Image
+              height="100%"
+              width="100%"
               src={path}
-              alt="img"
-              // onLoad={() => setLoaded(true)}
-              // onLoad={() => {
-              //   if (attachments && attachmentsMeta) {
-              //     URL.revokeObjectURL(path);
-              //   }
-              // }}
+              loading="lazy"
+              className="object-cover"
+              alt={path}
+              style={{ height: '100%', width: '100%' }}
             />
           </div>
         ))}

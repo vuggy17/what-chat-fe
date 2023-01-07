@@ -27,6 +27,7 @@ import { LOGIN } from 'renderer/shared/constants';
 import useUI from 'renderer/hooks/use-ui';
 import { LocalDb } from 'renderer/services/localdb';
 import { ReactComponent as IconSetting } from '../../../../../../assets/icons/setting.svg';
+import { ReactComponent as IconSocial } from '../../../../../../assets/icons/social.svg';
 
 type MenuItem = Required<MenuProps>['items'][number];
 
@@ -74,7 +75,8 @@ const items: MenuItem[] = [
   //       color: 'white',
   //     }}
   //   />
-  // ),
+  // ),\
+
   getItem(
     <Typography.Text strong>Contacts</Typography.Text>,
     'menu_contacts',
@@ -89,21 +91,15 @@ const items: MenuItem[] = [
     />
   ),
   getItem(
-    <Typography.Text strong>Setting</Typography.Text>,
-    'menu_setting',
+    <Typography.Text strong>Social</Typography.Text>,
+    'menu_social',
     <Avatar
-      icon={
-        <Icon
-          component={IconSetting}
-          style={{ fontSize: 20, margin: 'auto' }}
-          // color="white"
-        />
-      }
+      icon={<IconSocial style={{ margin: 'auto' }} />}
       shape="square"
       style={{
-        backgroundColor: '#a0d911',
+        backgroundColor: '#1677ff',
         verticalAlign: 'middle',
-        color: 'transparent',
+        color: 'white',
       }}
     />
   ),
@@ -155,7 +151,7 @@ export default function Drawer({
 }) {
   const setUser = useSetRecoilState(currentUser);
   const navigate = useNavigate();
-  const { setContactOpen, setNewGroupOpen } = useUI();
+  const { setContactOpen, setNewGroupOpen, setSocialOpen } = useUI();
 
   return (
     <AntDrawer
@@ -182,6 +178,11 @@ export default function Drawer({
           if (key === 'menu_group') {
             toggleVisibility();
             setNewGroupOpen(true);
+          }
+
+          if (key === 'menu_social') {
+            toggleVisibility();
+            setSocialOpen(true);
           }
         }}
         selectable={false}
