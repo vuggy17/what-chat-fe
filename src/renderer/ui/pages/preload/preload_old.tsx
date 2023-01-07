@@ -57,7 +57,7 @@ export default function Preload({
   const [loadingStage, setLoadingStage] = useState<string>(
     'Application initializing...'
   );
-  const { insertMessage } = useChatMessage();
+  const { insertMessage, appendMessage } = useChatMessage();
   const { updateChat, setChat } = useChat();
   const user = useRecoilValue(currentUser);
   const navigate = useNavigate();
@@ -86,9 +86,15 @@ export default function Preload({
         });
       }
 
-      addMessageToChat(chatId, message as Message, {
-        insertMessage,
-      });
+      if (!newChat) {
+        addMessageToChat(chatId, message as Message, {
+          insertMessage,
+        });
+      } else {
+        addMessageToChat(chatId, message as Message, {
+          insertMessage: appendMessage,
+        });
+      }
 
       updateChat({
         id: chatId,
@@ -144,10 +150,10 @@ export default function Preload({
       ServerToClientEvent.SEEN_MESSAGE,
       onMessageRead
     );
-    SocketClient.addEventHandler(
-      ServerToClientEvent.SEEN_MESSAGE,
-      onMessageRead
-    );
+    // SocketClient.addEventHandler(
+    //   ServerToClientEvent.SEEN_MESSAGE,
+    //   onMessageRead
+    // );
     SocketClient.addEventHandler(
       ServerToClientEvent.FRIEND_REQUEST_ACCEPTED,
       onFriendRequestAccepted
